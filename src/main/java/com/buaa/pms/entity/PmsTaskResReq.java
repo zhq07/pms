@@ -9,8 +9,7 @@ public class PmsTaskResReq {
     private String resReqTaskUid;
     private Integer resReqResType;
     private String resReqResUid;
-    private String resReqResId;
-    private String resReqResName;
+    private Integer resReqResWork;
     private Float resReqResAmount;
 
     public String getResReqUid() {
@@ -69,20 +68,12 @@ public class PmsTaskResReq {
         this.resReqResUid = resReqResUid;
     }
 
-    public String getResReqResId() {
-        return resReqResId;
+    public Integer getResReqResWork() {
+        return resReqResWork;
     }
 
-    public void setResReqResId(String resReqResId) {
-        this.resReqResId = resReqResId;
-    }
-
-    public String getResReqResName() {
-        return resReqResName;
-    }
-
-    public void setResReqResName(String resReqResName) {
-        this.resReqResName = resReqResName;
+    public void setResReqResWork(Integer resReqResWork) {
+        this.resReqResWork = resReqResWork;
     }
 
     public Float getResReqResAmount() {
@@ -103,8 +94,7 @@ public class PmsTaskResReq {
                 ", resReqTaskUid='" + resReqTaskUid + '\'' +
                 ", resReqResType=" + resReqResType +
                 ", resReqResUid='" + resReqResUid + '\'' +
-                ", resReqResId='" + resReqResId + '\'' +
-                ", resReqResName='" + resReqResName + '\'' +
+                ", resReqResWork=" + resReqResWork +
                 ", resReqResAmount=" + resReqResAmount +
                 '}';
     }

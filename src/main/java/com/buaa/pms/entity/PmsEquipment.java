@@ -6,13 +6,11 @@ public class PmsEquipment {
     private String equipId;
     private String equipName;
     private String equipOrgUid;
-    private String equipOrgName;
     private String equipCapType;
     private String equipCapLevel;
     private String equipCapDesc;
     private Integer equipStatus;
     private String equipCurrTaskUid;
-    private String equipTaskName;
 
     public String getEquipUid() {
         return equipUid;
@@ -44,14 +42,6 @@ public class PmsEquipment {
 
     public void setEquipOrgUid(String equipOrgUid) {
         this.equipOrgUid = equipOrgUid;
-    }
-
-    public String getEquipOrgName() {
-        return equipOrgName;
-    }
-
-    public void setEquipOrgName(String equipOrgName) {
-        this.equipOrgName = equipOrgName;
     }
 
     public String getEquipCapType() {
@@ -94,14 +84,6 @@ public class PmsEquipment {
         this.equipCurrTaskUid = equipCurrTaskUid;
     }
 
-    public String getEquipTaskName() {
-        return equipTaskName;
-    }
-
-    public void setEquipTaskName(String equipTaskName) {
-        this.equipTaskName = equipTaskName;
-    }
-
     @Override
     public String toString() {
         return "PmsEquipment{" +
@@ -109,13 +91,11 @@ public class PmsEquipment {
                 ", equipId='" + equipId + '\'' +
                 ", equipName='" + equipName + '\'' +
                 ", equipOrgUid='" + equipOrgUid + '\'' +
-                ", equipOrgName='" + equipOrgName + '\'' +
                 ", equipCapType='" + equipCapType + '\'' +
                 ", equipCapLevel='" + equipCapLevel + '\'' +
                 ", equipCapDesc='" + equipCapDesc + '\'' +
                 ", equipStatus=" + equipStatus +
                 ", equipCurrTaskUid='" + equipCurrTaskUid + '\'' +
-                ", equipTaskName='" + equipTaskName + '\'' +
                 '}';
     }
 }

@@ -8,11 +8,8 @@ public class PmsProject {
     private String projId;
     private String projName;
     private String projTaskUid;
-    private String projTaskName;
-    private String projParTaskUid;
-    private String projParTaskName;
+    private String projParProjUid;
     private String projOrgUid;
-    private String projOrgName;
     private String projManager;
     private String projDescription;
     private Date projPlanStartDate;
@@ -61,28 +58,12 @@ public class PmsProject {
         this.projTaskUid = projTaskUid;
     }
 
-    public String getProjTaskName() {
-        return projTaskName;
+    public String getProjParProjUid() {
+        return projParProjUid;
     }
 
-    public void setProjTaskName(String projTaskName) {
-        this.projTaskName = projTaskName;
-    }
-
-    public String getProjParTaskUid() {
-        return projParTaskUid;
-    }
-
-    public void setProjParTaskUid(String projParTaskUid) {
-        this.projParTaskUid = projParTaskUid;
-    }
-
-    public String getProjParTaskName() {
-        return projParTaskName;
-    }
-
-    public void setProjParTaskName(String projParTaskName) {
-        this.projParTaskName = projParTaskName;
+    public void setProjParProjUid(String projParProjUid) {
+        this.projParProjUid = projParProjUid;
     }
 
     public String getProjOrgUid() {
@@ -91,14 +72,6 @@ public class PmsProject {
 
     public void setProjOrgUid(String projOrgUid) {
         this.projOrgUid = projOrgUid;
-    }
-
-    public String getProjOrgName() {
-        return projOrgName;
-    }
-
-    public void setProjOrgName(String projOrgName) {
-        this.projOrgName = projOrgName;
     }
 
     public String getProjManager() {
@@ -228,11 +201,8 @@ public class PmsProject {
                 ", projId='" + projId + '\'' +
                 ", projName='" + projName + '\'' +
                 ", projTaskUid='" + projTaskUid + '\'' +
-                ", projTaskName='" + projTaskName + '\'' +
-                ", projParTaskUid='" + projParTaskUid + '\'' +
-                ", projParTaskName='" + projParTaskName + '\'' +
+                ", projParProjUid='" + projParProjUid + '\'' +
                 ", projOrgUid='" + projOrgUid + '\'' +
-                ", projOrgName='" + projOrgName + '\'' +
                 ", projManager='" + projManager + '\'' +
                 ", projDescription='" + projDescription + '\'' +
                 ", projPlanStartDate=" + projPlanStartDate +

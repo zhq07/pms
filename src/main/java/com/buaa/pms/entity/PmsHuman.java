@@ -6,13 +6,11 @@ public class PmsHuman {
     private String humId;
     private String humName;
     private String humOrgUid;
-    private String humOrgName;
     private String humPosition;
     private String humAbilityType;
     private String humAbilityLevel;
     private String humAbilityDesc;
     private String humCurrTaskUid;
-    private String humCurrTaskName;
     private String humPhone;
     private String humEmail;
 
@@ -46,14 +44,6 @@ public class PmsHuman {
 
     public void setHumOrgUid(String humOrgUid) {
         this.humOrgUid = humOrgUid;
-    }
-
-    public String getHumOrgName() {
-        return humOrgName;
-    }
-
-    public void setHumOrgName(String humOrgName) {
-        this.humOrgName = humOrgName;
     }
 
     public String getHumPosition() {
@@ -96,14 +86,6 @@ public class PmsHuman {
         this.humCurrTaskUid = humCurrTaskUid;
     }
 
-    public String getHumCurrTaskName() {
-        return humCurrTaskName;
-    }
-
-    public void setHumCurrTaskName(String humCurrTaskName) {
-        this.humCurrTaskName = humCurrTaskName;
-    }
-
     public String getHumPhone() {
         return humPhone;
     }
@@ -127,13 +109,11 @@ public class PmsHuman {
                 ", humId='" + humId + '\'' +
                 ", humName='" + humName + '\'' +
                 ", humOrgUid='" + humOrgUid + '\'' +
-                ", humOrgName='" + humOrgName + '\'' +
                 ", humPosition='" + humPosition + '\'' +
                 ", humAbilityType='" + humAbilityType + '\'' +
                 ", humAbilityLevel='" + humAbilityLevel + '\'' +
                 ", humAbilityDesc='" + humAbilityDesc + '\'' +
                 ", humCurrTaskUid='" + humCurrTaskUid + '\'' +
-                ", humCurrTaskName='" + humCurrTaskName + '\'' +
                 ", humPhone='" + humPhone + '\'' +
                 ", humEmail='" + humEmail + '\'' +
                 '}';

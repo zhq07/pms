@@ -8,9 +8,7 @@ public class PmsPublishedTask {
     private String taskId;
     private String taskName;
     private String taskProjUid;
-    private String taskProjName;
     private String taskProcUid;
-    private String taskProcName;
     private String taskManager;
     private String taskDescription;
     private Date taskPlanStartDate;
@@ -59,28 +57,12 @@ public class PmsPublishedTask {
         this.taskProjUid = taskProjUid;
     }
 
-    public String getTaskProjName() {
-        return taskProjName;
-    }
-
-    public void setTaskProjName(String taskProjName) {
-        this.taskProjName = taskProjName;
-    }
-
     public String getTaskProcUid() {
         return taskProcUid;
     }
 
     public void setTaskProcUid(String taskProcUid) {
         this.taskProcUid = taskProcUid;
-    }
-
-    public String getTaskProcName() {
-        return taskProcName;
-    }
-
-    public void setTaskProcName(String taskProcName) {
-        this.taskProcName = taskProcName;
     }
 
     public String getTaskManager() {
@@ -210,9 +192,7 @@ public class PmsPublishedTask {
                 ", taskId='" + taskId + '\'' +
                 ", taskName='" + taskName + '\'' +
                 ", taskProjUid='" + taskProjUid + '\'' +
-                ", taskProjName='" + taskProjName + '\'' +
                 ", taskProcUid='" + taskProcUid + '\'' +
-                ", taskProcName='" + taskProcName + '\'' +
                 ", taskManager='" + taskManager + '\'' +
                 ", taskDescription='" + taskDescription + '\'' +
                 ", taskPlanStartDate=" + taskPlanStartDate +

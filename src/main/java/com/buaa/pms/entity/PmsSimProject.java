@@ -7,9 +7,7 @@ public class PmsSimProject {
     private String simProjUid;
     private String simProjName;
     private String simProjProjUid;
-    private String simProjProjName;
     private String simProjProcUid;
-    private String simProjProcName;
     private Date simProjEarlyStartDate;
     private Date simProjLatefinishDate;
     private Date simProjStartDate;
@@ -42,28 +40,12 @@ public class PmsSimProject {
         this.simProjProjUid = simProjProjUid;
     }
 
-    public String getSimProjProjName() {
-        return simProjProjName;
-    }
-
-    public void setSimProjProjName(String simProjProjName) {
-        this.simProjProjName = simProjProjName;
-    }
-
     public String getSimProjProcUid() {
         return simProjProcUid;
     }
 
     public void setSimProjProcUid(String simProjProcUid) {
         this.simProjProcUid = simProjProcUid;
-    }
-
-    public String getSimProjProcName() {
-        return simProjProcName;
-    }
-
-    public void setSimProjProcName(String simProjProcName) {
-        this.simProjProcName = simProjProcName;
     }
 
     public Date getSimProjEarlyStartDate() {
@@ -124,13 +106,11 @@ public class PmsSimProject {
 
     @Override
     public String toString() {
-        return "PmsSimProj{" +
+        return "PmsSimProject{" +
                 "simProjUid='" + simProjUid + '\'' +
                 ", simProjName='" + simProjName + '\'' +
                 ", simProjProjUid='" + simProjProjUid + '\'' +
-                ", simProjProjName='" + simProjProjName + '\'' +
                 ", simProjProcUid='" + simProjProcUid + '\'' +
-                ", simProjProcName='" + simProjProcName + '\'' +
                 ", simProjEarlyStartDate=" + simProjEarlyStartDate +
                 ", simProjLatefinishDate=" + simProjLatefinishDate +
                 ", simProjStartDate=" + simProjStartDate +

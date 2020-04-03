@@ -71,7 +71,7 @@ public class PmsOptProject {
 
     @Override
     public String toString() {
-        return "PmsOptProj{" +
+        return "PmsOptProject{" +
                 "optProjUid='" + optProjUid + '\'' +
                 ", optProjName='" + optProjName + '\'' +
                 ", optProjStartDate=" + optProjStartDate +

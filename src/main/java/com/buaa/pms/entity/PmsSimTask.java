@@ -7,12 +7,8 @@ public class PmsSimTask {
     private String simTaskUid;
     private String simTaskSimProjUid;
     private String simTaskTaskUid;
-    private String simTaskTaskId;
-    private String simTaskTaskName;
     private String simTaskProjUid;
-    private String simTaskProjName;
     private String simTaskProcUid;
-    private String simTaskProcName;
     private Date simTaskPlanStartDate;
     private Date simTaskPlanFinishDate;
     private Integer simTaskPlanDur;
@@ -47,22 +43,6 @@ public class PmsSimTask {
         this.simTaskTaskUid = simTaskTaskUid;
     }
 
-    public String getSimTaskTaskId() {
-        return simTaskTaskId;
-    }
-
-    public void setSimTaskTaskId(String simTaskTaskId) {
-        this.simTaskTaskId = simTaskTaskId;
-    }
-
-    public String getSimTaskTaskName() {
-        return simTaskTaskName;
-    }
-
-    public void setSimTaskTaskName(String simTaskTaskName) {
-        this.simTaskTaskName = simTaskTaskName;
-    }
-
     public String getSimTaskProjUid() {
         return simTaskProjUid;
     }
@@ -71,28 +51,12 @@ public class PmsSimTask {
         this.simTaskProjUid = simTaskProjUid;
     }
 
-    public String getSimTaskProjName() {
-        return simTaskProjName;
-    }
-
-    public void setSimTaskProjName(String simTaskProjName) {
-        this.simTaskProjName = simTaskProjName;
-    }
-
     public String getSimTaskProcUid() {
         return simTaskProcUid;
     }
 
     public void setSimTaskProcUid(String simTaskProcUid) {
         this.simTaskProcUid = simTaskProcUid;
-    }
-
-    public String getSimTaskProcName() {
-        return simTaskProcName;
-    }
-
-    public void setSimTaskProcName(String simTaskProcName) {
-        this.simTaskProcName = simTaskProcName;
     }
 
     public Date getSimTaskPlanStartDate() {
@@ -173,12 +137,8 @@ public class PmsSimTask {
                 "simTaskUid='" + simTaskUid + '\'' +
                 ", simTaskSimProjUid='" + simTaskSimProjUid + '\'' +
                 ", simTaskTaskUid='" + simTaskTaskUid + '\'' +
-                ", simTaskTaskId='" + simTaskTaskId + '\'' +
-                ", simTaskTaskName='" + simTaskTaskName + '\'' +
                 ", simTaskProjUid='" + simTaskProjUid + '\'' +
-                ", simTaskProjName='" + simTaskProjName + '\'' +
                 ", simTaskProcUid='" + simTaskProcUid + '\'' +
-                ", simTaskProcName='" + simTaskProcName + '\'' +
                 ", simTaskPlanStartDate=" + simTaskPlanStartDate +
                 ", simTaskPlanFinishDate=" + simTaskPlanFinishDate +
                 ", simTaskPlanDur=" + simTaskPlanDur +

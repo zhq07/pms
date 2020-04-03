@@ -6,16 +6,10 @@ public class PmsAllocatePlace {
 
     private String apUid;
     private String apPlaceUid;
-    private String apPlaceId;
-    private String apPlaceName;
     private String apOrgUid;
-    private String apOrgName;
     private String apProjUid;
-    private String apProjName;
     private String apProcUid;
-    private String apProcName;
     private String apTaskUid;
-    private String apTaskName;
     private String apResPlanUid;
     private String apResReqUid;
     private Date apStartDate;
@@ -40,36 +34,12 @@ public class PmsAllocatePlace {
         this.apPlaceUid = apPlaceUid;
     }
 
-    public String getApPlaceId() {
-        return apPlaceId;
-    }
-
-    public void setApPlaceId(String apPlaceId) {
-        this.apPlaceId = apPlaceId;
-    }
-
-    public String getApPlaceName() {
-        return apPlaceName;
-    }
-
-    public void setApPlaceName(String apPlaceName) {
-        this.apPlaceName = apPlaceName;
-    }
-
     public String getApOrgUid() {
         return apOrgUid;
     }
 
     public void setApOrgUid(String apOrgUid) {
         this.apOrgUid = apOrgUid;
-    }
-
-    public String getApOrgName() {
-        return apOrgName;
-    }
-
-    public void setApOrgName(String apOrgName) {
-        this.apOrgName = apOrgName;
     }
 
     public String getApProjUid() {
@@ -80,14 +50,6 @@ public class PmsAllocatePlace {
         this.apProjUid = apProjUid;
     }
 
-    public String getApProjName() {
-        return apProjName;
-    }
-
-    public void setApProjName(String apProjName) {
-        this.apProjName = apProjName;
-    }
-
     public String getApProcUid() {
         return apProcUid;
     }
@@ -96,28 +58,12 @@ public class PmsAllocatePlace {
         this.apProcUid = apProcUid;
     }
 
-    public String getApProcName() {
-        return apProcName;
-    }
-
-    public void setApProcName(String apProcName) {
-        this.apProcName = apProcName;
-    }
-
     public String getApTaskUid() {
         return apTaskUid;
     }
 
     public void setApTaskUid(String apTaskUid) {
         this.apTaskUid = apTaskUid;
-    }
-
-    public String getApTaskName() {
-        return apTaskName;
-    }
-
-    public void setApTaskName(String apTaskName) {
-        this.apTaskName = apTaskName;
     }
 
     public String getApResPlanUid() {
@@ -181,16 +127,10 @@ public class PmsAllocatePlace {
         return "PmsAllocatePlace{" +
                 "apUid='" + apUid + '\'' +
                 ", apPlaceUid='" + apPlaceUid + '\'' +
-                ", apPlaceId='" + apPlaceId + '\'' +
-                ", apPlaceName='" + apPlaceName + '\'' +
                 ", apOrgUid='" + apOrgUid + '\'' +
-                ", apOrgName='" + apOrgName + '\'' +
                 ", apProjUid='" + apProjUid + '\'' +
-                ", apProjName='" + apProjName + '\'' +
                 ", apProcUid='" + apProcUid + '\'' +
-                ", apProcName='" + apProcName + '\'' +
                 ", apTaskUid='" + apTaskUid + '\'' +
-                ", apTaskName='" + apTaskName + '\'' +
                 ", apResPlanUid='" + apResPlanUid + '\'' +
                 ", apResReqUid='" + apResReqUid + '\'' +
                 ", apStartDate=" + apStartDate +

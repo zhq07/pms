@@ -6,16 +6,10 @@ public class PmsAllocateEquipment {
 
     private String aeUid;
     private String aeEquipUid;
-    private String aeEquipId;
-    private String aeEquipName;
     private String aeOrgUid;
-    private String aeOrgName;
     private String aeProjUid;
-    private String aeProjName;
     private String aeProcUid;
-    private String aeProcName;
     private String aeTaskUid;
-    private String aeTaskName;
     private String aeResPlanUid;
     private String aeResReqUid;
     private Date aeStartDate;
@@ -39,36 +33,12 @@ public class PmsAllocateEquipment {
         this.aeEquipUid = aeEquipUid;
     }
 
-    public String getAeEquipId() {
-        return aeEquipId;
-    }
-
-    public void setAeEquipId(String aeEquipId) {
-        this.aeEquipId = aeEquipId;
-    }
-
-    public String getAeEquipName() {
-        return aeEquipName;
-    }
-
-    public void setAeEquipName(String aeEquipName) {
-        this.aeEquipName = aeEquipName;
-    }
-
     public String getAeOrgUid() {
         return aeOrgUid;
     }
 
     public void setAeOrgUid(String aeOrgUid) {
         this.aeOrgUid = aeOrgUid;
-    }
-
-    public String getAeOrgName() {
-        return aeOrgName;
-    }
-
-    public void setAeOrgName(String aeOrgName) {
-        this.aeOrgName = aeOrgName;
     }
 
     public String getAeProjUid() {
@@ -79,14 +49,6 @@ public class PmsAllocateEquipment {
         this.aeProjUid = aeProjUid;
     }
 
-    public String getAeProjName() {
-        return aeProjName;
-    }
-
-    public void setAeProjName(String aeProjName) {
-        this.aeProjName = aeProjName;
-    }
-
     public String getAeProcUid() {
         return aeProcUid;
     }
@@ -95,28 +57,12 @@ public class PmsAllocateEquipment {
         this.aeProcUid = aeProcUid;
     }
 
-    public String getAeProcName() {
-        return aeProcName;
-    }
-
-    public void setAeProcName(String aeProcName) {
-        this.aeProcName = aeProcName;
-    }
-
     public String getAeTaskUid() {
         return aeTaskUid;
     }
 
     public void setAeTaskUid(String aeTaskUid) {
         this.aeTaskUid = aeTaskUid;
-    }
-
-    public String getAeTaskName() {
-        return aeTaskName;
-    }
-
-    public void setAeTaskName(String aeTaskName) {
-        this.aeTaskName = aeTaskName;
     }
 
     public String getAeResPlanUid() {
@@ -172,16 +118,10 @@ public class PmsAllocateEquipment {
         return "PmsAllocateEquipment{" +
                 "aeUid='" + aeUid + '\'' +
                 ", aeEquipUid='" + aeEquipUid + '\'' +
-                ", aeEquipId='" + aeEquipId + '\'' +
-                ", aeEquipName='" + aeEquipName + '\'' +
                 ", aeOrgUid='" + aeOrgUid + '\'' +
-                ", aeOrgName='" + aeOrgName + '\'' +
                 ", aeProjUid='" + aeProjUid + '\'' +
-                ", aeProjName='" + aeProjName + '\'' +
                 ", aeProcUid='" + aeProcUid + '\'' +
-                ", aeProcName='" + aeProcName + '\'' +
                 ", aeTaskUid='" + aeTaskUid + '\'' +
-                ", aeTaskName='" + aeTaskName + '\'' +
                 ", aeResPlanUid='" + aeResPlanUid + '\'' +
                 ", aeResReqUid='" + aeResReqUid + '\'' +
                 ", aeStartDate=" + aeStartDate +

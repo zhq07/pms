@@ -8,13 +8,10 @@ public class PmsProcess {
     private String procId;
     private String procName;
     private String procProjUid;
-    private String procProjName;
     private String procAuthor;
     private Date procPlanStartDate;
     private Date procPlanFinishDate;
     private Integer procPlanDur;
-    private Date procEarlyStartDate;
-    private Date procLateFinishDate;
     private Integer procStatus;
 
     public String getProcUid() {
@@ -49,14 +46,6 @@ public class PmsProcess {
         this.procProjUid = procProjUid;
     }
 
-    public String getProcProjName() {
-        return procProjName;
-    }
-
-    public void setProcProjName(String procProjName) {
-        this.procProjName = procProjName;
-    }
-
     public String getProcAuthor() {
         return procAuthor;
     }
@@ -89,22 +78,6 @@ public class PmsProcess {
         this.procPlanDur = procPlanDur;
     }
 
-    public Date getProcEarlyStartDate() {
-        return procEarlyStartDate;
-    }
-
-    public void setProcEarlyStartDate(Date procEarlyStartDate) {
-        this.procEarlyStartDate = procEarlyStartDate;
-    }
-
-    public Date getProcLateFinishDate() {
-        return procLateFinishDate;
-    }
-
-    public void setProcLateFinishDate(Date procLateFinishDate) {
-        this.procLateFinishDate = procLateFinishDate;
-    }
-
     public Integer getProcStatus() {
         return procStatus;
     }
@@ -120,13 +93,10 @@ public class PmsProcess {
                 ", procId='" + procId + '\'' +
                 ", procName='" + procName + '\'' +
                 ", procProjUid='" + procProjUid + '\'' +
-                ", procProjName='" + procProjName + '\'' +
                 ", procAuthor='" + procAuthor + '\'' +
                 ", procPlanStartDate=" + procPlanStartDate +
                 ", procPlanFinishDate=" + procPlanFinishDate +
                 ", procPlanDur=" + procPlanDur +
-                ", procEarlyStartDate=" + procEarlyStartDate +
-                ", procLateFinishDate=" + procLateFinishDate +
                 ", procStatus=" + procStatus +
                 '}';
     }
