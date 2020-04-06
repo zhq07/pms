@@ -49,11 +49,6 @@ public class PmsOrganizationController {
         pmsOrganizationService.deleteByUid(orgUid);
     }
 
-    @DeleteMapping("/delete")
-    public void delete(@RequestBody PmsOrganization pmsOrganization) {
-        pmsOrganizationService.deleteByUid(pmsOrganization.getOrgUid());
-    }
-
     @PutMapping("/update")
     public void update(@RequestBody PmsOrganization pmsOrganization) {
         pmsOrganizationService.update(pmsOrganization);

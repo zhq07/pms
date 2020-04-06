@@ -8,18 +8,18 @@ import java.util.List;
 @Repository
 public interface PmsOrganizationMapper {
 
-    List<PmsOrganization> selectAll();
+    public List<PmsOrganization> selectAll();
 
-    List<PmsOrganization> selectTop();
+    public List<PmsOrganization> selectTop();
 
-    List<PmsOrganization> selectByParUid(String orgParUid);
+    public List<PmsOrganization> selectByParUid(String orgParUid);
 
-    PmsOrganization selectByUid(String orgUid);
+    public PmsOrganization selectByUid(String orgUid);
 
-    void save(PmsOrganization pmsOrganization);
+    public void save(PmsOrganization pmsOrganization);
 
-    void deleteByUid(String orgUid);
+    public void deleteByUid(String orgUid);
 
-    void update(PmsOrganization pmsOrganization);
+    public void update(PmsOrganization pmsOrganization);
 
 }

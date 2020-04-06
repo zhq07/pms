@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace：xml文件对应的接口类名-->
+<mapper namespace="com.buaa.pms.mapper.PmsTaskMapper">
+
+    <!--数据库表字段与Java对象属性的映射关系-->
+    <resultMap id="pmsTaskMapper" type="PmsTask">
+        <result property="taskUid" column="task_uid"/>
+        <result property="taskId" column="task_id"/>
+        <result property="taskName" column="task_name"/>
+        <result property="taskType" column="task_type"/>
+        <result property="taskInType" column="task_in_type"/>
+        <result property="taskOutType" column="task_out_type"/>
+        <result property="taskProjUid" column="task_proj_uid"/>
+        <result property="taskProcUid" column="task_proc_uid"/>
+        <result property="taskParUid" column="task_par_uid"/>
+        <result property="taskManager" column="task_manager"/>
+        <result property="taskDescription" column="task_description"/>
+        <result property="taskPlanStartDate" column="task_plan_startdate"/>
+        <result property="taskPlanFinishDate" column="task_plan_finishdate"/>
+        <result property="taskPlanDur" column="task_plan_dur"/>
+        <result property="taskEarlyStartDate" column="task_early_startdate"/>
+        <result property="taskLateFinishDate" column="task_late_finishdate"/>
+        <result property="taskActStartDate" column="task_act_startdate"/>
+        <result property="taskActFinishDate" column="task_act_finishdate"/>
+        <result property="taskActDur" column="task_act_dur"/>
+        <result property="taskWork" column="task_work"/>
+        <result property="taskCompWork" column="task_comp_work"/>
+        <result property="taskRemWork" column="task_rem_work"/>
+        <result property="taskPctWork" column="task_pct_work"/>
+        <result property="taskStatus" column="task_status"/>
+    </resultMap>
+
+    <!--sql语句对应的接口方法名-->
+    <select id="selectAll" resultMap="pmsTaskMapper">
+        select * from pms_task
+    </select>
+
+    <select id="selectByProjUid" resultMap="pmsTaskMapper">
+        select * from pms_task where task_proj_uid = #{taskProjUid}
+    </select>
+
+    <select id="selectByProcUid" resultMap="pmsTaskMapper">
+        select * from pms_task where task_proc_uid = #{taskProcUid}
+    </select>
+
+    <select id="selectByParUid" resultMap="pmsTaskMapper">
+        select * from pms_task where task_par_uid = #{taskParUid}
+    </select>
+
+    <select id="selectByUid" resultMap="pmsTaskMapper">
+        select * from pms_task where task_uid = #{taskUid}
+    </select>
+
+    <insert id="save" parameterType="PmsTask">
+        insert into pms_task
+        (task_uid, task_id, task_name, task_type, task_in_type, task_out_type, task_proj_uid, task_proc_uid, task_par_uid, task_manager,
+        task_description, task_plan_startdate, task_plan_finishdate, task_plan_dur, task_early_startdate, task_late_finishdate,
+        task_act_startdate, task_act_finishdate, task_act_dur, task_work, task_comp_work, task_rem_work, task_pct_work, task_status)
+        values
+        (#{taskUid}, #{taskId}, #{taskName}, #{taskType}, #{taskInType}, #{taskOutType}, #{taskProjUid}, #{taskProcUid}, #{taskParUid}, #{taskManager},
+        #{taskDescription}, #{taskPlanStartDate}, #{taskPlanFinishDate}, #{taskPlanDur}, #{taskEarlyStartDate}, #{taskLateFinishDate},
+        #{taskActStartDate}, #{taskActFinishDate}, #{taskActDur}, #{taskWork}, #{taskCompWork}, #{taskRemWork}, #{taskPctWork}, #{taskStatus})
+    </insert>
+
+    <delete id="deleteByUid">
+        delete from pms_task where task_uid = #{taskUid}
+    </delete>
+
+    <delete id="deleteByProjUid">
+        delete from pms_task where task_proj_uid = #{taskProjUid}
+    </delete>
+
+    <delete id="deleteByProcUid">
+        delete from pms_task where task_proc_uid = #{taskProcUid}
+    </delete>
+
+    <delete id="deleteByParUid">
+        delete from pms_task where task_par_uid = #{taskParUid}
+    </delete>
+    
+    <update id="update" parameterType="PmsTask">
+        update pms_task set
+        task_id = #{taskId}, task_name = #{taskName}, task_type = #{taskType}, task_in_type = #{taskOutType}, task_type = #{taskType},
+        task_proj_uid = #{taskProjUid}, task_proc_uid = #{taskProcUid}, task_par_uid = #{taskParUid}, task_manager = #{taskManager},
+        task_description = #{taskDescription}, task_plan_startdate = #{taskPlanStartDate}, task_plan_finishdate = #{taskPlanFinishDate},
+        task_plan_dur = #{taskPlanDur}, task_early_startdate = #{taskEarlyStartDate}, task_late_finishdate = #{taskLateFinishDate},
+        task_act_startdate = #{taskActStartDate}, task_act_finishdate = #{taskActFinishDate}, task_act_dur = #{taskActDur},
+        task_work = #{taskWork}, task_comp_work = #{taskCompWork}, task_rem_work = #{taskRemWork}, task_pct_work = #{taskPctWork}, task_status = #{taskStatus}
+        where task_uid = #{taskUid}
+    </update>
+
+</mapper>

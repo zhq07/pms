@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace：xml文件对应的接口类名-->
+<mapper namespace="com.buaa.pms.mapper.PmsProjectMapper">
+
+    <!--数据库表字段与Java对象属性的映射关系-->
+    <resultMap id="pmsProjectMapper" type="PmsProject">
+        <result property="projUid" column="proj_uid"/>
+        <result property="projId" column="proj_id"/>
+        <result property="projName" column="proj_name"/>
+        <result property="projTaskUid" column="proj_task_uid"/>
+        <result property="projParUid" column="proj_par_uid"/>
+        <result property="projOrgUid" column="proj_org_uid"/>
+        <result property="projManager" column="proj_manager"/>
+        <result property="projDescription" column="proj_description"/>
+        <result property="projPlanStartDate" column="proj_plan_startdate"/>
+        <result property="projPlanFinishDate" column="proj_plan_finishdate"/>
+        <result property="projPlanDur" column="proj_plan_dur"/>
+        <result property="projEarlyStartDate" column="proj_early_startdate"/>
+        <result property="projLateFinishDate" column="proj_late_finishdate"/>
+        <result property="projActStartDate" column="proj_act_startdate"/>
+        <result property="projActFinishDate" column="proj_act_finishdate"/>
+        <result property="projActDur" column="proj_act_dur"/>
+        <result property="projWork" column="proj_work"/>
+        <result property="projCompWork" column="proj_comp_work"/>
+        <result property="projRemWork" column="proj_rem_work"/>
+        <result property="projPctWork" column="proj_pct_work"/>
+        <result property="projStatus" column="proj_status"/>
+    </resultMap>
+
+    <!--sql语句对应的接口方法名-->
+    <select id="selectAll" resultMap="pmsProjectMapper">
+        select * from pms_project
+    </select>
+
+    <select id="selectTop" resultMap="pmsProjectMapper">
+        select * from pms_project where proj_par_uid = '' or proj_par_uid is null
+    </select>
+
+    <select id="selectByParUid" resultMap="pmsProjectMapper">
+        select * from pms_project where proj_par_uid = #{projParUid}
+    </select>
+
+    <select id="selectByUid" resultMap="pmsProjectMapper">
+        select * from pms_project where proj_uid = #{projUid}
+    </select>
+
+    <insert id="save" parameterType="PmsProject">
+        insert into pms_project
+        (proj_uid, proj_id, proj_name, proj_task_uid, proj_par_uid, proj_org_uid, proj_manager, proj_description,
+        proj_plan_startdate, proj_plan_finishdate, proj_plan_dur, proj_early_startdate, proj_late_finishdate,
+        proj_act_startdate, proj_act_finishdate, proj_act_dur, proj_work, proj_comp_work, proj_rem_work, proj_pct_work, proj_status)
+        values
+        (#{projUid}, #{projId}, #{projName}, #{projTaskUid}, #{projParUid}, #{projOrgUid}, #{projManager}, #{projDescription},
+        #{projPlanStartDate}, #{projPlanFinishDate}, #{projPlanDur}, #{projEarlyStartDate}, #{projLateFinishDate},
+        #{projActStartDate}, #{projActFinishDate}, #{projActDur}, #{projWork}, #{projCompWork}, #{projRemWork}, #{projPctWork}, #{projStatus})
+    </insert>
+
+    <delete id="deleteByUid">
+        delete from pms_project where proj_uid = #{projUid}
+    </delete>
+    
+    <update id="update" parameterType="PmsProject">
+        update pms_project set
+        proj_id = #{projId}, proj_name = #{projName}, proj_task_uid = #{projTaskUid}, proj_par_uid = #{projParUid},
+        proj_org_uid = #{projOrgUid}, proj_manager = #{projManager}, proj_description = #{projDescription},
+        proj_plan_startdate = #{projPlanStartDate}, proj_plan_finishdate = #{projPlanFinishDate}, proj_plan_dur = #{projPlanDur},
+        proj_early_startdate = #{projEarlyStartDate}, proj_late_finishdate = #{projLateFinishDate}, proj_act_startdate = #{projActStartDate},
+        proj_act_finishdate = #{projActFinishDate}, proj_act_dur = #{projActDur}, proj_work = #{projWork}, proj_comp_work = #{projCompWork},
+        proj_rem_work = #{projRemWork}, proj_pct_work = #{projPctWork}, proj_status = #{projStatus}
+        where proj_uid = #{projUid}
+    </update>
+
+</mapper>

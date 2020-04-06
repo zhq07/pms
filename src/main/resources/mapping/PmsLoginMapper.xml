@@ -7,13 +7,13 @@
     <!--数据库表字段与Java对象属性的映射关系-->
     <resultMap id="pmsLoginMapper" type="PmsUser">
         <result property="userUid" column="user_uid"/>
-        <result property="username" column="username"/>
+        <result property="username" column="user_name"/>
         <result property="password" column="password"/>
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectByNameId" resultMap="pmsLoginMapper" parameterType="map">
-        select * from pms_users where username = #{username} and password = #{password}
+    <select id="selectByNameId" resultMap="pmsLoginMapper">
+        select * from pms_users where user_name = #{username} and password = #{password}
     </select>
 
 </mapper>

@@ -1,15 +1,19 @@
-package com.buaa.pms.entity;
+package com.buaa.pms.model;
 
 import java.sql.Date;
+import java.util.List;
 
-public class PmsProject {
+public class ProjTableItem {
 
     private String projUid;
     private String projId;
     private String projName;
     private String projTaskUid;
+    private String projTaskName;
     private String projParUid;
+    private String projParName;
     private String projOrgUid;
+    private String projOrgName;
     private String projManager;
     private String projDescription;
     private Date projPlanStartDate;
@@ -25,6 +29,8 @@ public class PmsProject {
     private Integer projRemWork;
     private Float projPctWork;
     private Integer projStatus;
+
+    private List<ProjTableItem> children;
 
     public String getProjUid() {
         return projUid;
@@ -58,12 +64,28 @@ public class PmsProject {
         this.projTaskUid = projTaskUid;
     }
 
+    public String getProjTaskName() {
+        return projTaskName;
+    }
+
+    public void setProjTaskName(String projTaskName) {
+        this.projTaskName = projTaskName;
+    }
+
     public String getProjParUid() {
         return projParUid;
     }
 
-    public void setProjParUid(String projParUid) {
-        this.projParUid = projParUid;
+    public void setProjParUid(String projParProjUid) {
+        this.projParUid = projParProjUid;
+    }
+
+    public String getProjParName() {
+        return projParName;
+    }
+
+    public void setProjParName(String projParProjName) {
+        this.projParName = projParProjName;
     }
 
     public String getProjOrgUid() {
@@ -72,6 +94,14 @@ public class PmsProject {
 
     public void setProjOrgUid(String projOrgUid) {
         this.projOrgUid = projOrgUid;
+    }
+
+    public String getProjOrgName() {
+        return projOrgName;
+    }
+
+    public void setProjOrgName(String projOrgName) {
+        this.projOrgName = projOrgName;
     }
 
     public String getProjManager() {
@@ -194,15 +224,26 @@ public class PmsProject {
         this.projStatus = projStatus;
     }
 
+    public List<ProjTableItem> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<ProjTableItem> children) {
+        this.children = children;
+    }
+
     @Override
     public String toString() {
-        return "PmsProject{" +
+        return "ProjTableItem{" +
                 "projUid='" + projUid + '\'' +
                 ", projId='" + projId + '\'' +
                 ", projName='" + projName + '\'' +
                 ", projTaskUid='" + projTaskUid + '\'' +
+                ", projTaskName='" + projTaskName + '\'' +
                 ", projParProjUid='" + projParUid + '\'' +
+                ", projParProjName='" + projParName + '\'' +
                 ", projOrgUid='" + projOrgUid + '\'' +
+                ", projOrgName='" + projOrgName + '\'' +
                 ", projManager='" + projManager + '\'' +
                 ", projDescription='" + projDescription + '\'' +
                 ", projPlanStartDate=" + projPlanStartDate +
@@ -218,6 +259,7 @@ public class PmsProject {
                 ", projRemWork=" + projRemWork +
                 ", projPctWork=" + projPctWork +
                 ", projStatus=" + projStatus +
+                ", children=" + children +
                 '}';
     }
 }

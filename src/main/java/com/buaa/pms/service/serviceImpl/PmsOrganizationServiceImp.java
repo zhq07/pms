@@ -54,7 +54,7 @@ public class PmsOrganizationServiceImp implements PmsOrganizationService {
 
     @Override
     public void saveOrUpdate(PmsOrganization pmsOrganization) {
-        if (pmsOrganization.getOrgUid() == null || pmsOrganization.getOrgUid() == "") {
+        if (pmsOrganization.getOrgUid() == null || pmsOrganization.getOrgUid().equals("")) {
             pmsOrganization.setOrgUid(new MyUUID().getUUID());
             this.save(pmsOrganization);
         } else {

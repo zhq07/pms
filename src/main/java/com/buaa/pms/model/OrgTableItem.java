@@ -1,9 +1,5 @@
 package com.buaa.pms.model;
 
-import com.buaa.pms.entity.PmsOrganization;
-import com.buaa.pms.mapper.PmsOrganizationMapper;
-
-import javax.annotation.Resource;
 import java.util.List;
 
 public class OrgTableItem {
@@ -19,9 +15,6 @@ public class OrgTableItem {
     private String orgDescription;
 
     private List<OrgTableItem> children;
-
-    @Resource
-    PmsOrganizationMapper pmsOrganizationMapper;
 
     public OrgTableItem() {}
 

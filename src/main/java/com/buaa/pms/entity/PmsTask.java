@@ -2,13 +2,17 @@ package com.buaa.pms.entity;
 
 import java.sql.Date;
 
-public class PmsPublishedTask {
+public class PmsTask {
 
     private String taskUid;
     private String taskId;
     private String taskName;
+    private Integer taskType;
+    private Integer taskInType;
+    private Integer taskOutType;
     private String taskProjUid;
     private String taskProcUid;
+    private String taskParUid;
     private String taskManager;
     private String taskDescription;
     private Date taskPlanStartDate;
@@ -49,6 +53,30 @@ public class PmsPublishedTask {
         this.taskName = taskName;
     }
 
+    public Integer getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(Integer taskType) {
+        this.taskType = taskType;
+    }
+
+    public Integer getTaskInType() {
+        return taskInType;
+    }
+
+    public void setTaskInType(Integer taskInType) {
+        this.taskInType = taskInType;
+    }
+
+    public Integer getTaskOutType() {
+        return taskOutType;
+    }
+
+    public void setTaskOutType(Integer taskOutType) {
+        this.taskOutType = taskOutType;
+    }
+
     public String getTaskProjUid() {
         return taskProjUid;
     }
@@ -63,6 +91,14 @@ public class PmsPublishedTask {
 
     public void setTaskProcUid(String taskProcUid) {
         this.taskProcUid = taskProcUid;
+    }
+
+    public String getTaskParUid() {
+        return taskParUid;
+    }
+
+    public void setTaskParUid(String taskParUid) {
+        this.taskParUid = taskParUid;
     }
 
     public String getTaskManager() {
@@ -187,12 +223,16 @@ public class PmsPublishedTask {
 
     @Override
     public String toString() {
-        return "PmsPublishedTask{" +
+        return "PmsTask{" +
                 "taskUid='" + taskUid + '\'' +
                 ", taskId='" + taskId + '\'' +
                 ", taskName='" + taskName + '\'' +
+                ", taskType=" + taskType +
+                ", taskInType=" + taskInType +
+                ", taskOutType=" + taskOutType +
                 ", taskProjUid='" + taskProjUid + '\'' +
                 ", taskProcUid='" + taskProcUid + '\'' +
+                ", taskParUid='" + taskParUid + '\'' +
                 ", taskManager='" + taskManager + '\'' +
                 ", taskDescription='" + taskDescription + '\'' +
                 ", taskPlanStartDate=" + taskPlanStartDate +
