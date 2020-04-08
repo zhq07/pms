@@ -10,7 +10,6 @@ public class PmsHuman {
     private String humAbilityType;
     private String humAbilityLevel;
     private String humAbilityDesc;
-    private String humCurrTaskUid;
     private String humPhone;
     private String humEmail;
 
@@ -78,14 +77,6 @@ public class PmsHuman {
         this.humAbilityDesc = humAbilityDesc;
     }
 
-    public String getHumCurrTaskUid() {
-        return humCurrTaskUid;
-    }
-
-    public void setHumCurrTaskUid(String humCurrTaskUid) {
-        this.humCurrTaskUid = humCurrTaskUid;
-    }
-
     public String getHumPhone() {
         return humPhone;
     }
@@ -113,7 +104,6 @@ public class PmsHuman {
                 ", humAbilityType='" + humAbilityType + '\'' +
                 ", humAbilityLevel='" + humAbilityLevel + '\'' +
                 ", humAbilityDesc='" + humAbilityDesc + '\'' +
-                ", humCurrTaskUid='" + humCurrTaskUid + '\'' +
                 ", humPhone='" + humPhone + '\'' +
                 ", humEmail='" + humEmail + '\'' +
                 '}';

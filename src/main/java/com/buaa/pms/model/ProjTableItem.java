@@ -28,7 +28,7 @@ public class ProjTableItem {
     private Integer projCompWork;
     private Integer projRemWork;
     private Float projPctWork;
-    private Integer projStatus;
+    private Integer projState;
 
     private List<ProjTableItem> children;
 
@@ -216,12 +216,12 @@ public class ProjTableItem {
         this.projPctWork = projPctWork;
     }
 
-    public Integer getProjStatus() {
-        return projStatus;
+    public Integer getProjState() {
+        return projState;
     }
 
-    public void setProjStatus(Integer projStatus) {
-        this.projStatus = projStatus;
+    public void setProjState(Integer projState) {
+        this.projState = projState;
     }
 
     public List<ProjTableItem> getChildren() {
@@ -258,7 +258,7 @@ public class ProjTableItem {
                 ", projCompWork=" + projCompWork +
                 ", projRemWork=" + projRemWork +
                 ", projPctWork=" + projPctWork +
-                ", projStatus=" + projStatus +
+                ", projState=" + projState +
                 ", children=" + children +
                 '}';
     }

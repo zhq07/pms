@@ -9,8 +9,6 @@ public class PmsPlace {
     private Float placeArea;
     private String placeDesc;
     private Float placeUsage;
-    private Integer placeStatus;
-    private String placeCurrTaskUid;
 
     public String getPlaceUid() {
         return placeUid;
@@ -68,22 +66,6 @@ public class PmsPlace {
         this.placeUsage = placeUsage;
     }
 
-    public Integer getPlaceStatus() {
-        return placeStatus;
-    }
-
-    public void setPlaceStatus(Integer placeStatus) {
-        this.placeStatus = placeStatus;
-    }
-
-    public String getPlaceCurrTaskUid() {
-        return placeCurrTaskUid;
-    }
-
-    public void setPlaceCurrTaskUid(String placeCurrTaskUid) {
-        this.placeCurrTaskUid = placeCurrTaskUid;
-    }
-
     @Override
     public String toString() {
         return "PmsPlace{" +
@@ -94,8 +76,6 @@ public class PmsPlace {
                 ", placeArea=" + placeArea +
                 ", placeDesc='" + placeDesc + '\'' +
                 ", placeUsage=" + placeUsage +
-                ", placeStatus=" + placeStatus +
-                ", placeCurrTaskUid='" + placeCurrTaskUid + '\'' +
                 '}';
     }
 }

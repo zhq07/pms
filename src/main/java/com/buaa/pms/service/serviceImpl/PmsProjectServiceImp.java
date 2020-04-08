@@ -1,7 +1,9 @@
 package com.buaa.pms.service.serviceImpl;
 
+import com.buaa.pms.entity.PmsOrganization;
 import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
+import com.buaa.pms.mapper.PmsOrganizationMapper;
 import com.buaa.pms.mapper.PmsProjectMapper;
 import com.buaa.pms.mapper.PmsTaskMapper;
 import com.buaa.pms.model.ProjTableItem;
@@ -21,6 +23,9 @@ public class PmsProjectServiceImp implements PmsProjectService {
     @Resource
     PmsTaskMapper pmsTaskMapper;
 
+    @Resource
+    PmsOrganizationMapper pmsOrganizationMapper;
+
     @Override
     public List<PmsProject> selectAll() {
         return pmsProjectMapper.selectAll();
@@ -29,6 +34,11 @@ public class PmsProjectServiceImp implements PmsProjectService {
     @Override
     public List<PmsProject> selectTop() {
         return pmsProjectMapper.selectTop();
+    }
+
+    @Override
+    public List<PmsProject> selectPublished() {
+        return pmsProjectMapper.selectPublished();
     }
 
     @Override
@@ -43,7 +53,21 @@ public class PmsProjectServiceImp implements PmsProjectService {
 
     @Override
     public void save(PmsProject pmsProject) {
+        // 分配UUID
         pmsProject.setProjUid(new MyUUID().getUUID());
+        // 计算工期
+        if (pmsProject.getProjPlanStartDate() != null && pmsProject.getProjPlanFinishDate() != null) {
+            int planDur = (int) (pmsProject.getProjPlanStartDate().getTime() - pmsProject.getProjPlanFinishDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsProject.setProjPlanDur(planDur);
+        }
+        // 计算实际工期
+        if (pmsProject.getProjActStartDate() != null && pmsProject.getProjActFinishDate() != null) {
+            int actDur = (int) (pmsProject.getProjActFinishDate().getTime() - pmsProject.getProjActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsProject.setProjActDur(actDur);
+        }
+        // 新增项目默认状态 0-“编制中”
+        if (pmsProject.getProjState() == null)
+            pmsProject.setProjState(0);
         pmsProjectMapper.save(pmsProject);
     }
 
@@ -55,6 +79,21 @@ public class PmsProjectServiceImp implements PmsProjectService {
 
     @Override
     public void update(PmsProject pmsProject) {
+        // 计算计划工期
+        if (pmsProject.getProjPlanStartDate() != null && pmsProject.getProjPlanFinishDate() != null) {
+            int planDur = (int) (pmsProject.getProjPlanFinishDate().getTime() - pmsProject.getProjPlanStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsProject.setProjPlanDur(planDur);
+        }
+        // 计算实际工期
+        if (pmsProject.getProjActStartDate() != null && pmsProject.getProjActFinishDate() != null) {
+            int actDur = (int) (pmsProject.getProjActFinishDate().getTime() - pmsProject.getProjActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsProject.setProjActDur(actDur);
+        }
+        // 项目状态若为空，则保持以前的状态
+        if (pmsProject.getProjState() == null) {
+            int state = pmsProjectMapper.selectByUid(pmsProject.getProjUid()).getProjState();
+            pmsProject.setProjState(state);
+        }
         pmsProjectMapper.update(pmsProject);
     }
 
@@ -103,6 +142,10 @@ public class PmsProjectServiceImp implements PmsProjectService {
         PmsProject parProj = pmsProjectMapper.selectByUid(proj.getProjParUid());
         tableItem.setProjParName(parProj == null ? "" : parProj.getProjName());
 
+        tableItem.setProjOrgUid(proj.getProjOrgUid());
+        PmsOrganization projOrg = pmsOrganizationMapper.selectByUid(proj.getProjOrgUid());
+        tableItem.setProjOrgName(projOrg == null ? "" : projOrg.getOrgName());
+
         tableItem.setProjManager(proj.getProjManager());
         tableItem.setProjDescription(proj.getProjDescription());
         tableItem.setProjPlanStartDate(proj.getProjPlanStartDate());
@@ -110,8 +153,10 @@ public class PmsProjectServiceImp implements PmsProjectService {
         tableItem.setProjPlanDur(proj.getProjPlanDur());
         tableItem.setProjEarlyStartDate(proj.getProjEarlyStartDate());
         tableItem.setProjLateFinishDate(proj.getProjLateFinishDate());
-        tableItem.setProjStatus(proj.getProjStatus());
-
+        tableItem.setProjActStartDate(proj.getProjActStartDate());
+        tableItem.setProjActFinishDate(proj.getProjActFinishDate());
+        tableItem.setProjPctWork(proj.getProjPctWork());
+        tableItem.setProjState(proj.getProjState());
         tableItem.setChildren(this.getChildrenByUid(proj.getProjUid()));
 
         return tableItem;

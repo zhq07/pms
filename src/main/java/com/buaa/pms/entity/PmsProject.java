@@ -24,7 +24,7 @@ public class PmsProject {
     private Integer projCompWork;
     private Integer projRemWork;
     private Float projPctWork;
-    private Integer projStatus;
+    private Integer projState;
 
     public String getProjUid() {
         return projUid;
@@ -186,12 +186,12 @@ public class PmsProject {
         this.projPctWork = projPctWork;
     }
 
-    public Integer getProjStatus() {
-        return projStatus;
+    public Integer getProjState() {
+        return projState;
     }
 
-    public void setProjStatus(Integer projStatus) {
-        this.projStatus = projStatus;
+    public void setProjState(Integer projState) {
+        this.projState = projState;
     }
 
     @Override
@@ -217,7 +217,7 @@ public class PmsProject {
                 ", projCompWork=" + projCompWork +
                 ", projRemWork=" + projRemWork +
                 ", projPctWork=" + projPctWork +
-                ", projStatus=" + projStatus +
+                ", projState=" + projState +
                 '}';
     }
 }

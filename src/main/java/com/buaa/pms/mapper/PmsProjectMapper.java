@@ -12,6 +12,8 @@ public interface PmsProjectMapper {
 
     public List<PmsProject> selectTop();
 
+    public List<PmsProject> selectPublished();
+
     public List<PmsProject> selectByParUid(String projParUid);
 
     public PmsProject selectByUid(String projUid);

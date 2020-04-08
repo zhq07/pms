@@ -41,6 +41,21 @@ public class PmsTaskServiceImp implements PmsTaskService {
 
     @Override
     public void save(PmsTask pmsTask) {
+        // 分配UUID
+        pmsTask.setTaskUid(new MyUUID().getUUID());
+        // 计算工期
+        if (pmsTask.getTaskPlanStartDate() != null && pmsTask.getTaskPlanFinishDate() != null) {
+            int planDur = (int) (pmsTask.getTaskPlanStartDate().getTime() - pmsTask.getTaskPlanFinishDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsTask.setTaskPlanDur(planDur);
+        }
+        // 计算实际工期
+        if (pmsTask.getTaskActStartDate() != null && pmsTask.getTaskActFinishDate() != null) {
+            int actDur = (int) (pmsTask.getTaskActFinishDate().getTime() - pmsTask.getTaskActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsTask.setTaskActDur(actDur);
+        }
+        // 新增任务默认状态 0-“编制中”
+        if (pmsTask.getTaskState() == null)
+            pmsTask.setTaskState(0);
         pmsTaskMapper.save(pmsTask);
     }
 
@@ -66,6 +81,21 @@ public class PmsTaskServiceImp implements PmsTaskService {
 
     @Override
     public void update(PmsTask pmsTask) {
+        // 计算工期
+        if (pmsTask.getTaskPlanStartDate() != null && pmsTask.getTaskPlanFinishDate() != null) {
+            int planDur = (int) (pmsTask.getTaskPlanStartDate().getTime() - pmsTask.getTaskPlanFinishDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsTask.setTaskPlanDur(planDur);
+        }
+        // 计算实际工期
+        if (pmsTask.getTaskActStartDate() != null && pmsTask.getTaskActFinishDate() != null) {
+            int actDur = (int) (pmsTask.getTaskActFinishDate().getTime() - pmsTask.getTaskActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
+            pmsTask.setTaskActDur(actDur);
+        }
+        // 任务状态若为空，则保持以前的状态
+        if (pmsTask.getTaskState() == null) {
+            int state = pmsTaskMapper.selectByUid(pmsTask.getTaskUid()).getTaskState();
+            pmsTask.setTaskState(state);
+        }
         pmsTaskMapper.update(pmsTask);
     }
 

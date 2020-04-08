@@ -9,10 +9,11 @@ public class PmsProcess {
     private String procName;
     private String procProjUid;
     private String procAuthor;
+    private String procDescription;
     private Date procPlanStartDate;
     private Date procPlanFinishDate;
     private Integer procPlanDur;
-    private Integer procStatus;
+    private Integer procState;
 
     public String getProcUid() {
         return procUid;
@@ -54,6 +55,14 @@ public class PmsProcess {
         this.procAuthor = procAuthor;
     }
 
+    public String getProcDescription() {
+        return procDescription;
+    }
+
+    public void setProcDescription(String procDescription) {
+        this.procDescription = procDescription;
+    }
+
     public Date getProcPlanStartDate() {
         return procPlanStartDate;
     }
@@ -78,12 +87,12 @@ public class PmsProcess {
         this.procPlanDur = procPlanDur;
     }
 
-    public Integer getProcStatus() {
-        return procStatus;
+    public Integer getProcState() {
+        return procState;
     }
 
-    public void setProcStatus(Integer procStatus) {
-        this.procStatus = procStatus;
+    public void setProcState(Integer procState) {
+        this.procState = procState;
     }
 
     @Override
@@ -94,10 +103,11 @@ public class PmsProcess {
                 ", procName='" + procName + '\'' +
                 ", procProjUid='" + procProjUid + '\'' +
                 ", procAuthor='" + procAuthor + '\'' +
+                ", procDescription='" + procDescription + '\'' +
                 ", procPlanStartDate=" + procPlanStartDate +
                 ", procPlanFinishDate=" + procPlanFinishDate +
                 ", procPlanDur=" + procPlanDur +
-                ", procStatus=" + procStatus +
+                ", procState=" + procState +
                 '}';
     }
 }

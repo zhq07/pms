@@ -9,8 +9,6 @@ public class PmsEquipment {
     private String equipCapType;
     private String equipCapLevel;
     private String equipCapDesc;
-    private Integer equipStatus;
-    private String equipCurrTaskUid;
 
     public String getEquipUid() {
         return equipUid;
@@ -68,22 +66,6 @@ public class PmsEquipment {
         this.equipCapDesc = equipCapDesc;
     }
 
-    public Integer getEquipStatus() {
-        return equipStatus;
-    }
-
-    public void setEquipStatus(Integer equipStatus) {
-        this.equipStatus = equipStatus;
-    }
-
-    public String getEquipCurrTaskUid() {
-        return equipCurrTaskUid;
-    }
-
-    public void setEquipCurrTaskUid(String equipCurrTaskUid) {
-        this.equipCurrTaskUid = equipCurrTaskUid;
-    }
-
     @Override
     public String toString() {
         return "PmsEquipment{" +
@@ -94,8 +76,6 @@ public class PmsEquipment {
                 ", equipCapType='" + equipCapType + '\'' +
                 ", equipCapLevel='" + equipCapLevel + '\'' +
                 ", equipCapDesc='" + equipCapDesc + '\'' +
-                ", equipStatus=" + equipStatus +
-                ", equipCurrTaskUid='" + equipCurrTaskUid + '\'' +
                 '}';
     }
 }

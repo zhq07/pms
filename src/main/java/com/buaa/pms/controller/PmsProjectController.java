@@ -24,6 +24,11 @@ public class PmsProjectController {
         return pmsProjectService.selectTop();
     }
 
+    @GetMapping("/getPublished")
+    public List<PmsProject> getPmsProjectPublished() {
+        return pmsProjectService.selectPublished();
+    }
+
     @GetMapping("/getProjTableData")
     public List<ProjTableItem> getPmsProjTableData() {
         return pmsProjectService.getProjTableData();

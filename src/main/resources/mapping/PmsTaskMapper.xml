@@ -29,7 +29,7 @@
         <result property="taskCompWork" column="task_comp_work"/>
         <result property="taskRemWork" column="task_rem_work"/>
         <result property="taskPctWork" column="task_pct_work"/>
-        <result property="taskStatus" column="task_status"/>
+        <result property="taskState" column="task_state"/>
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
@@ -57,11 +57,11 @@
         insert into pms_task
         (task_uid, task_id, task_name, task_type, task_in_type, task_out_type, task_proj_uid, task_proc_uid, task_par_uid, task_manager,
         task_description, task_plan_startdate, task_plan_finishdate, task_plan_dur, task_early_startdate, task_late_finishdate,
-        task_act_startdate, task_act_finishdate, task_act_dur, task_work, task_comp_work, task_rem_work, task_pct_work, task_status)
+        task_act_startdate, task_act_finishdate, task_act_dur, task_work, task_comp_work, task_rem_work, task_pct_work, task_state)
         values
         (#{taskUid}, #{taskId}, #{taskName}, #{taskType}, #{taskInType}, #{taskOutType}, #{taskProjUid}, #{taskProcUid}, #{taskParUid}, #{taskManager},
         #{taskDescription}, #{taskPlanStartDate}, #{taskPlanFinishDate}, #{taskPlanDur}, #{taskEarlyStartDate}, #{taskLateFinishDate},
-        #{taskActStartDate}, #{taskActFinishDate}, #{taskActDur}, #{taskWork}, #{taskCompWork}, #{taskRemWork}, #{taskPctWork}, #{taskStatus})
+        #{taskActStartDate}, #{taskActFinishDate}, #{taskActDur}, #{taskWork}, #{taskCompWork}, #{taskRemWork}, #{taskPctWork}, #{taskState})
     </insert>
 
     <delete id="deleteByUid">
@@ -87,7 +87,7 @@
         task_description = #{taskDescription}, task_plan_startdate = #{taskPlanStartDate}, task_plan_finishdate = #{taskPlanFinishDate},
         task_plan_dur = #{taskPlanDur}, task_early_startdate = #{taskEarlyStartDate}, task_late_finishdate = #{taskLateFinishDate},
         task_act_startdate = #{taskActStartDate}, task_act_finishdate = #{taskActFinishDate}, task_act_dur = #{taskActDur},
-        task_work = #{taskWork}, task_comp_work = #{taskCompWork}, task_rem_work = #{taskRemWork}, task_pct_work = #{taskPctWork}, task_status = #{taskStatus}
+        task_work = #{taskWork}, task_comp_work = #{taskCompWork}, task_rem_work = #{taskRemWork}, task_pct_work = #{taskPctWork}, task_state = #{taskState}
         where task_uid = #{taskUid}
     </update>
 

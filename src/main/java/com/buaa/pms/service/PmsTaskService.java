@@ -16,7 +16,6 @@ public interface PmsTaskService {
 
     public PmsTask selectByUid(String taskUid);
 
-
     public void save(PmsTask pmsTask);
 
     public void deleteByUid(String taskUid);

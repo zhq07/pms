@@ -27,7 +27,7 @@ public class PmsTask {
     private Integer taskCompWork;
     private Integer taskRemWork;
     private Float taskPctWork;
-    private Integer taskStatus;
+    private Integer taskState;
 
     public String getTaskUid() {
         return taskUid;
@@ -213,12 +213,12 @@ public class PmsTask {
         this.taskPctWork = taskPctWork;
     }
 
-    public Integer getTaskStatus() {
-        return taskStatus;
+    public Integer getTaskState() {
+        return taskState;
     }
 
-    public void setTaskStatus(Integer taskStatus) {
-        this.taskStatus = taskStatus;
+    public void setTaskState(Integer taskState) {
+        this.taskState = taskState;
     }
 
     @Override
@@ -247,7 +247,7 @@ public class PmsTask {
                 ", taskCompWork=" + taskCompWork +
                 ", taskRemWork=" + taskRemWork +
                 ", taskPctWork=" + taskPctWork +
-                ", taskStatus=" + taskStatus +
+                ", taskState=" + taskState +
                 '}';
     }
 }

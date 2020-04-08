@@ -26,7 +26,7 @@
         <result property="projCompWork" column="proj_comp_work"/>
         <result property="projRemWork" column="proj_rem_work"/>
         <result property="projPctWork" column="proj_pct_work"/>
-        <result property="projStatus" column="proj_status"/>
+        <result property="projState" column="proj_state"/>
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
@@ -36,6 +36,10 @@
 
     <select id="selectTop" resultMap="pmsProjectMapper">
         select * from pms_project where proj_par_uid = '' or proj_par_uid is null
+    </select>
+
+    <select id="selectPublished" resultMap="pmsProjectMapper">
+        select * from pms_project where proj_state in (1, 2, 3)
     </select>
 
     <select id="selectByParUid" resultMap="pmsProjectMapper">
@@ -50,11 +54,11 @@
         insert into pms_project
         (proj_uid, proj_id, proj_name, proj_task_uid, proj_par_uid, proj_org_uid, proj_manager, proj_description,
         proj_plan_startdate, proj_plan_finishdate, proj_plan_dur, proj_early_startdate, proj_late_finishdate,
-        proj_act_startdate, proj_act_finishdate, proj_act_dur, proj_work, proj_comp_work, proj_rem_work, proj_pct_work, proj_status)
+        proj_act_startdate, proj_act_finishdate, proj_act_dur, proj_work, proj_comp_work, proj_rem_work, proj_pct_work, proj_state)
         values
         (#{projUid}, #{projId}, #{projName}, #{projTaskUid}, #{projParUid}, #{projOrgUid}, #{projManager}, #{projDescription},
         #{projPlanStartDate}, #{projPlanFinishDate}, #{projPlanDur}, #{projEarlyStartDate}, #{projLateFinishDate},
-        #{projActStartDate}, #{projActFinishDate}, #{projActDur}, #{projWork}, #{projCompWork}, #{projRemWork}, #{projPctWork}, #{projStatus})
+        #{projActStartDate}, #{projActFinishDate}, #{projActDur}, #{projWork}, #{projCompWork}, #{projRemWork}, #{projPctWork}, #{projState})
     </insert>
 
     <delete id="deleteByUid">
@@ -68,7 +72,7 @@
         proj_plan_startdate = #{projPlanStartDate}, proj_plan_finishdate = #{projPlanFinishDate}, proj_plan_dur = #{projPlanDur},
         proj_early_startdate = #{projEarlyStartDate}, proj_late_finishdate = #{projLateFinishDate}, proj_act_startdate = #{projActStartDate},
         proj_act_finishdate = #{projActFinishDate}, proj_act_dur = #{projActDur}, proj_work = #{projWork}, proj_comp_work = #{projCompWork},
-        proj_rem_work = #{projRemWork}, proj_pct_work = #{projPctWork}, proj_status = #{projStatus}
+        proj_rem_work = #{projRemWork}, proj_pct_work = #{projPctWork}, proj_state = #{projState}
         where proj_uid = #{projUid}
     </update>
 
