@@ -22,11 +22,13 @@ public interface PmsTaskMapper {
 
     public void deleteByUid(String taskUid);
 
-    public void deleteByProjUid(String projUid);
+    public void deleteByProjUid(String taskProjUid);
 
-    public void deleteByProcUid(String procUid);
+    public void deleteByProcUid(String taskProcUid);
 
-    public void deleteByParUid(String parUid);
+    public void deleteByParUid(String taskParUid);
 
     public void update(PmsTask pmsTask);
+
+    public void updatePmsTaskIds(List<PmsTask> pmsTasks);
 }

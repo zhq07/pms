@@ -3,6 +3,7 @@ package com.buaa.pms.entity;
 public class PmsTaskResPlan {
 
     private String resPlanUid;
+    private String resPlanId;
     private String resPlanProjUid;
     private String resPlanProcUid;
     private String resPlanTaskUid;
@@ -14,6 +15,14 @@ public class PmsTaskResPlan {
 
     public void setResPlanUid(String resPlanUid) {
         this.resPlanUid = resPlanUid;
+    }
+
+    public String getResPlanId() {
+        return resPlanId;
+    }
+
+    public void setResPlanId(String resPlanId) {
+        this.resPlanId = resPlanId;
     }
 
     public String getResPlanProjUid() {
@@ -52,6 +61,7 @@ public class PmsTaskResPlan {
     public String toString() {
         return "PmsTaskResPlan{" +
                 "resPlanUid='" + resPlanUid + '\'' +
+                ", resPlanId='" + resPlanId + '\'' +
                 ", resPlanProjUid='" + resPlanProjUid + '\'' +
                 ", resPlanProcUid='" + resPlanProcUid + '\'' +
                 ", resPlanTaskUid='" + resPlanTaskUid + '\'' +

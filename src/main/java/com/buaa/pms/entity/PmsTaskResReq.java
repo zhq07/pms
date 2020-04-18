@@ -3,10 +3,11 @@ package com.buaa.pms.entity;
 public class PmsTaskResReq {
 
     private String resReqUid;
+    private String resReqId;
     private String resReqPlanUid;
+    private String resReqTaskUid;
     private String resReqProjUid;
     private String resReqProcUid;
-    private String resReqTaskUid;
     private Integer resReqResType;
     private String resReqResUid;
     private Integer resReqResWork;
@@ -20,12 +21,28 @@ public class PmsTaskResReq {
         this.resReqUid = resReqUid;
     }
 
+    public String getResReqId() {
+        return resReqId;
+    }
+
+    public void setResReqId(String resReqId) {
+        this.resReqId = resReqId;
+    }
+
     public String getResReqPlanUid() {
         return resReqPlanUid;
     }
 
     public void setResReqPlanUid(String resReqPlanUid) {
         this.resReqPlanUid = resReqPlanUid;
+    }
+
+    public String getResReqTaskUid() {
+        return resReqTaskUid;
+    }
+
+    public void setResReqTaskUid(String resReqTaskUid) {
+        this.resReqTaskUid = resReqTaskUid;
     }
 
     public String getResReqProjUid() {
@@ -42,14 +59,6 @@ public class PmsTaskResReq {
 
     public void setResReqProcUid(String resReqProcUid) {
         this.resReqProcUid = resReqProcUid;
-    }
-
-    public String getResReqTaskUid() {
-        return resReqTaskUid;
-    }
-
-    public void setResReqTaskUid(String resReqTaskUid) {
-        this.resReqTaskUid = resReqTaskUid;
     }
 
     public Integer getResReqResType() {
@@ -88,10 +97,11 @@ public class PmsTaskResReq {
     public String toString() {
         return "PmsTaskResReq{" +
                 "resReqUid='" + resReqUid + '\'' +
+                ", resReqId='" + resReqId + '\'' +
                 ", resReqPlanUid='" + resReqPlanUid + '\'' +
+                ", resReqTaskUid='" + resReqTaskUid + '\'' +
                 ", resReqProjUid='" + resReqProjUid + '\'' +
                 ", resReqProcUid='" + resReqProcUid + '\'' +
-                ", resReqTaskUid='" + resReqTaskUid + '\'' +
                 ", resReqResType=" + resReqResType +
                 ", resReqResUid='" + resReqResUid + '\'' +
                 ", resReqResWork=" + resReqResWork +

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace：xml文件对应的接口类名-->
+<mapper namespace="com.buaa.pms.mapper.PmsTaskLinkMapper">
+
+    <!--数据库表字段与Java对象属性的映射关系-->
+    <resultMap id="pmsTaskLinkMapper" type="PmsTaskLink">
+        <result property="taskLinkUid" column="tasklink_uid"/>
+        <result property="taskLinkPreTaskUid" column="tasklink_pretask_uid"/>
+        <result property="taskLinkSucTaskUid" column="tasklink_suctask_uid"/>
+        <result property="taskLinkType" column="tasklink_type"/>
+        <result property="taskLinkProjUid" column="tasklink_proj_uid"/>
+        <result property="taskLinkProcUid" column="tasklink_proc_uid"/>
+    </resultMap>
+
+    <!--sql语句对应的接口方法名-->
+    <select id="selectAll" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link
+    </select>
+
+    <select id="selectByProjUid" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link where tasklink_proj_uid = #{taskLinkProjUid}
+    </select>
+
+    <select id="selectByProcUid" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link where tasklink_proc_uid = #{taskLinkProcUid}
+    </select>
+
+    <select id="selectByUid" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link where tasklink_uid = #{taskLinkUid}
+    </select>
+
+    <select id="selectByTaskUid" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
+    </select>
+
+    <select id="selectByPreTaskUid" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
+    </select>
+
+    <select id="selectBySucTaskUid" resultMap="pmsTaskLinkMapper">
+        select * from pms_task_Link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
+    </select>
+
+    <insert id="save" parameterType="PmsTaskLink">
+        insert into pms_task_Link
+        (tasklink_uid, tasklink_pretask_uid, tasklink_suctask_uid, tasklink_type, tasklink_proj_uid, tasklink_proc_uid)
+        values
+        (#{taskLinkUid}, #{taskLinkPreTaskUid}, #{taskLinkSucTaskUid}, #{taskLinkType}, #{taskLinkProjUid}, #{taskLinkProcUid})
+    </insert>
+
+    <insert id="saveTaskLinks" parameterType="java.util.List">
+        insert into pms_task_Link
+        (tasklink_uid, tasklink_pretask_uid, tasklink_suctask_uid, tasklink_type, tasklink_proj_uid, tasklink_proc_uid)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.taskLinkUid}, #{item.taskLinkPreTaskUid}, #{item.taskLinkSucTaskUid}, #{item.taskLinkType}, #{item.taskLinkProjUid}, #{item.taskLinkProcUid})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByUid">
+        delete from pms_task_Link where tasklink_uid = #{taskLinkUid}
+    </delete>
+
+    <delete id="deleteByPreTaskUid">
+        delete from pms_task_Link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
+    </delete>
+
+    <delete id="deleteBySucTaskUid">
+        delete from pms_task_Link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
+    </delete>
+
+    <delete id="deleteByTaskUid">
+        delete from pms_task_Link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
+    </delete>
+
+    <delete id="deleteByProcUid">
+        delete from pms_task_Link where tasklink_proc_uid = #{taskLinkProcUid}
+    </delete>
+
+    <delete id="deleteByProjUid">
+        delete from pms_task_Link where tasklink_proj_uid = #{taskLinkProjUid}
+    </delete>
+    
+    <update id="update" parameterType="PmsTaskLink">
+        update pms_task_Link set
+        tasklink_pretask_uid = #{taskLinkPreTaskUid}, tasklink_suctask_uid = #{taskLinkSucTaskUid}, tasklink_type = #{taskLinkType},
+        tasklink_proj_uid = #{taskLinkProjUid}, tasklink_proc_uid = #{taskLinkProcUid}
+        where tasklink_uid = #{taskLinkUid}
+    </update>
+
+</mapper>

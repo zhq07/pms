@@ -38,11 +38,11 @@
     </select>
 
     <select id="selectByProjUid" resultMap="pmsTaskMapper">
-        select * from pms_task where task_proj_uid = #{taskProjUid}
+        select * from pms_task where task_proj_uid = #{taskProjUid}  order by task_id
     </select>
 
     <select id="selectByProcUid" resultMap="pmsTaskMapper">
-        select * from pms_task where task_proc_uid = #{taskProcUid}
+        select * from pms_task where task_proc_uid = #{taskProcUid} order by task_id
     </select>
 
     <select id="selectByParUid" resultMap="pmsTaskMapper">
@@ -82,13 +82,19 @@
     
     <update id="update" parameterType="PmsTask">
         update pms_task set
-        task_id = #{taskId}, task_name = #{taskName}, task_type = #{taskType}, task_in_type = #{taskOutType}, task_type = #{taskType},
+        task_id = #{taskId}, task_name = #{taskName}, task_type = #{taskType}, task_in_type = #{taskInType}, task_out_type = #{taskOutType},
         task_proj_uid = #{taskProjUid}, task_proc_uid = #{taskProcUid}, task_par_uid = #{taskParUid}, task_manager = #{taskManager},
         task_description = #{taskDescription}, task_plan_startdate = #{taskPlanStartDate}, task_plan_finishdate = #{taskPlanFinishDate},
         task_plan_dur = #{taskPlanDur}, task_early_startdate = #{taskEarlyStartDate}, task_late_finishdate = #{taskLateFinishDate},
         task_act_startdate = #{taskActStartDate}, task_act_finishdate = #{taskActFinishDate}, task_act_dur = #{taskActDur},
         task_work = #{taskWork}, task_comp_work = #{taskCompWork}, task_rem_work = #{taskRemWork}, task_pct_work = #{taskPctWork}, task_state = #{taskState}
         where task_uid = #{taskUid}
+    </update>
+
+    <update id="updatePmsTaskIds" parameterType="java.util.List">
+        <foreach collection="list" item="pmsTask" index="index" open="" close="" separator=";">
+            update pms_task set task_id = #{pmsTask.taskId} where task_uid = #{pmsTask.taskUid}
+        </foreach>
     </update>
 
 </mapper>

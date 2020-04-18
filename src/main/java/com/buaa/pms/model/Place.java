@@ -1,11 +1,12 @@
-package com.buaa.pms.entity;
+package com.buaa.pms.model;
 
-public class PmsPlace {
+public class Place {
 
     private String placeUid;
     private String placeId;
     private String placeName;
     private String placeOrgUid;
+    private String placeOrgName;
     private Integer placeType;
     private Integer placeArea;
     private String placeDesc;
@@ -42,6 +43,14 @@ public class PmsPlace {
         this.placeOrgUid = placeOrgUid;
     }
 
+    public String getPlaceOrgName() {
+        return placeOrgName;
+    }
+
+    public void setPlaceOrgName(String placeOrgName) {
+        this.placeOrgName = placeOrgName;
+    }
+
     public Integer getPlaceType() {
         return placeType;
     }
@@ -68,11 +77,12 @@ public class PmsPlace {
 
     @Override
     public String toString() {
-        return "PmsPlace{" +
+        return "Place{" +
                 "placeUid='" + placeUid + '\'' +
                 ", placeId='" + placeId + '\'' +
                 ", placeName='" + placeName + '\'' +
                 ", placeOrgUid='" + placeOrgUid + '\'' +
+                ", placeOrgName='" + placeOrgName + '\'' +
                 ", placeType=" + placeType +
                 ", placeArea=" + placeArea +
                 ", placeDesc='" + placeDesc + '\'' +

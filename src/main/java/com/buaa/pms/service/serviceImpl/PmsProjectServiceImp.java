@@ -5,9 +5,9 @@ import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
 import com.buaa.pms.mapper.PmsOrganizationMapper;
 import com.buaa.pms.mapper.PmsProjectMapper;
-import com.buaa.pms.mapper.PmsTaskMapper;
 import com.buaa.pms.model.ProjTableItem;
 import com.buaa.pms.service.PmsProjectService;
+import com.buaa.pms.service.PmsTaskService;
 import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class PmsProjectServiceImp implements PmsProjectService {
     PmsProjectMapper  pmsProjectMapper;
 
     @Resource
-    PmsTaskMapper pmsTaskMapper;
+    PmsTaskService pmsTaskService;
 
     @Resource
     PmsOrganizationMapper pmsOrganizationMapper;
@@ -100,7 +100,6 @@ public class PmsProjectServiceImp implements PmsProjectService {
     @Override
     public void saveOrUpdate(PmsProject pmsProject) {
         if (pmsProject.getProjUid() == null || pmsProject.getProjUid().equals("")) {
-            pmsProject.setProjUid(new MyUUID().getUUID());
             this.save(pmsProject);
         } else {
             this.update(pmsProject);
@@ -135,7 +134,7 @@ public class PmsProjectServiceImp implements PmsProjectService {
         tableItem.setProjName(proj.getProjName());
 
         tableItem.setProjTaskUid(proj.getProjTaskUid());
-        PmsTask projTask = pmsTaskMapper.selectByUid(proj.getProjTaskUid());
+        PmsTask projTask = pmsTaskService.selectByUid(proj.getProjTaskUid());
         tableItem.setProjTaskName(projTask == null ? "" : projTask.getTaskName());
 
         tableItem.setProjParUid(proj.getProjParUid());

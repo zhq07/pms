@@ -1,6 +1,7 @@
 package com.buaa.pms.controller;
 
 import com.buaa.pms.entity.PmsProcess;
+import com.buaa.pms.model.Process;
 import com.buaa.pms.service.PmsProcessService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,11 @@ public class PmsProcessController {
         return pmsProcessService.selectAll();
     }
 
+    @GetMapping("/getProcList")
+    public List<Process> getProcList() {
+        return pmsProcessService.getProcList();
+    }
+
     @GetMapping("/getPublished")
     public List<PmsProcess> getPmsProcessPublished() {
         return pmsProcessService.selectPublished();
@@ -26,6 +32,11 @@ public class PmsProcessController {
     @GetMapping("/getByProjUid/{procProjUid}")
     public List<PmsProcess> getPmsProcessByProjUid(@PathVariable String procProjUid) {
         return pmsProcessService.selectByProjUid(procProjUid);
+    }
+
+    @GetMapping("/getProcListByProjUid/{procProjUid}")
+    public List<Process> getProcListByProjUid(@PathVariable String procProjUid) {
+        return pmsProcessService.getProcListByProjUid(procProjUid);
     }
 
     @GetMapping("/getByUid/{procUid}")

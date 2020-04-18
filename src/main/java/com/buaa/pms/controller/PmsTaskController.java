@@ -1,6 +1,7 @@
 package com.buaa.pms.controller;
 
 import com.buaa.pms.entity.PmsTask;
+import com.buaa.pms.model.Task;
 import com.buaa.pms.service.PmsTaskService;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,9 +24,19 @@ public class PmsTaskController {
         return pmsTaskService.selectByProjUid(taskProjUid);
     }
 
+    @GetMapping("/getTaskListByProjUid/{taskProjUid}")
+    public List<Task> getTaskListByProjUid(@PathVariable String taskProjUid) {
+        return pmsTaskService.getTaskListByProjUid(taskProjUid);
+    }
+
     @GetMapping("/getByProcUid/{taskProcUid}")
     public List<PmsTask> selectByProcUid(@PathVariable String taskProcUid) {
         return pmsTaskService.selectByProcUid(taskProcUid);
+    }
+
+    @GetMapping("/getTaskListByProcUid/{taskProcUid}")
+    public List<Task> getTaskListByProcUid(@PathVariable String taskProcUid) {
+        return pmsTaskService.getTaskListByProcUid(taskProcUid);
     }
 
     @GetMapping("/getByParUid/{taskParUid}")
@@ -68,9 +79,19 @@ public class PmsTaskController {
         pmsTaskService.update(pmsTask);
     }
 
+    @PutMapping("/updatePmsTaskIds")
+    public void updatePmsTaskIds(@RequestBody List<PmsTask> pmsTasks) {
+        pmsTaskService.updatePmsTaskIds(pmsTasks);
+    }
+
     @PostMapping("/saveOrUpdate")
     public void saveOrUpdate(@RequestBody PmsTask pmsTask){
         pmsTaskService.saveOrUpdate(pmsTask);
+    }
+
+    @PostMapping("/saveOrUpdateTask")
+    public void saveOrUpdateTask(@RequestBody Task Task){
+        pmsTaskService.saveOrUpdateTask(Task);
     }
 
 }
