@@ -1,7 +1,5 @@
 package com.buaa.pms.service.serviceImpl;
 
-import com.buaa.pms.entity.PmsProcess;
-import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
 import com.buaa.pms.entity.PmsTaskLink;
 import com.buaa.pms.mapper.PmsTaskMapper;
@@ -28,10 +26,7 @@ public class PmsTaskServiceImp implements PmsTaskService {
     PmsTaskResPlanService pmsTaskResPlanService;
 
     @Resource
-    PmsProjectService pmsProjectService;
-
-    @Resource
-    PmsProcessService pmsProcessService;
+    PmsTaskResReqService pmsTaskResReqService;
 
     @Override
     public List<PmsTask> selectAll() {
@@ -44,10 +39,28 @@ public class PmsTaskServiceImp implements PmsTaskService {
     }
 
     @Override
+    public List<PmsTask> selectPublishedByProjUid(String taskProjUid) {
+        List<PmsTask> tasksPublished = new ArrayList<>();
+        List<PmsTask> pmsTasks = pmsTaskMapper.selectByProjUid(taskProjUid);
+        for (PmsTask task : pmsTasks) {
+            if (task.getTaskState() != 0)
+                tasksPublished.add(task);
+        }
+        return tasksPublished;
+    }
+
+    @Override
     public List<Task> getTaskListByProjUid(String taskProjUid) {
         List<PmsTask> pmsTasks = this.selectByProjUid(taskProjUid);
         List<PmsTaskLink> pmsTaskLinks = pmsTaskLinkService.selectByProjUid(taskProjUid);
         return this.getTaskListByTasksAndTaskLinks(pmsTasks, pmsTaskLinks);
+    }
+
+    @Override
+    public List<PmsTask> selectByProcUidList(List<String> taskProcUidList) {
+        if (taskProcUidList != null && !taskProcUidList.isEmpty())
+            return pmsTaskMapper.selectByProcUidList(taskProcUidList);
+        return null;
     }
 
     @Override
@@ -76,16 +89,6 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public void save(PmsTask pmsTask) {
         // 分配UUID
         pmsTask.setTaskUid(new MyUUID().getUUID());
-        // 计算计划工期
-        if (pmsTask.getTaskPlanStartDate() != null && pmsTask.getTaskPlanFinishDate() != null) {
-            int planDur = (int) (pmsTask.getTaskPlanFinishDate().getTime() - pmsTask.getTaskPlanStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsTask.setTaskPlanDur(planDur);
-        }
-        // 计算实际工期
-        if (pmsTask.getTaskActStartDate() != null && pmsTask.getTaskActFinishDate() != null) {
-            int actDur = (int) (pmsTask.getTaskActFinishDate().getTime() - pmsTask.getTaskActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsTask.setTaskActDur(actDur);
-        }
         // 新增任务默认状态 0-“编制中”
         if (pmsTask.getTaskState() == null)
             pmsTask.setTaskState(0);
@@ -96,8 +99,9 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public void deleteByUid(String taskUid) {
         // 删除任务相关连接
         pmsTaskLinkService.deleteByTaskUid(taskUid);
-        // 删除任务资源方案
+        // 删除任务资源方案和资源需求
         pmsTaskResPlanService.deleteByTaskUid(taskUid);
+        pmsTaskResReqService.deleteByTaskUid(taskUid);
         // 删除任务
         pmsTaskMapper.deleteByUid(taskUid);
     }
@@ -114,6 +118,8 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public void deleteByProcUid(String procUid) {
         // 删除任务相关连接
         pmsTaskLinkService.deleteByProcUid(procUid);
+        // 删除资源方案和资源需求
+
         // 删除任务
         pmsTaskMapper.deleteByProcUid(procUid);
     }
@@ -125,16 +131,6 @@ public class PmsTaskServiceImp implements PmsTaskService {
 
     @Override
     public void update(PmsTask pmsTask) {
-        // 计算计划工期
-        if (pmsTask.getTaskPlanStartDate() != null && pmsTask.getTaskPlanFinishDate() != null) {
-            int planDur = (int) (pmsTask.getTaskPlanFinishDate().getTime() - pmsTask.getTaskPlanStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsTask.setTaskPlanDur(planDur);
-        }
-        // 计算实际工期
-        if (pmsTask.getTaskActStartDate() != null && pmsTask.getTaskActFinishDate() != null) {
-            int actDur = (int) (pmsTask.getTaskActFinishDate().getTime() - pmsTask.getTaskActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsTask.setTaskActDur(actDur);
-        }
         // 任务状态若为空，则保持以前的状态
         if (pmsTask.getTaskState() == null) {
             int state = pmsTaskMapper.selectByUid(pmsTask.getTaskUid()).getTaskState();
@@ -147,6 +143,12 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public void updatePmsTaskIds(List<PmsTask> pmsTasks) {
         if (pmsTasks != null && !pmsTasks.isEmpty())
             pmsTaskMapper.updatePmsTaskIds(pmsTasks);
+    }
+
+    @Override
+    public void updatePmsTasks(List<PmsTask> pmsTasks) {
+        if (pmsTasks != null && !pmsTasks.isEmpty())
+            pmsTaskMapper.updatePmsTasks(pmsTasks);
     }
 
     @Override
@@ -191,7 +193,7 @@ public class PmsTaskServiceImp implements PmsTaskService {
             pmsTaskLinkService.saveTaskLinks(pmsTaskLinks);
     }
 
-    private List<Task> getTaskListByTasksAndTaskLinks(List<PmsTask> pmsTasks, List<PmsTaskLink> pmsTaskLinks) {
+    public List<Task> getTaskListByTasksAndTaskLinks(List<PmsTask> pmsTasks, List<PmsTaskLink> pmsTaskLinks) {
         List<Task> taskList = new ArrayList<>();
         Map<String, PmsTask> pmsTaskMap = new HashMap<>();
         Map<String, List<PmsTask>> pmsTaskNormalPreMap = new HashMap<>();

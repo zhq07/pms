@@ -14,6 +14,16 @@ public class OrgTableItem {
     private String orgAddress;
     private String orgDescription;
 
+    private String name;    // echarts图用
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     private List<OrgTableItem> children;
 
     public OrgTableItem() {}

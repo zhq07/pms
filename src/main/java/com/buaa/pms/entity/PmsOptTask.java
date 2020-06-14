@@ -1,16 +1,17 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsOptTask {
 
     private String optTaskUid;
     private String optTaskOptProjUid;
+    private String optTaskOptProcUid;
     private String optTaskTaskUid;
     private String optTaskProjUid;
     private String optTaskProcUid;
-    private Date optTaskPlanStartDate;
-    private Date optTaskPlanFinishDate;
+    private Timestamp optTaskPlanStartDateTime;
+    private Timestamp optTaskPlanFinishDateTime;
     private Integer optTaskPlanDur;
 
     public String getOptTaskUid() {
@@ -27,6 +28,14 @@ public class PmsOptTask {
 
     public void setOptTaskOptProjUid(String optTaskOptProjUid) {
         this.optTaskOptProjUid = optTaskOptProjUid;
+    }
+
+    public String getOptTaskOptProcUid() {
+        return optTaskOptProcUid;
+    }
+
+    public void setOptTaskOptProcUid(String optTaskOptProcUid) {
+        this.optTaskOptProcUid = optTaskOptProcUid;
     }
 
     public String getOptTaskTaskUid() {
@@ -53,20 +62,20 @@ public class PmsOptTask {
         this.optTaskProcUid = optTaskProcUid;
     }
 
-    public Date getOptTaskPlanStartDate() {
-        return optTaskPlanStartDate;
+    public Timestamp getOptTaskPlanStartDateTime() {
+        return optTaskPlanStartDateTime;
     }
 
-    public void setOptTaskPlanStartDate(Date optTaskPlanStartDate) {
-        this.optTaskPlanStartDate = optTaskPlanStartDate;
+    public void setOptTaskPlanStartDateTime(Timestamp optTaskPlanStartDateTime) {
+        this.optTaskPlanStartDateTime = optTaskPlanStartDateTime;
     }
 
-    public Date getOptTaskPlanFinishDate() {
-        return optTaskPlanFinishDate;
+    public Timestamp getOptTaskPlanFinishDateTime() {
+        return optTaskPlanFinishDateTime;
     }
 
-    public void setOptTaskPlanFinishDate(Date optTaskPlanFinishDate) {
-        this.optTaskPlanFinishDate = optTaskPlanFinishDate;
+    public void setOptTaskPlanFinishDateTime(Timestamp optTaskPlanFinishDateTime) {
+        this.optTaskPlanFinishDateTime = optTaskPlanFinishDateTime;
     }
 
     public Integer getOptTaskPlanDur() {
@@ -75,19 +84,5 @@ public class PmsOptTask {
 
     public void setOptTaskPlanDur(Integer optTaskPlanDur) {
         this.optTaskPlanDur = optTaskPlanDur;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsOptTask{" +
-                "optTaskUid='" + optTaskUid + '\'' +
-                ", optTaskOptProjUid='" + optTaskOptProjUid + '\'' +
-                ", optTaskTaskUid='" + optTaskTaskUid + '\'' +
-                ", optTaskProjUid='" + optTaskProjUid + '\'' +
-                ", optTaskProcUid='" + optTaskProcUid + '\'' +
-                ", optTaskPlanStartDate=" + optTaskPlanStartDate +
-                ", optTaskPlanFinishDate=" + optTaskPlanFinishDate +
-                ", optTaskPlanDur=" + optTaskPlanDur +
-                '}';
     }
 }

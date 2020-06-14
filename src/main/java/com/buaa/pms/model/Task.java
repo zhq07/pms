@@ -1,16 +1,13 @@
 package com.buaa.pms.model;
 
 import com.buaa.pms.entity.PmsTask;
-import com.buaa.pms.entity.PmsTaskLink;
 
-import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Task {
 
     private PmsTask pmsTask;
-    // 紧后任务集合
+    // 紧前任务集合
     private List<PmsTask> taskNormalPreTasks;
     private List<PmsTask> taskRealPreTasks;
 

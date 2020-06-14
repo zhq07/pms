@@ -1,11 +1,11 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsTask {
 
     private String taskUid;
-    private String taskId;
+    private Integer taskId;
     private String taskName;
     private Integer taskType;
     private Integer taskInType;
@@ -15,18 +15,20 @@ public class PmsTask {
     private String taskParUid;
     private String taskManager;
     private String taskDescription;
-    private Date taskPlanStartDate;
-    private Date taskPlanFinishDate;
-    private Integer taskPlanDur;
-    private Date taskEarlyStartDate;
-    private Date taskLateFinishDate;
-    private Date taskActStartDate;
-    private Date taskActFinishDate;
+    private Integer taskPriority;
+    private Timestamp taskPlanStartDateTime;
+    private Timestamp taskPlanFinishDateTime;
+    private Float taskPlanDur;
+    private Timestamp taskEarlyStartDateTime;
+    private Timestamp taskLateFinishDateTime;
+    private Timestamp taskActStartDateTime;
+    private Timestamp taskActFinishDateTime;
     private Integer taskActDur;
     private Integer taskWork;
     private Integer taskCompWork;
     private Integer taskRemWork;
     private Float taskPctWork;
+    private Integer taskWorkModel;
     private Integer taskState;
 
     public String getTaskUid() {
@@ -37,11 +39,11 @@ public class PmsTask {
         this.taskUid = taskUid;
     }
 
-    public String getTaskId() {
+    public Integer getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(String taskId) {
+    public void setTaskId(Integer taskId) {
         this.taskId = taskId;
     }
 
@@ -117,60 +119,68 @@ public class PmsTask {
         this.taskDescription = taskDescription;
     }
 
-    public Date getTaskPlanStartDate() {
-        return taskPlanStartDate;
+    public Integer getTaskPriority() {
+        return taskPriority;
     }
 
-    public void setTaskPlanStartDate(Date taskPlanStartDate) {
-        this.taskPlanStartDate = taskPlanStartDate;
+    public void setTaskPriority(Integer taskPriority) {
+        this.taskPriority = taskPriority;
     }
 
-    public Date getTaskPlanFinishDate() {
-        return taskPlanFinishDate;
+    public Timestamp getTaskPlanStartDateTime() {
+        return taskPlanStartDateTime;
     }
 
-    public void setTaskPlanFinishDate(Date taskPlanFinishDate) {
-        this.taskPlanFinishDate = taskPlanFinishDate;
+    public void setTaskPlanStartDateTime(Timestamp taskPlanStartDateTime) {
+        this.taskPlanStartDateTime = taskPlanStartDateTime;
     }
 
-    public Integer getTaskPlanDur() {
+    public Timestamp getTaskPlanFinishDateTime() {
+        return taskPlanFinishDateTime;
+    }
+
+    public void setTaskPlanFinishDateTime(Timestamp taskPlanFinishDateTime) {
+        this.taskPlanFinishDateTime = taskPlanFinishDateTime;
+    }
+
+    public Float getTaskPlanDur() {
         return taskPlanDur;
     }
 
-    public void setTaskPlanDur(Integer taskPlanDur) {
+    public void setTaskPlanDur(Float taskPlanDur) {
         this.taskPlanDur = taskPlanDur;
     }
 
-    public Date getTaskEarlyStartDate() {
-        return taskEarlyStartDate;
+    public Timestamp getTaskEarlyStartDateTime() {
+        return taskEarlyStartDateTime;
     }
 
-    public void setTaskEarlyStartDate(Date taskEarlyStartDate) {
-        this.taskEarlyStartDate = taskEarlyStartDate;
+    public void setTaskEarlyStartDateTime(Timestamp taskEarlyStartDateTime) {
+        this.taskEarlyStartDateTime = taskEarlyStartDateTime;
     }
 
-    public Date getTaskLateFinishDate() {
-        return taskLateFinishDate;
+    public Timestamp getTaskLateFinishDateTime() {
+        return taskLateFinishDateTime;
     }
 
-    public void setTaskLateFinishDate(Date taskLateFinishDate) {
-        this.taskLateFinishDate = taskLateFinishDate;
+    public void setTaskLateFinishDateTime(Timestamp taskLateFinishDateTime) {
+        this.taskLateFinishDateTime = taskLateFinishDateTime;
     }
 
-    public Date getTaskActStartDate() {
-        return taskActStartDate;
+    public Timestamp getTaskActStartDateTime() {
+        return taskActStartDateTime;
     }
 
-    public void setTaskActStartDate(Date taskActStartDate) {
-        this.taskActStartDate = taskActStartDate;
+    public void setTaskActStartDateTime(Timestamp taskActStartDateTime) {
+        this.taskActStartDateTime = taskActStartDateTime;
     }
 
-    public Date getTaskActFinishDate() {
-        return taskActFinishDate;
+    public Timestamp getTaskActFinishDateTime() {
+        return taskActFinishDateTime;
     }
 
-    public void setTaskActFinishDate(Date taskActFinishDate) {
-        this.taskActFinishDate = taskActFinishDate;
+    public void setTaskActFinishDateTime(Timestamp taskActFinishDateTime) {
+        this.taskActFinishDateTime = taskActFinishDateTime;
     }
 
     public Integer getTaskActDur() {
@@ -213,41 +223,19 @@ public class PmsTask {
         this.taskPctWork = taskPctWork;
     }
 
+    public Integer getTaskWorkModel() {
+        return taskWorkModel;
+    }
+
+    public void setTaskWorkModel(Integer taskWorkModel) {
+        this.taskWorkModel = taskWorkModel;
+    }
+
     public Integer getTaskState() {
         return taskState;
     }
 
     public void setTaskState(Integer taskState) {
         this.taskState = taskState;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsTask{" +
-                "taskUid='" + taskUid + '\'' +
-                ", taskId='" + taskId + '\'' +
-                ", taskName='" + taskName + '\'' +
-                ", taskType=" + taskType +
-                ", taskInType=" + taskInType +
-                ", taskOutType=" + taskOutType +
-                ", taskProjUid='" + taskProjUid + '\'' +
-                ", taskProcUid='" + taskProcUid + '\'' +
-                ", taskParUid='" + taskParUid + '\'' +
-                ", taskManager='" + taskManager + '\'' +
-                ", taskDescription='" + taskDescription + '\'' +
-                ", taskPlanStartDate=" + taskPlanStartDate +
-                ", taskPlanFinishDate=" + taskPlanFinishDate +
-                ", taskPlanDur=" + taskPlanDur +
-                ", taskEarlyStartDate=" + taskEarlyStartDate +
-                ", taskLateFinishDate=" + taskLateFinishDate +
-                ", taskActStartDate=" + taskActStartDate +
-                ", taskActFinishDate=" + taskActFinishDate +
-                ", taskActDur=" + taskActDur +
-                ", taskWork=" + taskWork +
-                ", taskCompWork=" + taskCompWork +
-                ", taskRemWork=" + taskRemWork +
-                ", taskPctWork=" + taskPctWork +
-                ", taskState=" + taskState +
-                '}';
     }
 }

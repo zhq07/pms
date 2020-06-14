@@ -1,6 +1,6 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsSimTask {
 
@@ -9,14 +9,14 @@ public class PmsSimTask {
     private String simTaskTaskUid;
     private String simTaskProjUid;
     private String simTaskProcUid;
-    private Date simTaskPlanStartDate;
-    private Date simTaskPlanFinishDate;
+    private Timestamp simTaskPlanStartDateTime;
+    private Timestamp simTaskPlanFinishDateTime;
     private Integer simTaskPlanDur;
-    private Date simTaskEarlyStartDate;
-    private Date simTaskLateFinishDate;
-    private Integer simTaskWait;
-    private Integer simTaskDurU;
-    private Integer simTaskDurSigma;
+    private Timestamp simTaskEarlyStartDateTime;
+    private Timestamp simTaskLateFinishDateTime;
+    private Float simTaskWait;
+    private Float simTaskDurU;
+    private Float simTaskDurSigma;
     private Float simTaskPctRework;
 
     public String getSimTaskUid() {
@@ -59,20 +59,20 @@ public class PmsSimTask {
         this.simTaskProcUid = simTaskProcUid;
     }
 
-    public Date getSimTaskPlanStartDate() {
-        return simTaskPlanStartDate;
+    public Timestamp getSimTaskPlanStartDateTime() {
+        return simTaskPlanStartDateTime;
     }
 
-    public void setSimTaskPlanStartDate(Date simTaskPlanStartDate) {
-        this.simTaskPlanStartDate = simTaskPlanStartDate;
+    public void setSimTaskPlanStartDateTime(Timestamp simTaskPlanStartDateTime) {
+        this.simTaskPlanStartDateTime = simTaskPlanStartDateTime;
     }
 
-    public Date getSimTaskPlanFinishDate() {
-        return simTaskPlanFinishDate;
+    public Timestamp getSimTaskPlanFinishDateTime() {
+        return simTaskPlanFinishDateTime;
     }
 
-    public void setSimTaskPlanFinishDate(Date simTaskPlanFinishDate) {
-        this.simTaskPlanFinishDate = simTaskPlanFinishDate;
+    public void setSimTaskPlanFinishDateTime(Timestamp simTaskPlanFinishDateTime) {
+        this.simTaskPlanFinishDateTime = simTaskPlanFinishDateTime;
     }
 
     public Integer getSimTaskPlanDur() {
@@ -83,43 +83,43 @@ public class PmsSimTask {
         this.simTaskPlanDur = simTaskPlanDur;
     }
 
-    public Date getSimTaskEarlyStartDate() {
-        return simTaskEarlyStartDate;
+    public Timestamp getSimTaskEarlyStartDateTime() {
+        return simTaskEarlyStartDateTime;
     }
 
-    public void setSimTaskEarlyStartDate(Date simTaskEarlyStartDate) {
-        this.simTaskEarlyStartDate = simTaskEarlyStartDate;
+    public void setSimTaskEarlyStartDateTime(Timestamp simTaskEarlyStartDateTime) {
+        this.simTaskEarlyStartDateTime = simTaskEarlyStartDateTime;
     }
 
-    public Date getSimTaskLateFinishDate() {
-        return simTaskLateFinishDate;
+    public Timestamp getSimTaskLateFinishDateTime() {
+        return simTaskLateFinishDateTime;
     }
 
-    public void setSimTaskLateFinishDate(Date simTaskLateFinishDate) {
-        this.simTaskLateFinishDate = simTaskLateFinishDate;
+    public void setSimTaskLateFinishDateTime(Timestamp simTaskLateFinishDateTime) {
+        this.simTaskLateFinishDateTime = simTaskLateFinishDateTime;
     }
 
-    public Integer getSimTaskWait() {
+    public Float getSimTaskWait() {
         return simTaskWait;
     }
 
-    public void setSimTaskWait(Integer simTaskWait) {
+    public void setSimTaskWait(Float simTaskWait) {
         this.simTaskWait = simTaskWait;
     }
 
-    public Integer getSimTaskDurU() {
+    public Float getSimTaskDurU() {
         return simTaskDurU;
     }
 
-    public void setSimTaskDurU(Integer simTaskDurU) {
+    public void setSimTaskDurU(Float simTaskDurU) {
         this.simTaskDurU = simTaskDurU;
     }
 
-    public Integer getSimTaskDurSigma() {
+    public Float getSimTaskDurSigma() {
         return simTaskDurSigma;
     }
 
-    public void setSimTaskDurSigma(Integer simTaskDurSigma) {
+    public void setSimTaskDurSigma(Float simTaskDurSigma) {
         this.simTaskDurSigma = simTaskDurSigma;
     }
 
@@ -129,25 +129,5 @@ public class PmsSimTask {
 
     public void setSimTaskPctRework(Float simTaskPctRework) {
         this.simTaskPctRework = simTaskPctRework;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsSimTask{" +
-                "simTaskUid='" + simTaskUid + '\'' +
-                ", simTaskSimProjUid='" + simTaskSimProjUid + '\'' +
-                ", simTaskTaskUid='" + simTaskTaskUid + '\'' +
-                ", simTaskProjUid='" + simTaskProjUid + '\'' +
-                ", simTaskProcUid='" + simTaskProcUid + '\'' +
-                ", simTaskPlanStartDate=" + simTaskPlanStartDate +
-                ", simTaskPlanFinishDate=" + simTaskPlanFinishDate +
-                ", simTaskPlanDur=" + simTaskPlanDur +
-                ", simTaskEarlyStartDate=" + simTaskEarlyStartDate +
-                ", simTaskLateFinishDate=" + simTaskLateFinishDate +
-                ", simTaskWait=" + simTaskWait +
-                ", simTaskDurU=" + simTaskDurU +
-                ", simTaskDurSigma=" + simTaskDurSigma +
-                ", simTaskPctRework=" + simTaskPctRework +
-                '}';
     }
 }

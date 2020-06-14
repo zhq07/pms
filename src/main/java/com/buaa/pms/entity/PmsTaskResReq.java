@@ -1,16 +1,21 @@
 package com.buaa.pms.entity;
 
+import java.sql.Timestamp;
+
 public class PmsTaskResReq {
 
     private String resReqUid;
     private String resReqId;
-    private String resReqPlanUid;
+    private String resReqResPlanUid;
     private String resReqTaskUid;
     private String resReqProjUid;
     private String resReqProcUid;
     private Integer resReqResType;
     private String resReqResUid;
-    private Integer resReqResWork;
+    private Timestamp resReqResStartDateTime;
+    private Timestamp resReqResFinishDateTime;
+    private Float resReqResWork;
+    private Integer resReqResWorkModel;
     private Float resReqResAmount;
 
     public String getResReqUid() {
@@ -29,12 +34,12 @@ public class PmsTaskResReq {
         this.resReqId = resReqId;
     }
 
-    public String getResReqPlanUid() {
-        return resReqPlanUid;
+    public String getResReqResPlanUid() {
+        return resReqResPlanUid;
     }
 
-    public void setResReqPlanUid(String resReqPlanUid) {
-        this.resReqPlanUid = resReqPlanUid;
+    public void setResReqResPlanUid(String resReqResPlanUid) {
+        this.resReqResPlanUid = resReqResPlanUid;
     }
 
     public String getResReqTaskUid() {
@@ -77,12 +82,36 @@ public class PmsTaskResReq {
         this.resReqResUid = resReqResUid;
     }
 
-    public Integer getResReqResWork() {
+    public Timestamp getResReqResStartDateTime() {
+        return resReqResStartDateTime;
+    }
+
+    public void setResReqResStartDateTime(Timestamp resReqResStartDateTime) {
+        this.resReqResStartDateTime = resReqResStartDateTime;
+    }
+
+    public Timestamp getResReqResFinishDateTime() {
+        return resReqResFinishDateTime;
+    }
+
+    public void setResReqResFinishDateTime(Timestamp resReqResFinishDateTime) {
+        this.resReqResFinishDateTime = resReqResFinishDateTime;
+    }
+
+    public Float getResReqResWork() {
         return resReqResWork;
     }
 
-    public void setResReqResWork(Integer resReqResWork) {
+    public void setResReqResWork(Float resReqResWork) {
         this.resReqResWork = resReqResWork;
+    }
+
+    public Integer getResReqResWorkModel() {
+        return resReqResWorkModel;
+    }
+
+    public void setResReqResWorkModel(Integer resReqResWorkModel) {
+        this.resReqResWorkModel = resReqResWorkModel;
     }
 
     public Float getResReqResAmount() {
@@ -91,21 +120,5 @@ public class PmsTaskResReq {
 
     public void setResReqResAmount(Float resReqResAmount) {
         this.resReqResAmount = resReqResAmount;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsTaskResReq{" +
-                "resReqUid='" + resReqUid + '\'' +
-                ", resReqId='" + resReqId + '\'' +
-                ", resReqPlanUid='" + resReqPlanUid + '\'' +
-                ", resReqTaskUid='" + resReqTaskUid + '\'' +
-                ", resReqProjUid='" + resReqProjUid + '\'' +
-                ", resReqProcUid='" + resReqProcUid + '\'' +
-                ", resReqResType=" + resReqResType +
-                ", resReqResUid='" + resReqResUid + '\'' +
-                ", resReqResWork=" + resReqResWork +
-                ", resReqResAmount=" + resReqResAmount +
-                '}';
     }
 }

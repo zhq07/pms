@@ -5,7 +5,7 @@
 <mapper namespace="com.buaa.pms.mapper.PmsHumanMapper">
 
     <!--数据库表字段与Java对象属性的映射关系-->
-    <resultMap id="pmsHumanMapper" type="PmsHuman">
+    <resultMap id="pmsHumanMap" type="PmsHuman">
         <result property="humUid" column="hum_uid"/>
         <result property="humId" column="hum_id"/>
         <result property="humName" column="hum_name"/>
@@ -19,15 +19,15 @@
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectAll" resultMap="pmsHumanMapper">
+    <select id="selectAll" resultMap="pmsHumanMap">
         select * from pms_human
     </select>
 
-    <select id="selectByOrgUid" resultMap="pmsHumanMapper">
+    <select id="selectByOrgUid" resultMap="pmsHumanMap">
         select * from pms_human where hum_org_uid = #{humOrgUid}
     </select>
 
-    <select id="selectByUid" resultMap="pmsHumanMapper">
+    <select id="selectByUid" resultMap="pmsHumanMap">
         select * from pms_human where hum_uid = #{humUid}
     </select>
 

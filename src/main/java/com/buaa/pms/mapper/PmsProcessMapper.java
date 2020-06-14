@@ -14,6 +14,8 @@ public interface PmsProcessMapper {
 
     public List<PmsProcess> selectByProjUid(String procProjUid);
 
+    public List<PmsProcess> selectByUidList(List<String> procUidList);
+
     public PmsProcess selectByUid(String procUid);
 
     public void save(PmsProcess pmsProcess);

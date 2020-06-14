@@ -15,6 +15,8 @@ public interface PmsProjectService {
 
     public List<PmsProject> selectByParUid(String projParUid);
 
+    public List<PmsProject> selectByUidList(List<String> projUidList);
+
     public PmsProject selectByUid(String projUid);
 
     public void save(PmsProject pmsProject);

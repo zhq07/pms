@@ -1,6 +1,6 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsAllocatePlace {
 
@@ -12,10 +12,11 @@ public class PmsAllocatePlace {
     private String apTaskUid;
     private String apResPlanUid;
     private String apResReqUid;
-    private Date apStartDate;
-    private Date apFinishDate;
+    private Timestamp apStartDateTime;
+    private Timestamp apFinishDateTime;
     private Float apReqAmount;
     private Integer apWorkDur;
+    private Integer apWorkModel;
     private Integer apIsEffective;
 
     public String getApUid() {
@@ -82,20 +83,20 @@ public class PmsAllocatePlace {
         this.apResReqUid = apResReqUid;
     }
 
-    public Date getApStartDate() {
-        return apStartDate;
+    public Timestamp getApStartDateTime() {
+        return apStartDateTime;
     }
 
-    public void setApStartDate(Date apStartDate) {
-        this.apStartDate = apStartDate;
+    public void setApStartDateTime(Timestamp apStartDateTime) {
+        this.apStartDateTime = apStartDateTime;
     }
 
-    public Date getApFinishDate() {
-        return apFinishDate;
+    public Timestamp getApFinishDateTime() {
+        return apFinishDateTime;
     }
 
-    public void setApFinishDate(Date apFinishDate) {
-        this.apFinishDate = apFinishDate;
+    public void setApFinishDateTime(Timestamp apFinishDateTime) {
+        this.apFinishDateTime = apFinishDateTime;
     }
 
     public Float getApReqAmount() {
@@ -114,30 +115,19 @@ public class PmsAllocatePlace {
         this.apWorkDur = apWorkDur;
     }
 
+    public Integer getApWorkModel() {
+        return apWorkModel;
+    }
+
+    public void setApWorkModel(Integer apWorkModel) {
+        this.apWorkModel = apWorkModel;
+    }
+
     public Integer getApIsEffective() {
         return apIsEffective;
     }
 
     public void setApIsEffective(Integer apIsEffective) {
         this.apIsEffective = apIsEffective;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsAllocatePlace{" +
-                "apUid='" + apUid + '\'' +
-                ", apPlaceUid='" + apPlaceUid + '\'' +
-                ", apOrgUid='" + apOrgUid + '\'' +
-                ", apProjUid='" + apProjUid + '\'' +
-                ", apProcUid='" + apProcUid + '\'' +
-                ", apTaskUid='" + apTaskUid + '\'' +
-                ", apResPlanUid='" + apResPlanUid + '\'' +
-                ", apResReqUid='" + apResReqUid + '\'' +
-                ", apStartDate=" + apStartDate +
-                ", apFinishDate=" + apFinishDate +
-                ", apReqAmount=" + apReqAmount +
-                ", apWorkDur=" + apWorkDur +
-                ", apIsEffective=" + apIsEffective +
-                '}';
     }
 }

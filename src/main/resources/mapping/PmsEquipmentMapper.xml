@@ -5,7 +5,7 @@
 <mapper namespace="com.buaa.pms.mapper.PmsEquipmentMapper">
 
     <!--数据库表字段与Java对象属性的映射关系-->
-    <resultMap id="pmsEquipmentMapper" type="PmsEquipment">
+    <resultMap id="pmsEquipmentMap" type="PmsEquipment">
         <result property="equipUid" column="equip_uid"/>
         <result property="equipId" column="equip_id"/>
         <result property="equipName" column="equip_name"/>
@@ -16,15 +16,15 @@
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectAll" resultMap="pmsEquipmentMapper">
+    <select id="selectAll" resultMap="pmsEquipmentMap">
         select * from pms_equipment
     </select>
 
-    <select id="selectByOrgUid" resultMap="pmsEquipmentMapper">
+    <select id="selectByOrgUid" resultMap="pmsEquipmentMap">
         select * from pms_equipment where equip_org_uid = #{equipOrgUid}
     </select>
 
-    <select id="selectByUid" resultMap="pmsEquipmentMapper">
+    <select id="selectByUid" resultMap="pmsEquipmentMap">
         select * from pms_equipment where equip_uid = #{equipUid}
     </select>
 

@@ -1,6 +1,6 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsSimProject {
 
@@ -8,13 +8,13 @@ public class PmsSimProject {
     private String simProjName;
     private String simProjProjUid;
     private String simProjProcUid;
-    private Date simProjEarlyStartDate;
-    private Date simProjLatefinishDate;
-    private Date simProjStartDate;
-    private Date simProjFinishDate;
+    private Timestamp simProjEarlyStartDateTime;
+    private Timestamp simProjLatefinishDateTime;
+    private Timestamp simProjStartDateTime;
+    private Timestamp simProjFinishDateTime;
     private Integer simProjDur;
     private Integer simProjMode;
-    private Date simProjCreate;
+    private Timestamp simProjCreate;
 
     public String getSimProjUid() {
         return simProjUid;
@@ -48,36 +48,36 @@ public class PmsSimProject {
         this.simProjProcUid = simProjProcUid;
     }
 
-    public Date getSimProjEarlyStartDate() {
-        return simProjEarlyStartDate;
+    public Timestamp getSimProjEarlyStartDateTime() {
+        return simProjEarlyStartDateTime;
     }
 
-    public void setSimProjEarlyStartDate(Date simProjEarlyStartDate) {
-        this.simProjEarlyStartDate = simProjEarlyStartDate;
+    public void setSimProjEarlyStartDateTime(Timestamp simProjEarlyStartDateTime) {
+        this.simProjEarlyStartDateTime = simProjEarlyStartDateTime;
     }
 
-    public Date getSimProjLatefinishDate() {
-        return simProjLatefinishDate;
+    public Timestamp getSimProjLatefinishDateTime() {
+        return simProjLatefinishDateTime;
     }
 
-    public void setSimProjLatefinishDate(Date simProjLatefinishDate) {
-        this.simProjLatefinishDate = simProjLatefinishDate;
+    public void setSimProjLatefinishDateTime(Timestamp simProjLatefinishDateTime) {
+        this.simProjLatefinishDateTime = simProjLatefinishDateTime;
     }
 
-    public Date getSimProjStartDate() {
-        return simProjStartDate;
+    public Timestamp getSimProjStartDateTime() {
+        return simProjStartDateTime;
     }
 
-    public void setSimProjStartDate(Date simProjStartDate) {
-        this.simProjStartDate = simProjStartDate;
+    public void setSimProjStartDateTime(Timestamp simProjStartDateTime) {
+        this.simProjStartDateTime = simProjStartDateTime;
     }
 
-    public Date getSimProjFinishDate() {
-        return simProjFinishDate;
+    public Timestamp getSimProjFinishDateTime() {
+        return simProjFinishDateTime;
     }
 
-    public void setSimProjFinishDate(Date simProjFinishDate) {
-        this.simProjFinishDate = simProjFinishDate;
+    public void setSimProjFinishDateTime(Timestamp simProjFinishDateTime) {
+        this.simProjFinishDateTime = simProjFinishDateTime;
     }
 
     public Integer getSimProjDur() {
@@ -96,28 +96,11 @@ public class PmsSimProject {
         this.simProjMode = simProjMode;
     }
 
-    public Date getSimProjCreate() {
+    public Timestamp getSimProjCreate() {
         return simProjCreate;
     }
 
-    public void setSimProjCreate(Date simProjCreate) {
+    public void setSimProjCreate(Timestamp simProjCreate) {
         this.simProjCreate = simProjCreate;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsSimProject{" +
-                "simProjUid='" + simProjUid + '\'' +
-                ", simProjName='" + simProjName + '\'' +
-                ", simProjProjUid='" + simProjProjUid + '\'' +
-                ", simProjProcUid='" + simProjProcUid + '\'' +
-                ", simProjEarlyStartDate=" + simProjEarlyStartDate +
-                ", simProjLatefinishDate=" + simProjLatefinishDate +
-                ", simProjStartDate=" + simProjStartDate +
-                ", simProjFinishDate=" + simProjFinishDate +
-                ", simProjDur=" + simProjDur +
-                ", simProjMode=" + simProjMode +
-                ", simProjCreate=" + simProjCreate +
-                '}';
     }
 }

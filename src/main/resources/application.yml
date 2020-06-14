@@ -6,7 +6,7 @@ spring:
 
   datasource: #定义数据源
     name: pms
-    url: jdbc:mysql://localhost:3306/pms?characterEncoding=utf8&useSSL=true&serverTimezone=UTC&zeroDateTimeBehavior=CONVERT_TO_NULL&allowMultiQueries=true
+    url: jdbc:mysql://localhost:3306/pms?characterEncoding=utf8&useSSL=true&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL&allowMultiQueries=true
     username: root  #数据库用户名，root为管理员
     password: root #该数据库用户的密码
     driver-class-name: com.mysql.cj.jdbc.Driver

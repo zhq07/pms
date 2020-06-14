@@ -10,6 +10,8 @@ public interface PmsTaskLinkService {
 
     public List<PmsTaskLink> selectByProjUid(String taskLinkProjUid);
 
+    public List<PmsTaskLink> selectByProcUidList(List<String> taskLinkProcUidList);
+
     public List<PmsTaskLink> selectByProcUid(String taskLinkProcUid);
 
     public List<PmsTaskLink> selectByPreTaskUid(String taskLinkPreTaskUid);
@@ -35,6 +37,8 @@ public interface PmsTaskLinkService {
     public void deleteByProcUid(String taskLinkProcUid);
 
     public void update(PmsTaskLink pmsTaskLink);
+
+    public void updateTaskLinks(List<PmsTaskLink> pmsTaskLinks);
 
     public void saveOrUpdate(PmsTaskLink pmsTaskLink);
 

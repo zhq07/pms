@@ -12,6 +12,8 @@ public interface PmsTaskResPlanMapper {
 
     public List<PmsTaskResPlan> selectByProjUid(String resPlanProjUid);
 
+    public List<PmsTaskResPlan> selectByProcUidList(List<String> resPlanProcUidList);
+
     public List<PmsTaskResPlan> selectByProcUid(String resPlanProcUid);
 
     public List<PmsTaskResPlan> selectByTaskUid(String resPlanTaskUid);
@@ -29,4 +31,6 @@ public interface PmsTaskResPlanMapper {
     public void deleteByProcUid(String resPlanProcUid);
 
     public void update(PmsTaskResPlan pmsTaskResPlan);
+
+    public void updatePmsTaskResPlans(List<PmsTaskResPlan> pmsTaskResPlans);
 }

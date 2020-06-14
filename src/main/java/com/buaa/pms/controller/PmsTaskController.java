@@ -24,6 +24,11 @@ public class PmsTaskController {
         return pmsTaskService.selectByProjUid(taskProjUid);
     }
 
+    @GetMapping("/getPublishedByProjUid/{taskProjUid}")
+    public List<PmsTask> selectPublishedByProjUid(@PathVariable String taskProjUid) {
+        return pmsTaskService.selectPublishedByProjUid(taskProjUid);
+    }
+
     @GetMapping("/getTaskListByProjUid/{taskProjUid}")
     public List<Task> getTaskListByProjUid(@PathVariable String taskProjUid) {
         return pmsTaskService.getTaskListByProjUid(taskProjUid);

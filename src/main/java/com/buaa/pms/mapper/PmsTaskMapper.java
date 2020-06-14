@@ -1,5 +1,6 @@
 package com.buaa.pms.mapper;
 
+import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +12,8 @@ public interface PmsTaskMapper {
     public List<PmsTask> selectAll();
 
     public List<PmsTask> selectByProjUid(String taskProjUid);
+
+    public List<PmsTask> selectByProcUidList(List<String> taskProcUidList);
 
     public List<PmsTask> selectByProcUid(String taskProcUid);
 
@@ -31,4 +34,6 @@ public interface PmsTaskMapper {
     public void update(PmsTask pmsTask);
 
     public void updatePmsTaskIds(List<PmsTask> pmsTasks);
+
+    public void updatePmsTasks(List<PmsTask> pmsTasks);
 }

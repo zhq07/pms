@@ -1,6 +1,6 @@
 package com.buaa.pms.model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class ProjTableItem {
@@ -16,19 +16,30 @@ public class ProjTableItem {
     private String projOrgName;
     private String projManager;
     private String projDescription;
-    private Date projPlanStartDate;
-    private Date projPlanFinishDate;
+    private Integer projPriority;
+    private Timestamp projPlanStartDateTime;
+    private Timestamp projPlanFinishDateTime;
     private Integer projPlanDur;
-    private Date projEarlyStartDate;
-    private Date projLateFinishDate;
-    private Date projActStartDate;
-    private Date projActFinishDate;
+    private Timestamp projEarlyStartDateTime;
+    private Timestamp projLateFinishDateTime;
+    private Timestamp projActStartDateTime;
+    private Timestamp projActFinishDateTime;
     private Integer projActDur;
     private Integer projWork;
     private Integer projCompWork;
     private Integer projRemWork;
     private Float projPctWork;
     private Integer projState;
+
+    private String name;    // echarts图用
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     private List<ProjTableItem> children;
 
@@ -76,16 +87,16 @@ public class ProjTableItem {
         return projParUid;
     }
 
-    public void setProjParUid(String projParProjUid) {
-        this.projParUid = projParProjUid;
+    public void setProjParUid(String projParUid) {
+        this.projParUid = projParUid;
     }
 
     public String getProjParName() {
         return projParName;
     }
 
-    public void setProjParName(String projParProjName) {
-        this.projParName = projParProjName;
+    public void setProjParName(String projParName) {
+        this.projParName = projParName;
     }
 
     public String getProjOrgUid() {
@@ -120,20 +131,28 @@ public class ProjTableItem {
         this.projDescription = projDescription;
     }
 
-    public Date getProjPlanStartDate() {
-        return projPlanStartDate;
+    public Integer getProjPriority() {
+        return projPriority;
     }
 
-    public void setProjPlanStartDate(Date projPlanStartDate) {
-        this.projPlanStartDate = projPlanStartDate;
+    public void setProjPriority(Integer projPriority) {
+        this.projPriority = projPriority;
     }
 
-    public Date getProjPlanFinishDate() {
-        return projPlanFinishDate;
+    public Timestamp getProjPlanStartDateTime() {
+        return projPlanStartDateTime;
     }
 
-    public void setProjPlanFinishDate(Date projPlanFinishDate) {
-        this.projPlanFinishDate = projPlanFinishDate;
+    public void setProjPlanStartDateTime(Timestamp projPlanStartDateTime) {
+        this.projPlanStartDateTime = projPlanStartDateTime;
+    }
+
+    public Timestamp getProjPlanFinishDateTime() {
+        return projPlanFinishDateTime;
+    }
+
+    public void setProjPlanFinishDateTime(Timestamp projPlanFinishDateTime) {
+        this.projPlanFinishDateTime = projPlanFinishDateTime;
     }
 
     public Integer getProjPlanDur() {
@@ -144,36 +163,36 @@ public class ProjTableItem {
         this.projPlanDur = projPlanDur;
     }
 
-    public Date getProjEarlyStartDate() {
-        return projEarlyStartDate;
+    public Timestamp getProjEarlyStartDateTime() {
+        return projEarlyStartDateTime;
     }
 
-    public void setProjEarlyStartDate(Date projEarlyStartDate) {
-        this.projEarlyStartDate = projEarlyStartDate;
+    public void setProjEarlyStartDateTime(Timestamp projEarlyStartDateTime) {
+        this.projEarlyStartDateTime = projEarlyStartDateTime;
     }
 
-    public Date getProjLateFinishDate() {
-        return projLateFinishDate;
+    public Timestamp getProjLateFinishDateTime() {
+        return projLateFinishDateTime;
     }
 
-    public void setProjLateFinishDate(Date projLateFinishDate) {
-        this.projLateFinishDate = projLateFinishDate;
+    public void setProjLateFinishDateTime(Timestamp projLateFinishDateTime) {
+        this.projLateFinishDateTime = projLateFinishDateTime;
     }
 
-    public Date getProjActStartDate() {
-        return projActStartDate;
+    public Timestamp getProjActStartDateTime() {
+        return projActStartDateTime;
     }
 
-    public void setProjActStartDate(Date projActStartDate) {
-        this.projActStartDate = projActStartDate;
+    public void setProjActStartDateTime(Timestamp projActStartDateTime) {
+        this.projActStartDateTime = projActStartDateTime;
     }
 
-    public Date getProjActFinishDate() {
-        return projActFinishDate;
+    public Timestamp getProjActFinishDateTime() {
+        return projActFinishDateTime;
     }
 
-    public void setProjActFinishDate(Date projActFinishDate) {
-        this.projActFinishDate = projActFinishDate;
+    public void setProjActFinishDateTime(Timestamp projActFinishDateTime) {
+        this.projActFinishDateTime = projActFinishDateTime;
     }
 
     public Integer getProjActDur() {
@@ -230,36 +249,5 @@ public class ProjTableItem {
 
     public void setChildren(List<ProjTableItem> children) {
         this.children = children;
-    }
-
-    @Override
-    public String toString() {
-        return "ProjTableItem{" +
-                "projUid='" + projUid + '\'' +
-                ", projId='" + projId + '\'' +
-                ", projName='" + projName + '\'' +
-                ", projTaskUid='" + projTaskUid + '\'' +
-                ", projTaskName='" + projTaskName + '\'' +
-                ", projParProjUid='" + projParUid + '\'' +
-                ", projParProjName='" + projParName + '\'' +
-                ", projOrgUid='" + projOrgUid + '\'' +
-                ", projOrgName='" + projOrgName + '\'' +
-                ", projManager='" + projManager + '\'' +
-                ", projDescription='" + projDescription + '\'' +
-                ", projPlanStartDate=" + projPlanStartDate +
-                ", projPlanFinishDate=" + projPlanFinishDate +
-                ", projPlanDur=" + projPlanDur +
-                ", projEarlyStartDate=" + projEarlyStartDate +
-                ", projLateFinishDate=" + projLateFinishDate +
-                ", projActStartDate=" + projActStartDate +
-                ", projActFinishDate=" + projActFinishDate +
-                ", projActDur=" + projActDur +
-                ", projWork=" + projWork +
-                ", projCompWork=" + projCompWork +
-                ", projRemWork=" + projRemWork +
-                ", projPctWork=" + projPctWork +
-                ", projState=" + projState +
-                ", children=" + children +
-                '}';
     }
 }

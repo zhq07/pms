@@ -1,11 +1,9 @@
 package com.buaa.pms.service.serviceImpl;
 
-import com.buaa.pms.entity.PmsProcess;
-import com.buaa.pms.entity.PmsProject;
+import com.buaa.pms.entity.*;
 import com.buaa.pms.mapper.PmsProcessMapper;
 import com.buaa.pms.model.Process;
-import com.buaa.pms.service.PmsProcessService;
-import com.buaa.pms.service.PmsProjectService;
+import com.buaa.pms.service.*;
 import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +18,18 @@ public class PmsProcessServiceImp implements PmsProcessService {
 
     @Resource
     PmsProjectService pmsProjectService;
+
+    @Resource
+    PmsTaskService pmsTaskService;
+
+    @Resource
+    PmsTaskLinkService pmsTaskLinkService;
+
+    @Resource
+    PmsTaskResPlanService pmsTaskResPlanService;
+
+    @Resource
+    PmsTaskResReqService pmsTaskResReqService;
 
     @Override
     public List<PmsProcess> selectAll() {
@@ -57,6 +67,13 @@ public class PmsProcessServiceImp implements PmsProcessService {
     }
 
     @Override
+    public List<PmsProcess> selectByUidList(List<String> procUidList) {
+        if (procUidList != null && !procUidList.isEmpty())
+            return pmsProcessMapper.selectByUidList(procUidList);
+        return null;
+    }
+
+    @Override
     public PmsProcess selectByUid(String procUid) {
         return pmsProcessMapper.selectByUid(procUid);
     }
@@ -65,11 +82,6 @@ public class PmsProcessServiceImp implements PmsProcessService {
     public void save(PmsProcess pmsProcess) {
         // 分配UUID
         pmsProcess.setProcUid(new MyUUID().getUUID());
-        // 计算计划工期
-        if (pmsProcess.getProcPlanStartDate() != null && pmsProcess.getProcPlanFinishDate() != null) {
-            int planDur = (int) (pmsProcess.getProcPlanFinishDate().getTime() - pmsProcess.getProcPlanStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsProcess.setProcPlanDur(planDur);
-        }
         // 新增流程默认状态 0-“编制中”
         if (pmsProcess.getProcState() == null)
             pmsProcess.setProcState(0);
@@ -89,11 +101,6 @@ public class PmsProcessServiceImp implements PmsProcessService {
 
     @Override
     public void update(PmsProcess pmsProcess) {
-        // 计算计划工期
-        if (pmsProcess.getProcPlanStartDate() != null && pmsProcess.getProcPlanFinishDate() != null) {
-            int planDur = (int) (pmsProcess.getProcPlanFinishDate().getTime() - pmsProcess.getProcPlanStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsProcess.setProcPlanDur(planDur);
-        }
         // 项目状态若为空，则保持以前的状态
         System.out.println("项目状态: " + pmsProcess.getProcState());
         if (pmsProcess.getProcState() == null) {
@@ -112,6 +119,114 @@ public class PmsProcessServiceImp implements PmsProcessService {
         }
     }
 
+    // 发布流程及对应项目
+    @Override
+    public String publishProc(PmsProcess pmsProcess) {
+        String SUCCESS = "success", FALSE = "false";
+        PmsProject pmsProject = pmsProjectService.selectByUid(pmsProcess.getProcProjUid()); // 流程对应的项目
+        if (pmsProject != null) {
+            if (pmsProject.getProjState() != 0) {
+                return FALSE;
+            }
+            PmsTask pmsTask = pmsTaskService.selectByUid(pmsProject.getProjTaskUid());  // 项目对应的任务
+            if (pmsTask == null || pmsTask.getTaskType() == 0) {    // 如果项目对应的是普通任务
+                // 将流程及其对应的项目状态设为1-已发布
+                pmsProcess.setProcState(1);
+                this.saveOrUpdate(pmsProcess);
+                pmsProject.setProjState(1);
+                pmsProject.setProjPlanStartDateTime(pmsProcess.getProcPlanStartDateTime());
+                pmsProject.setProjPlanFinishDateTime(pmsProcess.getProcPlanFinishDateTime());
+                pmsProjectService.saveOrUpdate(pmsProject);
+                // 将流程中的任务状态设为1-已发布
+                List<PmsTask> tasks = pmsTaskService.selectByProcUid(pmsProcess.getProcUid());
+                for (PmsTask task : tasks) {
+                    task.setTaskState(1);
+                }
+                pmsTaskService.updatePmsTasks(tasks);
+                return SUCCESS;
+            }
+            if (pmsTask.getTaskType() == 2) {   // 如果项目对应的是黑盒任务
+                List<PmsTask>  pmsTaskList = pmsTaskService.selectByProcUid(pmsProcess.getProcUid());   // 黑盒任务对应流程中的任务
+                if (pmsTaskList == null || pmsTaskList.isEmpty()) {
+                    return FALSE;
+                }
+                int n = pmsTaskList.size();
+                int index = pmsTask.getTaskId();
+                // 修改黑盒任务所属流程中任务的编号
+                PmsProcess upProcess = this.selectByUid(pmsTask.getTaskProcUid());  // 黑盒任务所属流程
+                if (upProcess == null) {
+                    return FALSE;
+                }
+                List<PmsTask> broTasks = pmsTaskService.selectByProcUid(pmsTask.getTaskProcUid());
+                for (PmsTask broTask : broTasks) {
+                    if (broTask.getTaskId() > index) {
+                        broTask.setTaskId(broTask.getTaskId() + n - 1);
+                    }
+                }
+                pmsTaskService.updatePmsTaskIds(broTasks);
+                // 处理黑盒中的任务
+                PmsTask firstTask = pmsTaskList.get(0);
+                PmsTask lastTask = pmsTaskList.get(n - 1);
+                // 修改黑盒任务对应流程中任务的连接
+                List<PmsTaskLink> preLinks = pmsTaskLinkService.selectBySucTaskUid(pmsTask.getTaskUid());
+                for (PmsTaskLink taskLink : preLinks) {
+                    taskLink.setTaskLinkSucTaskUid(firstTask.getTaskUid());
+                    taskLink.setTaskLinkProcUid(pmsTask.getTaskProcUid());
+                    taskLink.setTaskLinkProjUid(pmsTask.getTaskProjUid());
+//                    pmsTaskLinkService.saveOrUpdate(taskLink);
+                }
+                pmsTaskLinkService.updateTaskLinks(preLinks);
+                List<PmsTaskLink> sucLinks = pmsTaskLinkService.selectByPreTaskUid(pmsTask.getTaskUid());
+                for (PmsTaskLink taskLink : sucLinks) {
+                    taskLink.setTaskLinkPreTaskUid(lastTask.getTaskUid());
+                    taskLink.setTaskLinkProcUid(pmsTask.getTaskProcUid());
+                    taskLink.setTaskLinkProjUid(pmsTask.getTaskProjUid());
+//                    pmsTaskLinkService.saveOrUpdate(taskLink);
+                }
+                pmsTaskLinkService.updateTaskLinks(sucLinks);
+                List<PmsTaskLink> blackLinks = pmsTaskLinkService.selectByProcUid(pmsProcess.getProcUid());
+                for (PmsTaskLink taskLink : blackLinks) {
+                    taskLink.setTaskLinkProcUid(pmsTask.getTaskProcUid());
+                    taskLink.setTaskLinkProjUid(pmsTask.getTaskProjUid());
+//                    pmsTaskLinkService.saveOrUpdate(taskLink);
+                }
+                pmsTaskLinkService.updateTaskLinks(blackLinks);
+                // 修改黑盒任务对应流程中任务的所属流程和项目
+                for (PmsTask task : pmsTaskList) {
+                    task.setTaskParUid(pmsTask.getTaskParUid());
+                    task.setTaskProcUid(pmsTask.getTaskProcUid());
+                    task.setTaskProjUid(pmsTask.getTaskProjUid());
+                    task.setTaskId(task.getTaskId() + index - 1);
+                    task.setTaskState(1);
+//                    pmsTaskService.saveOrUpdate(task);
+                }
+                pmsTaskService.updatePmsTasks(pmsTaskList);
+                // 修改黑盒任务对应流程中资源计划的所属流程和项目
+                List<PmsTaskResPlan> taskResPlanList = pmsTaskResPlanService.selectByProcUid(pmsProcess.getProcUid());
+                for (PmsTaskResPlan taskResPlan : taskResPlanList) {
+                    taskResPlan.setResPlanProcUid(pmsTask.getTaskProcUid());
+                    taskResPlan.setResPlanProjUid(pmsTask.getTaskProjUid());
+                }
+                pmsTaskResPlanService.updatePmsTaskResPlans(taskResPlanList);
+                // 修改黑盒任务对应流程中资源需求的所属流程和项目
+                List<PmsTaskResReq> taskResReqList = pmsTaskResReqService.selectByProcUid(pmsProcess.getProcUid());
+                for (PmsTaskResReq taskResReq : taskResReqList) {
+                    taskResReq.setResReqProcUid(pmsTask.getTaskProcUid());
+                    taskResReq.setResReqProjUid(pmsTask.getTaskProjUid());
+                }
+                pmsTaskResReqService.updatePmsTaskResReqs(taskResReqList);
+                // 删除黑盒任务
+                pmsTaskService.deleteByUid(pmsTask.getTaskUid());
+                // 删除黑盒任务对应的项目
+                this.deleteByProjUid(pmsProject.getProjUid());
+                pmsProjectService.deleteByUid(pmsProject.getProjUid());
+                return SUCCESS;
+            }
+        }
+        return FALSE;
+
+    }
+
     private Process getProcessFromPmsProcess(PmsProcess pmsProcess) {
         Process process = new Process();
         process.setProcUid(pmsProcess.getProcUid());
@@ -122,8 +237,8 @@ public class PmsProcessServiceImp implements PmsProcessService {
         process.setProcProjName(procProj == null ? "" : procProj.getProjName());
         process.setProcAuthor(pmsProcess.getProcAuthor());
         process.setProcDescription(pmsProcess.getProcDescription());
-        process.setProcPlanStartDate(pmsProcess.getProcPlanStartDate());
-        process.setProcPlanFinishDate(pmsProcess.getProcPlanFinishDate());
+        process.setProcPlanStartDateTime(pmsProcess.getProcPlanStartDateTime());
+        process.setProcPlanFinishDateTime(pmsProcess.getProcPlanFinishDateTime());
         process.setProcPlanDur(pmsProcess.getProcPlanDur());
         process.setProcState(pmsProcess.getProcState());
 

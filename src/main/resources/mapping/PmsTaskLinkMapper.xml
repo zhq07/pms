@@ -5,7 +5,7 @@
 <mapper namespace="com.buaa.pms.mapper.PmsTaskLinkMapper">
 
     <!--数据库表字段与Java对象属性的映射关系-->
-    <resultMap id="pmsTaskLinkMapper" type="PmsTaskLink">
+    <resultMap id="pmsTaskLinkMap" type="PmsTaskLink">
         <result property="taskLinkUid" column="tasklink_uid"/>
         <result property="taskLinkPreTaskUid" column="tasklink_pretask_uid"/>
         <result property="taskLinkSucTaskUid" column="tasklink_suctask_uid"/>
@@ -15,31 +15,38 @@
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectAll" resultMap="pmsTaskLinkMapper">
+    <select id="selectAll" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link
     </select>
 
-    <select id="selectByProjUid" resultMap="pmsTaskLinkMapper">
+    <select id="selectByProjUid" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link where tasklink_proj_uid = #{taskLinkProjUid}
     </select>
 
-    <select id="selectByProcUid" resultMap="pmsTaskLinkMapper">
+    <select id="selectByProcUidList" resultMap="pmsTaskLinkMap">
+        select * from pms_task_Link where tasklink_proc_uid in
+        <foreach collection="list" open="(" separator="," close=")" item="procUid">
+            #{procUid}
+        </foreach>
+    </select>
+
+    <select id="selectByProcUid" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link where tasklink_proc_uid = #{taskLinkProcUid}
     </select>
 
-    <select id="selectByUid" resultMap="pmsTaskLinkMapper">
+    <select id="selectByUid" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link where tasklink_uid = #{taskLinkUid}
     </select>
 
-    <select id="selectByTaskUid" resultMap="pmsTaskLinkMapper">
+    <select id="selectByTaskUid" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
     </select>
 
-    <select id="selectByPreTaskUid" resultMap="pmsTaskLinkMapper">
+    <select id="selectByPreTaskUid" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
     </select>
 
-    <select id="selectBySucTaskUid" resultMap="pmsTaskLinkMapper">
+    <select id="selectBySucTaskUid" resultMap="pmsTaskLinkMap">
         select * from pms_task_Link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
     </select>
 
@@ -88,6 +95,15 @@
         tasklink_pretask_uid = #{taskLinkPreTaskUid}, tasklink_suctask_uid = #{taskLinkSucTaskUid}, tasklink_type = #{taskLinkType},
         tasklink_proj_uid = #{taskLinkProjUid}, tasklink_proc_uid = #{taskLinkProcUid}
         where tasklink_uid = #{taskLinkUid}
+    </update>
+
+    <update id="updateTaskLinks" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pms_task_Link set
+            tasklink_pretask_uid = #{item.taskLinkPreTaskUid}, tasklink_suctask_uid = #{item.taskLinkSucTaskUid}, tasklink_type = #{item.taskLinkType},
+            tasklink_proj_uid = #{item.taskLinkProjUid}, tasklink_proc_uid = #{item.taskLinkProcUid}
+            where tasklink_uid = #{item.taskLinkUid}
+        </foreach>
     </update>
 
 </mapper>

@@ -69,4 +69,8 @@ public class PmsProcessController {
         pmsProcessService.saveOrUpdate(pmsProcess);
     }
 
+    @PostMapping("/publishProc")
+    public String publishProc(@RequestBody PmsProcess pmsProcess){
+        return pmsProcessService.publishProc(pmsProcess);
+    }
 }

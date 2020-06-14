@@ -26,6 +26,13 @@ public class PmsTaskLinkServiceImp implements PmsTaskLinkService {
     }
 
     @Override
+    public List<PmsTaskLink> selectByProcUidList(List<String> taskLinkProcUidList) {
+        if (taskLinkProcUidList != null && !taskLinkProcUidList.isEmpty())
+            return pmsTaskLinkMapper.selectByProcUidList(taskLinkProcUidList);
+        return null;
+    }
+
+    @Override
     public List<PmsTaskLink> selectByProcUid(String taskLinkProcUid) {
         return pmsTaskLinkMapper.selectByProcUid(taskLinkProcUid);
     }
@@ -54,7 +61,8 @@ public class PmsTaskLinkServiceImp implements PmsTaskLinkService {
 
     @Override
     public void saveTaskLinks(List<PmsTaskLink> pmsTaskLinks) {
-        pmsTaskLinkMapper.saveTaskLinks(pmsTaskLinks);
+        if (pmsTaskLinks != null && !pmsTaskLinks.isEmpty())
+            pmsTaskLinkMapper.saveTaskLinks(pmsTaskLinks);
     }
 
     @Override
@@ -90,6 +98,12 @@ public class PmsTaskLinkServiceImp implements PmsTaskLinkService {
     @Override
     public void update(PmsTaskLink pmsTaskLink) {
         pmsTaskLinkMapper.update(pmsTaskLink);
+    }
+
+    @Override
+    public void updateTaskLinks(List<PmsTaskLink> pmsTaskLinks) {
+        if (pmsTaskLinks != null && !pmsTaskLinks.isEmpty())
+            pmsTaskLinkMapper.updateTaskLinks(pmsTaskLinks);
     }
 
     @Override

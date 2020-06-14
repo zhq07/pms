@@ -1,6 +1,6 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsAllocateEquipment {
 
@@ -12,9 +12,10 @@ public class PmsAllocateEquipment {
     private String aeTaskUid;
     private String aeResPlanUid;
     private String aeResReqUid;
-    private Date aeStartDate;
-    private Date aeFinishDate;
+    private Timestamp aeStartDateTime;
+    private Timestamp aeFinishDateTime;
     private Integer aeWorkDur;
+    private Integer aeWorkModel;
     private Integer aeIsEffective;
 
     public String getAeUid() {
@@ -81,20 +82,20 @@ public class PmsAllocateEquipment {
         this.aeResReqUid = aeResReqUid;
     }
 
-    public Date getAeStartDate() {
-        return aeStartDate;
+    public Timestamp getAeStartDateTime() {
+        return aeStartDateTime;
     }
 
-    public void setAeStartDate(Date aeStartDate) {
-        this.aeStartDate = aeStartDate;
+    public void setAeStartDateTime(Timestamp aeStartDateTime) {
+        this.aeStartDateTime = aeStartDateTime;
     }
 
-    public Date getAeFinishDate() {
-        return aeFinishDate;
+    public Timestamp getAeFinishDateTime() {
+        return aeFinishDateTime;
     }
 
-    public void setAeFinishDate(Date aeFinishDate) {
-        this.aeFinishDate = aeFinishDate;
+    public void setAeFinishDateTime(Timestamp aeFinishDateTime) {
+        this.aeFinishDateTime = aeFinishDateTime;
     }
 
     public Integer getAeWorkDur() {
@@ -105,29 +106,19 @@ public class PmsAllocateEquipment {
         this.aeWorkDur = aeWorkDur;
     }
 
+    public Integer getAeWorkModel() {
+        return aeWorkModel;
+    }
+
+    public void setAeWorkModel(Integer aeWorkModel) {
+        this.aeWorkModel = aeWorkModel;
+    }
+
     public Integer getAeIsEffective() {
         return aeIsEffective;
     }
 
     public void setAeIsEffective(Integer aeIsEffective) {
         this.aeIsEffective = aeIsEffective;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsAllocateEquipment{" +
-                "aeUid='" + aeUid + '\'' +
-                ", aeEquipUid='" + aeEquipUid + '\'' +
-                ", aeOrgUid='" + aeOrgUid + '\'' +
-                ", aeProjUid='" + aeProjUid + '\'' +
-                ", aeProcUid='" + aeProcUid + '\'' +
-                ", aeTaskUid='" + aeTaskUid + '\'' +
-                ", aeResPlanUid='" + aeResPlanUid + '\'' +
-                ", aeResReqUid='" + aeResReqUid + '\'' +
-                ", aeStartDate=" + aeStartDate +
-                ", aeFinishDate=" + aeFinishDate +
-                ", aeWorkDur=" + aeWorkDur +
-                ", aeIsEffective=" + aeIsEffective +
-                '}';
     }
 }

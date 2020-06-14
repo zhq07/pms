@@ -12,6 +12,8 @@ public interface PmsTaskLinkMapper {
 
     public List<PmsTaskLink> selectByProjUid(String taskLinkProjUid);
 
+    public List<PmsTaskLink> selectByProcUidList(List<String> taskLinkProcUidList);
+
     public List<PmsTaskLink> selectByProcUid(String taskLinkProcUid);
 
     public List<PmsTaskLink> selectByTaskUid(String taskLinkTaskUid);
@@ -39,4 +41,6 @@ public interface PmsTaskLinkMapper {
     public void deleteByProcUid(String taskLinkProcUid);
 
     public void update(PmsTaskLink pmsTaskLink);
+
+    public void updateTaskLinks(List<PmsTaskLink> pmsTaskLinks);
 }

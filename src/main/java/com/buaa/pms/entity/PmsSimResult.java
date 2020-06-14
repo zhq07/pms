@@ -6,8 +6,8 @@ public class PmsSimResult {
 
     private String simRsUid;
     private String simRsSimProjUid;
-    private Integer simRsDurU;
-    private Integer simRsSigma;
+    private Float simRsDurU;
+    private Float simRsSigma;
     private Float simRsProba1;
     private Float simRsProba2;
     private Float simRsProba3;
@@ -30,19 +30,19 @@ public class PmsSimResult {
         this.simRsSimProjUid = simRsSimProjUid;
     }
 
-    public Integer getSimRsDurU() {
+    public Float getSimRsDurU() {
         return simRsDurU;
     }
 
-    public void setSimRsDurU(Integer simRsDurU) {
+    public void setSimRsDurU(Float simRsDurU) {
         this.simRsDurU = simRsDurU;
     }
 
-    public Integer getSimRsSigma() {
+    public Float getSimRsSigma() {
         return simRsSigma;
     }
 
-    public void setSimRsSigma(Integer simRsSigma) {
+    public void setSimRsSigma(Float simRsSigma) {
         this.simRsSigma = simRsSigma;
     }
 
@@ -84,20 +84,5 @@ public class PmsSimResult {
 
     public void setSimRsDateTime(Timestamp simRsDateTime) {
         this.simRsDateTime = simRsDateTime;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsSimResult{" +
-                "simRsUid='" + simRsUid + '\'' +
-                ", simRsSimProjUid='" + simRsSimProjUid + '\'' +
-                ", simRsDurU=" + simRsDurU +
-                ", simRsSigma=" + simRsSigma +
-                ", simRsProba1=" + simRsProba1 +
-                ", simRsProba2=" + simRsProba2 +
-                ", simRsProba3=" + simRsProba3 +
-                ", simRsCount=" + simRsCount +
-                ", simRsDateTime=" + simRsDateTime +
-                '}';
     }
 }

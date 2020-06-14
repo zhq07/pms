@@ -3,11 +3,11 @@ package com.buaa.pms.service.serviceImpl;
 import com.buaa.pms.entity.PmsOrganization;
 import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
+import com.buaa.pms.entity.PmsTaskResPlan;
 import com.buaa.pms.mapper.PmsOrganizationMapper;
 import com.buaa.pms.mapper.PmsProjectMapper;
 import com.buaa.pms.model.ProjTableItem;
-import com.buaa.pms.service.PmsProjectService;
-import com.buaa.pms.service.PmsTaskService;
+import com.buaa.pms.service.*;
 import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,16 @@ public class PmsProjectServiceImp implements PmsProjectService {
     PmsProjectMapper  pmsProjectMapper;
 
     @Resource
+    PmsProcessService pmsProcessService;
+
+    @Resource
     PmsTaskService pmsTaskService;
+
+    @Resource
+    PmsTaskResPlanService pmsTaskResPlanService;
+
+    @Resource
+    PmsTaskResReqService pmsTaskResReqService;
 
     @Resource
     PmsOrganizationMapper pmsOrganizationMapper;
@@ -47,6 +56,13 @@ public class PmsProjectServiceImp implements PmsProjectService {
     }
 
     @Override
+    public List<PmsProject> selectByUidList(List<String> projUidList) {
+        if(projUidList != null && !projUidList.isEmpty())
+            return pmsProjectMapper.selectByUidList(projUidList);
+        return null;
+    }
+
+    @Override
     public PmsProject selectByUid(String projUid) {
         return pmsProjectMapper.selectByUid(projUid);
     }
@@ -55,16 +71,6 @@ public class PmsProjectServiceImp implements PmsProjectService {
     public void save(PmsProject pmsProject) {
         // 分配UUID
         pmsProject.setProjUid(new MyUUID().getUUID());
-        // 计算工期
-        if (pmsProject.getProjPlanStartDate() != null && pmsProject.getProjPlanFinishDate() != null) {
-            int planDur = (int) (pmsProject.getProjPlanStartDate().getTime() - pmsProject.getProjPlanFinishDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsProject.setProjPlanDur(planDur);
-        }
-        // 计算实际工期
-        if (pmsProject.getProjActStartDate() != null && pmsProject.getProjActFinishDate() != null) {
-            int actDur = (int) (pmsProject.getProjActFinishDate().getTime() - pmsProject.getProjActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsProject.setProjActDur(actDur);
-        }
         // 新增项目默认状态 0-“编制中”
         if (pmsProject.getProjState() == null)
             pmsProject.setProjState(0);
@@ -74,21 +80,15 @@ public class PmsProjectServiceImp implements PmsProjectService {
     @Override
     public void deleteByUid(String projUid) {
         pmsProjectMapper.deleteByUid(projUid);
-        // 后续要添加代码，项目删除后，其包含的流程和任务、对应的优化项目和仿真项目也要删除
+        pmsProcessService.deleteByProjUid(projUid);
+        pmsTaskService.deleteByProjUid(projUid);
+        pmsTaskResPlanService.deleteByProjUid(projUid);
+        pmsTaskResReqService.deleteByProjUid(projUid);
+        // 后续要添加代码，项目删除后，其对应的优化项目和仿真项目也要删除
     }
 
     @Override
     public void update(PmsProject pmsProject) {
-        // 计算计划工期
-        if (pmsProject.getProjPlanStartDate() != null && pmsProject.getProjPlanFinishDate() != null) {
-            int planDur = (int) (pmsProject.getProjPlanFinishDate().getTime() - pmsProject.getProjPlanStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsProject.setProjPlanDur(planDur);
-        }
-        // 计算实际工期
-        if (pmsProject.getProjActStartDate() != null && pmsProject.getProjActFinishDate() != null) {
-            int actDur = (int) (pmsProject.getProjActFinishDate().getTime() - pmsProject.getProjActStartDate().getTime()) / (1000 * 60 * 60 * 24) + 1;
-            pmsProject.setProjActDur(actDur);
-        }
         // 项目状态若为空，则保持以前的状态
         if (pmsProject.getProjState() == null) {
             int state = pmsProjectMapper.selectByUid(pmsProject.getProjUid()).getProjState();
@@ -132,6 +132,7 @@ public class PmsProjectServiceImp implements PmsProjectService {
         tableItem.setProjUid(proj.getProjUid());
         tableItem.setProjId(proj.getProjId());
         tableItem.setProjName(proj.getProjName());
+        tableItem.setName(proj.getProjName());
 
         tableItem.setProjTaskUid(proj.getProjTaskUid());
         PmsTask projTask = pmsTaskService.selectByUid(proj.getProjTaskUid());
@@ -147,13 +148,14 @@ public class PmsProjectServiceImp implements PmsProjectService {
 
         tableItem.setProjManager(proj.getProjManager());
         tableItem.setProjDescription(proj.getProjDescription());
-        tableItem.setProjPlanStartDate(proj.getProjPlanStartDate());
-        tableItem.setProjPlanFinishDate(proj.getProjPlanFinishDate());
+        tableItem.setProjPriority(proj.getProjPriority());
+        tableItem.setProjPlanStartDateTime(proj.getProjPlanStartDateTime());
+        tableItem.setProjPlanFinishDateTime(proj.getProjPlanFinishDateTime());
         tableItem.setProjPlanDur(proj.getProjPlanDur());
-        tableItem.setProjEarlyStartDate(proj.getProjEarlyStartDate());
-        tableItem.setProjLateFinishDate(proj.getProjLateFinishDate());
-        tableItem.setProjActStartDate(proj.getProjActStartDate());
-        tableItem.setProjActFinishDate(proj.getProjActFinishDate());
+        tableItem.setProjEarlyStartDateTime(proj.getProjEarlyStartDateTime());
+        tableItem.setProjLateFinishDateTime(proj.getProjLateFinishDateTime());
+        tableItem.setProjActStartDateTime(proj.getProjActStartDateTime());
+        tableItem.setProjActFinishDateTime(proj.getProjActFinishDateTime());
         tableItem.setProjPctWork(proj.getProjPctWork());
         tableItem.setProjState(proj.getProjState());
         tableItem.setChildren(this.getChildrenByUid(proj.getProjUid()));

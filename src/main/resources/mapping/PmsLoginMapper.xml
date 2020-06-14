@@ -5,14 +5,14 @@
 <mapper namespace="com.buaa.pms.mapper.PmsLoginMapper">
 
     <!--数据库表字段与Java对象属性的映射关系-->
-    <resultMap id="pmsLoginMapper" type="PmsUser">
+    <resultMap id="pmsLoginMap" type="PmsUser">
         <result property="userUid" column="user_uid"/>
         <result property="username" column="user_name"/>
         <result property="password" column="password"/>
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectByNameId" resultMap="pmsLoginMapper">
+    <select id="selectByNameId" resultMap="pmsLoginMap">
         select * from pms_users where user_name = #{username} and password = #{password}
     </select>
 

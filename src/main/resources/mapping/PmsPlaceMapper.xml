@@ -5,7 +5,7 @@
 <mapper namespace="com.buaa.pms.mapper.PmsPlaceMapper">
 
     <!--数据库表字段与Java对象属性的映射关系-->
-    <resultMap id="pmsPlaceMapper" type="PmsPlace">
+    <resultMap id="pmsPlaceMap" type="PmsPlace">
         <result property="placeUid" column="place_uid"/>
         <result property="placeId" column="place_id"/>
         <result property="placeName" column="place_name"/>
@@ -16,15 +16,15 @@
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectAll" resultMap="pmsPlaceMapper">
+    <select id="selectAll" resultMap="pmsPlaceMap">
         select * from pms_place
     </select>
 
-    <select id="selectByOrgUid" resultMap="pmsPlaceMapper">
+    <select id="selectByOrgUid" resultMap="pmsPlaceMap">
         select * from pms_place where place_org_uid = #{placeOrgUid}
     </select>
 
-    <select id="selectByUid" resultMap="pmsPlaceMapper">
+    <select id="selectByUid" resultMap="pmsPlaceMap">
         select * from pms_place where place_uid = #{placeUid}
     </select>
 

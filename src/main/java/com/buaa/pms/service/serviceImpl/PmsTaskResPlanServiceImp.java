@@ -3,6 +3,7 @@ package com.buaa.pms.service.serviceImpl;
 import com.buaa.pms.entity.PmsTaskResPlan;
 import com.buaa.pms.mapper.PmsTaskResPlanMapper;
 import com.buaa.pms.service.PmsTaskResPlanService;
+import com.buaa.pms.service.PmsTaskResReqService;
 import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,9 @@ public class PmsTaskResPlanServiceImp implements PmsTaskResPlanService {
     @Resource
     PmsTaskResPlanMapper pmsTaskResPlanMapper;
 
+    @Resource
+    PmsTaskResReqService pmsTaskResReqService;
+
     @Override
     public List<PmsTaskResPlan> selectAll() {
         return pmsTaskResPlanMapper.selectAll();
@@ -23,6 +27,13 @@ public class PmsTaskResPlanServiceImp implements PmsTaskResPlanService {
     @Override
     public List<PmsTaskResPlan> selectByProjUid(String resPlanProjUid) {
         return pmsTaskResPlanMapper.selectByProjUid(resPlanProjUid);
+    }
+
+    @Override
+    public List<PmsTaskResPlan> selectByProcUidList(List<String> resPlanProcUidList) {
+        if (resPlanProcUidList != null && !resPlanProcUidList.isEmpty())
+            return pmsTaskResPlanMapper.selectByProcUidList(resPlanProcUidList);
+        return null;
     }
 
     @Override
@@ -49,6 +60,9 @@ public class PmsTaskResPlanServiceImp implements PmsTaskResPlanService {
 
     @Override
     public void deleteByUid(String resPlanUid) {
+        // 删除资源方案包含的资源需求
+        pmsTaskResReqService.deleteByResReqResPlanUid(resPlanUid);
+        // 删除资源方案
         pmsTaskResPlanMapper.deleteByUid(resPlanUid);
     }
 
@@ -70,6 +84,12 @@ public class PmsTaskResPlanServiceImp implements PmsTaskResPlanService {
     @Override
     public void update(PmsTaskResPlan pmsTaskResPlan) {
         pmsTaskResPlanMapper.update(pmsTaskResPlan);
+    }
+
+    @Override
+    public void updatePmsTaskResPlans(List<PmsTaskResPlan> pmsTaskResPlans) {
+        if (pmsTaskResPlans != null && !pmsTaskResPlans.isEmpty())
+            pmsTaskResPlanMapper.updatePmsTaskResPlans(pmsTaskResPlans);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.buaa.pms.service;
 
 import com.buaa.pms.entity.PmsTask;
+import com.buaa.pms.entity.PmsTaskLink;
 import com.buaa.pms.model.Task;
 
 import java.util.List;
@@ -13,7 +14,11 @@ public interface PmsTaskService {
 
     public List<Task> getTaskListByProjUid(String taskProjUid);
 
+    public List<PmsTask> selectByProcUidList(List<String> taskProcUidList);
+
     public List<PmsTask> selectByProcUid(String taskProcUid);
+
+    public List<PmsTask> selectPublishedByProjUid(String taskProjUid);
 
     public List<Task> getTaskListByProcUid(String taskProcUid);
 
@@ -35,8 +40,12 @@ public interface PmsTaskService {
 
     public void updatePmsTaskIds(List<PmsTask> pmsTasks);
 
+    public void updatePmsTasks(List<PmsTask> pmsTasks);
+
     public void saveOrUpdate(PmsTask pmsTask);
 
     public void saveOrUpdateTask(Task task);
+
+    public List<Task> getTaskListByTasksAndTaskLinks(List<PmsTask> pmsTasks, List<PmsTaskLink> pmsTaskLinks);
 
 }

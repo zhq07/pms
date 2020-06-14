@@ -17,6 +17,8 @@ public interface PmsProcessService {
 
     public List<Process> getProcListByProjUid(String procProjUid);
 
+    public List<PmsProcess> selectByUidList(List<String> procUidList);
+
     public PmsProcess selectByUid(String procUid);
 
     public void save(PmsProcess pmsProcess);
@@ -28,5 +30,7 @@ public interface PmsProcessService {
     public void update(PmsProcess pmsProcess);
 
     public void saveOrUpdate(PmsProcess pmsProcess);
+
+    public String publishProc(PmsProcess pmsProcess);
 
 }

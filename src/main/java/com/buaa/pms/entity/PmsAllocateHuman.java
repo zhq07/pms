@@ -1,6 +1,6 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsAllocateHuman {
 
@@ -12,9 +12,10 @@ public class PmsAllocateHuman {
     private String ahTaskUid;
     private String ahResPlanUid;
     private String ahResReqUid;
-    private Date ahStartDate;
-    private Date ahFinishDate;
+    private Timestamp ahStartDateTime;
+    private Timestamp ahFinishDateTime;
     private Integer ahWorkDur;
+    private Integer ahWorkModel;
     private Integer ahIsEffective;
 
     public String getAhUid() {
@@ -81,20 +82,20 @@ public class PmsAllocateHuman {
         this.ahResReqUid = ahResReqUid;
     }
 
-    public Date getAhStartDate() {
-        return ahStartDate;
+    public Timestamp getAhStartDateTime() {
+        return ahStartDateTime;
     }
 
-    public void setAhStartDate(Date ahStartDate) {
-        this.ahStartDate = ahStartDate;
+    public void setAhStartDateTime(Timestamp ahStartDateTime) {
+        this.ahStartDateTime = ahStartDateTime;
     }
 
-    public Date getAhFinishDate() {
-        return ahFinishDate;
+    public Timestamp getAhFinishDateTime() {
+        return ahFinishDateTime;
     }
 
-    public void setAhFinishDate(Date ahFinishDate) {
-        this.ahFinishDate = ahFinishDate;
+    public void setAhFinishDateTime(Timestamp ahFinishDateTime) {
+        this.ahFinishDateTime = ahFinishDateTime;
     }
 
     public Integer getAhWorkDur() {
@@ -105,29 +106,19 @@ public class PmsAllocateHuman {
         this.ahWorkDur = ahWorkDur;
     }
 
+    public Integer getAhWorkModel() {
+        return ahWorkModel;
+    }
+
+    public void setAhWorkModel(Integer ahWorkModel) {
+        this.ahWorkModel = ahWorkModel;
+    }
+
     public Integer getAhIsEffective() {
         return ahIsEffective;
     }
 
     public void setAhIsEffective(Integer ahIsEffective) {
         this.ahIsEffective = ahIsEffective;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsAllocateHuman{" +
-                "ahUid='" + ahUid + '\'' +
-                ", ahHumUid='" + ahHumUid + '\'' +
-                ", ahOrgUid='" + ahOrgUid + '\'' +
-                ", ahProjUid='" + ahProjUid + '\'' +
-                ", ahProcUid='" + ahProcUid + '\'' +
-                ", ahTaskUid='" + ahTaskUid + '\'' +
-                ", ahResPlanUid='" + ahResPlanUid + '\'' +
-                ", ahResReqUid='" + ahResReqUid + '\'' +
-                ", ahStartDate=" + ahStartDate +
-                ", ahFinishDate=" + ahFinishDate +
-                ", ahWorkDur=" + ahWorkDur +
-                ", ahIsEffective=" + ahIsEffective +
-                '}';
     }
 }

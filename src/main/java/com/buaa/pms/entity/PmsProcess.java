@@ -1,6 +1,6 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PmsProcess {
 
@@ -10,8 +10,8 @@ public class PmsProcess {
     private String procProjUid;
     private String procAuthor;
     private String procDescription;
-    private Date procPlanStartDate;
-    private Date procPlanFinishDate;
+    private Timestamp procPlanStartDateTime;
+    private Timestamp procPlanFinishDateTime;
     private Integer procPlanDur;
     private Integer procState;
 
@@ -63,20 +63,20 @@ public class PmsProcess {
         this.procDescription = procDescription;
     }
 
-    public Date getProcPlanStartDate() {
-        return procPlanStartDate;
+    public Timestamp getProcPlanStartDateTime() {
+        return procPlanStartDateTime;
     }
 
-    public void setProcPlanStartDate(Date procPlanStartDate) {
-        this.procPlanStartDate = procPlanStartDate;
+    public void setProcPlanStartDateTime(Timestamp procPlanStartDateTime) {
+        this.procPlanStartDateTime = procPlanStartDateTime;
     }
 
-    public Date getProcPlanFinishDate() {
-        return procPlanFinishDate;
+    public Timestamp getProcPlanFinishDateTime() {
+        return procPlanFinishDateTime;
     }
 
-    public void setProcPlanFinishDate(Date procPlanFinishDate) {
-        this.procPlanFinishDate = procPlanFinishDate;
+    public void setProcPlanFinishDateTime(Timestamp procPlanFinishDateTime) {
+        this.procPlanFinishDateTime = procPlanFinishDateTime;
     }
 
     public Integer getProcPlanDur() {
@@ -93,21 +93,5 @@ public class PmsProcess {
 
     public void setProcState(Integer procState) {
         this.procState = procState;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsProcess{" +
-                "procUid='" + procUid + '\'' +
-                ", procId='" + procId + '\'' +
-                ", procName='" + procName + '\'' +
-                ", procProjUid='" + procProjUid + '\'' +
-                ", procAuthor='" + procAuthor + '\'' +
-                ", procDescription='" + procDescription + '\'' +
-                ", procPlanStartDate=" + procPlanStartDate +
-                ", procPlanFinishDate=" + procPlanFinishDate +
-                ", procPlanDur=" + procPlanDur +
-                ", procState=" + procState +
-                '}';
     }
 }

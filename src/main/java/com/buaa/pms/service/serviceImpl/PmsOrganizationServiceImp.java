@@ -86,6 +86,7 @@ public class PmsOrganizationServiceImp implements PmsOrganizationService {
         tableItem.setOrgUid(org.getOrgUid());
         tableItem.setOrgId(org.getOrgId());
         tableItem.setOrgName(org.getOrgName());
+        tableItem.setName(org.getOrgName());
         tableItem.setOrgParUid(org.getOrgParUid());
         PmsOrganization parOrg = pmsOrganizationMapper.selectByUid(org.getOrgParUid());
         tableItem.setOrgParName(parOrg == null ? "" : parOrg.getOrgName());

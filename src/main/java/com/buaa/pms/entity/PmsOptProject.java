@@ -1,14 +1,13 @@
 package com.buaa.pms.entity;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 public class PmsOptProject {
 
     private String optProjUid;
     private String optProjName;
-    private Date optProjStartDate;
-    private Date optProjFinishDate;
+    private Timestamp optProjStartDateTime;
+    private Timestamp optProjFinishDateTime;
     private Integer optProjApply;
     private Timestamp optProjCreate;
     private Timestamp optProjApplyTime;
@@ -29,20 +28,20 @@ public class PmsOptProject {
         this.optProjName = optProjName;
     }
 
-    public Date getOptProjStartDate() {
-        return optProjStartDate;
+    public Timestamp getOptProjStartDateTime() {
+        return optProjStartDateTime;
     }
 
-    public void setOptProjStartDate(Date optProjStartDate) {
-        this.optProjStartDate = optProjStartDate;
+    public void setOptProjStartDateTime(Timestamp optProjStartDateTime) {
+        this.optProjStartDateTime = optProjStartDateTime;
     }
 
-    public Date getOptProjFinishDate() {
-        return optProjFinishDate;
+    public Timestamp getOptProjFinishDateTime() {
+        return optProjFinishDateTime;
     }
 
-    public void setOptProjFinishDate(Date optProjFinishDate) {
-        this.optProjFinishDate = optProjFinishDate;
+    public void setOptProjFinishDateTime(Timestamp optProjFinishDateTime) {
+        this.optProjFinishDateTime = optProjFinishDateTime;
     }
 
     public Integer getOptProjApply() {
@@ -67,18 +66,5 @@ public class PmsOptProject {
 
     public void setOptProjApplyTime(Timestamp optProjApplyTime) {
         this.optProjApplyTime = optProjApplyTime;
-    }
-
-    @Override
-    public String toString() {
-        return "PmsOptProject{" +
-                "optProjUid='" + optProjUid + '\'' +
-                ", optProjName='" + optProjName + '\'' +
-                ", optProjStartDate=" + optProjStartDate +
-                ", optProjFinishDate=" + optProjFinishDate +
-                ", optProjApply=" + optProjApply +
-                ", optProjCreate=" + optProjCreate +
-                ", optProjApplyTime=" + optProjApplyTime +
-                '}';
     }
 }

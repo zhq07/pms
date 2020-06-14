@@ -5,7 +5,7 @@
 <mapper namespace="com.buaa.pms.mapper.PmsOrganizationMapper">
 
     <!--数据库表字段与Java对象属性的映射关系-->
-    <resultMap id="pmsOrganizationMapper" type="PmsOrganization">
+    <resultMap id="pmsOrganizationMap" type="PmsOrganization">
         <result property="orgUid" column="org_uid"/>
         <result property="orgId" column="org_id"/>
         <result property="orgName" column="org_name"/>
@@ -18,19 +18,19 @@
     </resultMap>
 
     <!--sql语句对应的接口方法名-->
-    <select id="selectAll" resultMap="pmsOrganizationMapper">
+    <select id="selectAll" resultMap="pmsOrganizationMap">
         select * from pms_organization
     </select>
 
-    <select id="selectTop" resultMap="pmsOrganizationMapper">
+    <select id="selectTop" resultMap="pmsOrganizationMap">
         select * from pms_organization where org_par_uid = '' or org_par_uid is null
     </select>
 
-    <select id="selectByParUid" resultMap="pmsOrganizationMapper">
+    <select id="selectByParUid" resultMap="pmsOrganizationMap">
         select * from pms_organization where org_par_uid = #{orgParUid}
     </select>
 
-    <select id="selectByUid" resultMap="pmsOrganizationMapper">
+    <select id="selectByUid" resultMap="pmsOrganizationMap">
         select * from pms_organization where org_uid = #{orgUid}
     </select>
 
