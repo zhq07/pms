@@ -31,6 +31,10 @@ public class OptMain {
     PmsHumanService pmsHumanService;
     @Resource
     PmsEquipmentService pmsEquipmentService;
+    @Resource
+    PmsPlaceService pmsPlaceService;
+    @Resource
+    PmsKnowledgeService pmsKnowledgeService;
 
     public static final int TASKLINKTYPE_NORMAL = 0;    // 任务连接类型，普通连接
     public static final int TASKLINKTYPE_REAL = 1;    // 任务连接类型，真连接
@@ -356,9 +360,9 @@ public class OptMain {
 //        procUidList.add("707323834117652480");
         initTaskNodes(procUidList);  // 初始化任务节点图，获得任务节点网络的虚拟首节点
 
-        int maxG = 50;                       // 最大迭代次数
+        int maxG = 30;                       // 最大迭代次数
         int G = 0;                          // 种群的代数
-        int chromosomeNum = 30;              // 种群中的个体（染色体）个数
+        int chromosomeNum = 80;              // 种群中的个体（染色体）个数
         int genNum = optTaskCountSum + 4;   // 一个染色体上的基因个数，即编码长度
         double[][] population = new double[chromosomeNum][genNum];  // 种群存在数组中
         double[] populationFitness = new double[chromosomeNum];     // 记录种群中个体的适应度值
@@ -709,8 +713,8 @@ public class OptMain {
             if (finish.after(projLateFinish)) {         // 如果项目超期了，适应度值就加上罚函数
                 double exceedTime = (finish.getTime() - projLateFinish.getTime()) / MS_OF_DAY + 1;  // 超期天数
                 f += g * exceedTime * exceedTime / estimateDur;      // 加上罚函数对个体进行惩罚
-                System.out.println();
-                System.out.println("超期" + exceedTime + "被惩罚了：" + finish);
+//                System.out.println();
+//                System.out.println("超期" + exceedTime + "被惩罚了：" + finish);
             }
             fitness += f;
         }
@@ -837,7 +841,37 @@ public class OptMain {
             }
             resOcpyNodesList.add(resOcpyNodes);
         }
-        OptResult optResult = new OptResult(taskList, resOcpyNodesList);
+
+        // 根据普通连接，正序广度优先遍历
+        List<List<OptTaskNode>> taskNodeChartList = new LinkedList<>();
+        List<List<Task>> procChartTaskList = new LinkedList<>();
+        Set<String> taskUidSet = new HashSet<>();
+        Queue<OptTaskNode> queue = new LinkedList<>();
+        queue.addAll(startOptTaskNode.getSucTasks());
+        int size = queue.size();
+        // 分层遍历
+        while (!queue.isEmpty()) {
+            List<OptTaskNode> optTaskNodes = new LinkedList<>();
+            List<Task> tasks = new LinkedList<>();
+            optTaskNodes.addAll(queue);
+            taskNodeChartList.add(optTaskNodes);
+            for (int i = 0; i < size; i++) {
+                OptTaskNode optTaskNode = queue.poll();
+                Task task = new Task(optTaskNode.getPmsTask());
+                task.setTaskRealSucTasks(new LinkedList<>());
+                tasks.add(task);
+                for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
+                    task.getTaskRealSucTasks().add(sucTask.getPmsTask());
+                    // 紧后任务节点入队
+                    if (taskUidSet.add(sucTask.getPmsTask().getTaskUid())) {
+                        queue.add(sucTask);
+                    }
+                }
+            }
+            procChartTaskList.add(tasks);
+            size = queue.size();
+        }
+        OptResult optResult = new OptResult(taskList, resOcpyNodesList, procChartTaskList);
         return optResult;
     }
 }

@@ -11,6 +11,10 @@ public class Task {
     private List<PmsTask> taskNormalPreTasks;
     private List<PmsTask> taskRealPreTasks;
 
+    // 紧后任务集合
+    private List<PmsTask> taskNormalSucTasks;
+    private List<PmsTask> taskRealSucTasks;
+
     public Task() {}
 
     public Task(PmsTask pmsTask) {
@@ -50,5 +54,21 @@ public class Task {
 
     public void setTaskRealPreTasks(List<PmsTask> taskRealPreTasks) {
         this.taskRealPreTasks = taskRealPreTasks;
+    }
+
+    public List<PmsTask> getTaskNormalSucTasks() {
+        return taskNormalSucTasks;
+    }
+
+    public void setTaskNormalSucTasks(List<PmsTask> taskNormalSucTasks) {
+        this.taskNormalSucTasks = taskNormalSucTasks;
+    }
+
+    public List<PmsTask> getTaskRealSucTasks() {
+        return taskRealSucTasks;
+    }
+
+    public void setTaskRealSucTasks(List<PmsTask> taskRealSucTasks) {
+        this.taskRealSucTasks = taskRealSucTasks;
     }
 }

@@ -1,15 +1,9 @@
 package com.buaa.pms.service.serviceImpl;
 
-import com.buaa.pms.entity.PmsEquipment;
-import com.buaa.pms.entity.PmsHuman;
-import com.buaa.pms.entity.PmsPlace;
-import com.buaa.pms.entity.PmsTaskResReq;
+import com.buaa.pms.entity.*;
 import com.buaa.pms.mapper.PmsTaskResReqMapper;
 import com.buaa.pms.model.TaskResReq;
-import com.buaa.pms.service.PmsEquipmentService;
-import com.buaa.pms.service.PmsHumanService;
-import com.buaa.pms.service.PmsPlaceService;
-import com.buaa.pms.service.PmsTaskResReqService;
+import com.buaa.pms.service.*;
 import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +25,9 @@ public class PmsTaskResReqServiceImp implements PmsTaskResReqService {
 
     @Resource
     PmsPlaceService pmsPlaceService;
+
+    @Resource
+    PmsKnowledgeService pmsKnowledgeService;
 
     @Override
     public List<PmsTaskResReq> selectAll() {
@@ -176,7 +173,12 @@ public class PmsTaskResReqServiceImp implements PmsTaskResReqService {
                 resReq.setResName(place.getPlaceName());
                 resReq.setResAbilityType(place.getPlaceType().toString());
                 break;
-            case 3 : break;
+            case 3 :
+                PmsKnowledge knowledge = pmsKnowledgeService.selectByUid(pmsTaskResReq.getResReqResUid());
+                resReq.setResId(knowledge.getKnowlId());
+                resReq.setResName(knowledge.getKnowlName());
+                resReq.setResAbilityType(knowledge.getKnowlType());
+                break;
             default: return resReq;
         }
         return resReq;
