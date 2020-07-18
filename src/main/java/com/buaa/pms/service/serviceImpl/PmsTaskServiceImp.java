@@ -110,6 +110,9 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public void deleteByProjUid(String projUid) {
         // 删除任务相关连接
         pmsTaskLinkService.deleteByProjUid(projUid);
+        // 删除任务资源方案和资源需求
+        pmsTaskResPlanService.deleteByProjUid(projUid);
+        pmsTaskResReqService.deleteByProjUid(projUid);
         // 删除任务
         pmsTaskMapper.deleteByProjUid(projUid);
     }
@@ -119,7 +122,8 @@ public class PmsTaskServiceImp implements PmsTaskService {
         // 删除任务相关连接
         pmsTaskLinkService.deleteByProcUid(procUid);
         // 删除资源方案和资源需求
-
+        pmsTaskResPlanService.deleteByProcUid(procUid);
+        pmsTaskResReqService.deleteByProcUid(procUid);
         // 删除任务
         pmsTaskMapper.deleteByProcUid(procUid);
     }

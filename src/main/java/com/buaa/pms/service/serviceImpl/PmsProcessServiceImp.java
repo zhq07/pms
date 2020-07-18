@@ -91,7 +91,8 @@ public class PmsProcessServiceImp implements PmsProcessService {
     @Override
     public void deleteByUid(String procUid) {
         pmsProcessMapper.deleteByUid(procUid);
-        // 后续要添加代码，流程删除后，其包含的任务、对应的优化项目和仿真项目也要删除
+        // 流程删除后，其包含的任务、对应的优化项目和仿真项目也要删除
+        pmsTaskService.deleteByProcUid(procUid);
     }
 
     @Override
@@ -129,7 +130,7 @@ public class PmsProcessServiceImp implements PmsProcessService {
                 return FALSE;
             }
             PmsTask pmsTask = pmsTaskService.selectByUid(pmsProject.getProjTaskUid());  // 项目对应的任务
-            if (pmsTask == null || pmsTask.getTaskType() == 0) {    // 如果项目对应的是普通任务
+            if (pmsTask == null || pmsTask.getTaskType() != 5) {    // 如果项目对应的不是黑盒任务
                 // 将流程及其对应的项目状态设为1-已发布
                 pmsProcess.setProcState(1);
                 this.saveOrUpdate(pmsProcess);
@@ -145,7 +146,7 @@ public class PmsProcessServiceImp implements PmsProcessService {
                 pmsTaskService.updatePmsTasks(tasks);
                 return SUCCESS;
             }
-            if (pmsTask.getTaskType() == 2) {   // 如果项目对应的是黑盒任务
+            if (pmsTask.getTaskType() == 5) {   // 如果项目对应的是黑盒任务
                 List<PmsTask>  pmsTaskList = pmsTaskService.selectByProcUid(pmsProcess.getProcUid());   // 黑盒任务对应流程中的任务
                 if (pmsTaskList == null || pmsTaskList.isEmpty()) {
                     return FALSE;

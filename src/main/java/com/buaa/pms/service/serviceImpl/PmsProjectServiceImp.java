@@ -84,7 +84,6 @@ public class PmsProjectServiceImp implements PmsProjectService {
         pmsTaskService.deleteByProjUid(projUid);
         pmsTaskResPlanService.deleteByProjUid(projUid);
         pmsTaskResReqService.deleteByProjUid(projUid);
-        // 后续要添加代码，项目删除后，其对应的优化项目和仿真项目也要删除
     }
 
     @Override
