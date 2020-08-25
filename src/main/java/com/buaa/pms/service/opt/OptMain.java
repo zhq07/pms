@@ -42,11 +42,13 @@ public class OptMain {
     public static final long MS_OF_HOUR = 1000 * 3600;      // 1小时的毫秒数
     public static final long MS_OF_DAY = 1000 * 3600 * 24;  // 1天的毫秒数
 
-    public static final int maxG = 2;           // 最大迭代次数
-    public static final int chromosomeNum = 5;  // 种群规模（个体数量）
+    public static final int MAX_G = 30;           // 最大迭代次数
+    public static final int CHROMOSOME_NUM = 60;  // 种群规模（个体数量）
     public static final double SF = 0.5;        // 变异操作时的缩放因子
     public static final double MR = 0.2;        // 变异操作时，后半段的变异概率
     public static final double CR = 0.8;        // 交叉操作时的交叉概率
+
+    public static final int PRIO_FACTOR_NUM = 5;
 
     // 编码上每一位基因的取值范围
     int[] genValueLimit;
@@ -378,10 +380,10 @@ public class OptMain {
 //        procUidList.add("707323834117652480");
         initTaskNodes(procUidList);  // 初始化任务节点图，获得任务节点网络的虚拟首节点
 
-        int maxG = 30;                       // 最大迭代次数
+        int maxG = MAX_G;                       // 最大迭代次数
         int G = 0;
         // 种群的代数
-        int chromosomeNum = 50;              // 种群中的个体（染色体）个数
+        int chromosomeNum = CHROMOSOME_NUM;              // 种群中的个体（染色体）个数
         int genNum = optTaskCountSum + 4;   // 一个染色体上的基因个数，即编码长度
         double[][] population = new double[chromosomeNum][genNum];  // 种群存在数组中
         double[] populationFitness = new double[chromosomeNum];     // 记录种群中个体的适应度值
@@ -942,7 +944,11 @@ public class OptMain {
         List<List<Task>> procChartTaskList = new LinkedList<>();
         Set<String> taskUidSet = new HashSet<>();
         Queue<OptTaskNode> queue = new LinkedList<>();
-        queue.addAll(startOptTaskNode.getSucTasks());
+        for (int i = 0; i < startOptTaskNode.getSucTasks().size(); i++) {
+            // 仿真不包括辅线任务
+            if (startOptTaskNode.getSucTasks().get(i).getPmsTask().getTaskType() != 1)
+                queue.add(startOptTaskNode.getSucTasks().get(i));
+        }
         int size = queue.size();
         // 分层遍历
         while (!queue.isEmpty()) {
@@ -959,13 +965,21 @@ public class OptMain {
                     task.getTaskRealSucTasks().add(sucTask.getPmsTask());
                     // 紧后任务节点入队
                     if (taskUidSet.add(sucTask.getPmsTask().getTaskUid())) {
-                        queue.add(sucTask);
+                        // 仿真不包括辅线任务
+                        if(sucTask.getPmsTask().getTaskType() != 1)
+                            queue.add(sucTask);
                     }
                 }
             }
             procChartTaskList.add(tasks);
             size = queue.size();
         }
+//        System.out.println("************************************************************");
+//        System.out.println("层数：" + procChartTaskList.size());
+//        for (int i = 0; i < procChartTaskList.size(); i++) {
+//            System.out.println(procChartTaskList.get(i).size());
+//        }
+//        System.out.println("************************************************************");
         OptResult optResult = new OptResult(taskList, resOcpyNodesList, procChartTaskList);
         return optResult;
     }
