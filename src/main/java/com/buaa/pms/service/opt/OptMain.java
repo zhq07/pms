@@ -43,7 +43,7 @@ public class OptMain {
     public static final long MS_OF_DAY = 1000 * 3600 * 24;  // 1天的毫秒数
 
     public static final int MAX_G = 30;           // 最大迭代次数
-    public static final int CHROMOSOME_NUM = 60;  // 种群规模（个体数量）
+    public static final int CHROMOSOME_NUM = 50;  // 种群规模（个体数量）
     public static final double SF = 0.5;        // 变异操作时的缩放因子
     public static final double MR = 0.2;        // 变异操作时，后半段的变异概率
     public static final double CR = 0.8;        // 交叉操作时的交叉概率
@@ -89,7 +89,7 @@ public class OptMain {
     // 所有任务的资源方案，key为任务UID，value为该任务包含的资源方案
     private Map<String, List<PmsTaskResPlan>> taskResPlanMap;
 
-    // 所有涉及到的非独占资源的数量，key为资源方案UID，value为该资源实例的数量
+    // 所有涉及到的非独占资源的数量，key为资源UID，value为该资源实例的数量
     private Map<String, Double> resAmountMap;
 
     // 所有资源方案的资源需求，key为资源方案UID，value为该资源包含的资源需求
@@ -132,7 +132,7 @@ public class OptMain {
         // 所有任务的资源方案，key为任务UID，value为该任务包含的资源方案
         taskResPlanMap = new HashMap<>();
 
-        // 所有涉及到的非独占资源的数量，key为资源方案UID，value为该资源实例的数量
+        // 所有涉及到的非独占资源的数量，key为资源UID，value为该资源实例的数量
         Map<String, Double> resAmountMap = new HashMap<>();
         // 所有资源方案的资源需求，key为资源方案UID，value为该资源包含的资源需求
         resPlanResReqMap = new HashMap<>();
@@ -222,13 +222,13 @@ public class OptMain {
                 startOptTaskNode.getSucTasks().add(optTaskNode);
             }
             // 实际紧后任务
-            // 暂存实际紧后任务
             List<OptTaskNode> sucTasks = new ArrayList<>(optTaskNode.getRealSucTasks());     // 真紧后任务一定是实际紧后任务
             for (OptTaskNode normalSucTask : optTaskNode.getNormalSucTasks()) {
                 if (normalSucTask.getRealPreTasks().size() == 0)    // 普通紧后任务中，没有设置真紧前任务的任务，也是实际紧后任务
                     sucTasks.add(normalSucTask);
             }
             optTaskNode.setSucTasks(sucTasks);
+//            optTaskNode.setSucTasks(optTaskNode.getRealSucTasks().isEmpty() ? optTaskNode.getNormalSucTasks() : optTaskNode.getRealSucTasks());
             int sucTaskCount = optTaskNode.getSucTasks().size();    // 紧后任务数量
             optTaskNode.setSucTaskCount(sucTaskCount);
             optTaskNode.setCurSucTaskCount(sucTaskCount);
@@ -239,15 +239,22 @@ public class OptMain {
             if (!optTaskNode.getRealPreTasks().isEmpty()) {         // 如果任务有真紧前任务
                 Set<OptTaskNode> mutexTasks = new HashSet<>();
                 // 将真紧前任务与该任务之间的任务加入互斥任务集合
+                // 仅支持一个支路有串行可调任务
+                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$寻找互斥任务$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                System.out.println(optTaskNode.getPmsTask().getTaskName() + "::");
                 for (OptTaskNode realPreTask : optTaskNode.getRealPreTasks()) {
                     for (OptTaskNode curTask : realPreTask.getNormalSucTasks()) {
+                        if (curTask.getNormalSucTasks().get(0).getRealPreTasks().isEmpty() || curTask.getNormalSucTasks().get(0).getRealPreTasks().contains(curTask))
+                            continue;
 //                    OptTaskNode curTask = realPreTask.getNormalSucTasks().get(0);
-                        while (curTask != optTaskNode && !curTask.getNormalSucTasks().isEmpty()) {
+                        while (!curTask.getNormalSucTasks().isEmpty() && curTask != optTaskNode) {
+                            System.out.print(curTask.getPmsTask().getTaskName()  + "------");
                             mutexTasks.add(curTask);
                             curTask = curTask.getNormalSucTasks().get(0);
                         }
                     }
                 }
+                System.out.println();
                 if (!mutexTasks.isEmpty()) {
                     for (OptTaskNode mutexTask : mutexTasks) {
                         optTaskNode.getMutexTasks().add(mutexTask);
@@ -467,11 +474,11 @@ public class OptMain {
             }
             PmsTask pmsTask = optTaskNode.getPmsTask();
             result.add(pmsTask);
-            System.out.println("**************");
-            System.out.println(optTaskNode.getPriorityValue());
-            System.out.println(pmsTask.getTaskName());
-            System.out.println(pmsTask.getTaskPlanStartDateTime());
-            System.out.println(pmsTask.getTaskPlanFinishDateTime());
+//            System.out.println("**************");
+//            System.out.println(optTaskNode.getPriorityValue());
+//            System.out.println(pmsTask.getTaskName());
+//            System.out.println(pmsTask.getTaskPlanStartDateTime());
+//            System.out.println(pmsTask.getTaskPlanFinishDateTime());
         }
         return result;
     }
@@ -482,10 +489,11 @@ public class OptMain {
      * @return
      */
     public Map<String, Timestamp[]> decode(double[] chromosome) {
+
         Map<String, Timestamp[]> projStartFinishTimeMap = new HashMap<>();
         Map<String, OptTaskNode> readyTaskMap = new HashMap<>();        // 存储已被安排时间的任务节点，key为任务UID
-        resOcpyNodeMap = new HashMap<>();
-//        resOcpyNodeMap.clear();     // 还原资源占用情况resOcpyNodeMap
+//        resOcpyNodeMap = new HashMap<>();
+        resOcpyNodeMap.clear();     // 还原资源占用情况resOcpyNodeMap
         Calendar calendar = Calendar.getInstance();
         // 正序广度优先遍历，解码，求个体的工期Dur和完成时间Finish
         Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
@@ -519,19 +527,6 @@ public class OptMain {
                     taskStart.setTime(preTask.getPmsTask().getTaskPlanFinishDateTime().getTime());
             }
             taskFinish.setTime(endTime(taskStart, pmsTask.getTaskPlanDur(), pmsTask.getTaskWorkModel()).getTime());  // 当前任务开始时间对应的结束时间
-            // 考虑互斥任务
-//            for (OptTaskNode mutexTaskNode : optTaskNode.getMutexTasks()) {
-//                PmsTask mutexTask = mutexTaskNode.getPmsTask();
-//                if (readyTaskMap.containsKey(mutexTask.getTaskUid())) {
-//                    // 若初始搜索时间段与该任务的已经安排的互斥任务有重合，则将开始时间向后推到互斥任务的结束时间，以避开重合
-//                    if (!taskStart.before(mutexTask.getTaskPlanStartDateTime()) && taskStart.before(mutexTask.getTaskPlanFinishDateTime())
-//                            || taskFinish.after(mutexTask.getTaskPlanStartDateTime()) && !taskFinish.after(mutexTask.getTaskPlanFinishDateTime())) {
-//                        taskStart.setTime(mutexTask.getTaskPlanFinishDateTime().getTime());
-//                        taskFinish.setTime(endTime(taskStart, pmsTask.getTaskPlanDur(), pmsTask.getTaskWorkModel()).getTime());
-////                        System.out.println("互斥：" + mutexTask.getTaskName() + "--" + pmsTask.getTaskName());
-//                    }
-//                }
-//            }
             // 初始化任务计划开始、结束时间
             pmsTask.setTaskPlanStartDateTime(taskStart);
             pmsTask.setTaskPlanFinishDateTime(taskFinish);
@@ -557,19 +552,25 @@ public class OptMain {
             while (!resAllocate) {
                 resAllocate = true;
                 // 考虑互斥任务
-                for (OptTaskNode mutexTaskNode : optTaskNode.getMutexTasks()) {
-                    PmsTask mutexTask = mutexTaskNode.getPmsTask();
-                    if (readyTaskMap.containsKey(mutexTask.getTaskUid())) {
-                        // 若初始搜索时间段与该任务的已经安排的互斥任务有重合，则将开始时间向后推到互斥任务的结束时间，以避开重合
-                        if (taskStart.before(mutexTask.getTaskPlanFinishDateTime()) && taskFinish.after(mutexTask.getTaskPlanStartDateTime())) {
-                            taskStart.setTime(mutexTask.getTaskPlanFinishDateTime().getTime());
-                            taskFinish.setTime(endTime(taskStart, pmsTask.getTaskPlanDur(), pmsTask.getTaskWorkModel()).getTime());
+                if (!optTaskNode.getMutexTasks().isEmpty()) {
+                    boolean mTimeOk = false;
+                    // 保证避开所有互斥任务
+                    while (!mTimeOk) {
+                        mTimeOk = true;
+                        for (OptTaskNode mutexTaskNode : optTaskNode.getMutexTasks()) {
+                            PmsTask mutexTask = mutexTaskNode.getPmsTask();
+                            if (readyTaskMap.containsKey(mutexTask.getTaskUid())) {
+                                // 若初始搜索时间段与该任务的已经安排的互斥任务有重合，则将开始时间向后推到互斥任务的结束时间，以避开重合
+                                if (taskStart.before(mutexTask.getTaskPlanFinishDateTime()) && taskFinish.after(mutexTask.getTaskPlanStartDateTime())) {
+                                    if (taskStart.before(mutexTask.getTaskPlanFinishDateTime()))
+                                    taskStart.setTime(mutexTask.getTaskPlanFinishDateTime().getTime());
+                                    taskFinish.setTime(endTime(taskStart, pmsTask.getTaskPlanDur(), pmsTask.getTaskWorkModel()).getTime());
+                                    mTimeOk = false;
+                                }
+                            }
                         }
                     }
                 }
-//                System.out.println("*************************************************************");
-//                System.out.println(pmsTask.getTaskName() + "--" + taskStart + "--" + taskFinish);
-//                System.out.println("*************************************************************");
                 newResNodes.clear();    // 新一轮尝试安排任务时间之前，清空上轮产生的资源占用节点
                 taskFinish.setTime(endTime(taskStart, dur, pmsTask.getTaskWorkModel()).getTime());  // 当前任务开始时间对应的结束时间
                 for (PmsTaskResReq resReq : resReqs) {
@@ -685,6 +686,8 @@ public class OptMain {
                                     } else {
                                         taskStart.setTime(taskStart.getTime() + MS_OF_HOUR);
                                     }
+                                    pmsTask.setTaskPlanStartDateTime(taskStart);
+                                    pmsTask.setTaskPlanFinishDateTime(taskFinish);
                                     break;
                                 }
                             }

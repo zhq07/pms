@@ -33,6 +33,8 @@ public interface PmsTaskMapper {
 
     public void update(PmsTask pmsTask);
 
+    public void updatePriorityByProj(PmsProject pmsProject);
+
     public void updatePmsTaskIds(List<PmsTask> pmsTasks);
 
     public void updatePmsTasks(List<PmsTask> pmsTasks);

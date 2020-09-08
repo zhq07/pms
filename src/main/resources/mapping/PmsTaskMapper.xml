@@ -101,6 +101,12 @@
         where task_uid = #{taskUid}
     </update>
 
+    <update id="updatePriorityByProj" parameterType="PmsProject">
+        update pms_task set
+        task_priority = #{projPriority}
+        where task_proj_uid = #{projUid}
+    </update>
+
     <update id="updatePmsTaskIds" parameterType="java.util.List">
         <foreach collection="list" item="pmsTask" index="index" open="" close="" separator=";">
             update pms_task set task_id = #{pmsTask.taskId} where task_uid = #{pmsTask.taskUid}

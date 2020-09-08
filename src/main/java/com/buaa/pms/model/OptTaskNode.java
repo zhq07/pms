@@ -9,6 +9,7 @@ import java.util.List;
 
 public class OptTaskNode {
     private PmsTask pmsTask;
+
     // 实际紧前任务，有真紧前任务时等于真紧前任务集合，否则等于普通紧前任务集合
     private List<OptTaskNode> preTasks;
     // 实际紧后任务
@@ -27,7 +28,7 @@ public class OptTaskNode {
     private int resPlanCount;
     // 任务所选资源方案在编码(数组)中对应位置的下标，即基因位坐标(表示编码的数组的下标)，以便解码时快速定位
     private int resPlanGenIndex;
-    
+
     // 互斥任务集合（不能与该任务同时执行的任务）
     List<OptTaskNode> mutexTasks;
     // 紧前任务数量

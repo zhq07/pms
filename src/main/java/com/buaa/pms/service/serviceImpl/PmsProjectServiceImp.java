@@ -93,6 +93,10 @@ public class PmsProjectServiceImp implements PmsProjectService {
             int state = pmsProjectMapper.selectByUid(pmsProject.getProjUid()).getProjState();
             pmsProject.setProjState(state);
         }
+        // 如果项目优先级被更改，则项目下任务的优先级都被更改，与项目优先级一致
+        if (pmsProject.getProjPriority() != pmsProjectMapper.selectByUid(pmsProject.getProjUid()).getProjPriority()) {
+            pmsTaskService.updatePriorityByProj(pmsProject);
+        }
         pmsProjectMapper.update(pmsProject);
     }
 

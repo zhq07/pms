@@ -1,5 +1,6 @@
 package com.buaa.pms.service;
 
+import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
 import com.buaa.pms.entity.PmsTaskLink;
 import com.buaa.pms.model.Task;
@@ -37,6 +38,8 @@ public interface PmsTaskService {
     public void deleteByParUid(String parUid);
 
     public void update(PmsTask pmsTask);
+
+    public void updatePriorityByProj(PmsProject pmsProject);
 
     public void updatePmsTaskIds(List<PmsTask> pmsTasks);
 

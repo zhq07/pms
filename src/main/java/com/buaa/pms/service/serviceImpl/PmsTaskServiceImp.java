@@ -1,5 +1,6 @@
 package com.buaa.pms.service.serviceImpl;
 
+import com.buaa.pms.entity.PmsProject;
 import com.buaa.pms.entity.PmsTask;
 import com.buaa.pms.entity.PmsTaskLink;
 import com.buaa.pms.mapper.PmsTaskMapper;
@@ -141,6 +142,11 @@ public class PmsTaskServiceImp implements PmsTaskService {
             pmsTask.setTaskState(state);
         }
         pmsTaskMapper.update(pmsTask);
+    }
+
+    @Override
+    public void updatePriorityByProj(PmsProject pmsProject) {
+        pmsTaskMapper.updatePriorityByProj(pmsProject);
     }
 
     @Override
