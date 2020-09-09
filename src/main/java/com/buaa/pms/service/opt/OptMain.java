@@ -522,10 +522,12 @@ public class OptMain {
             if (pmsTask.getTaskEarlyStartDateTime() != null) {
                 taskStart.setTime(pmsTask.getTaskEarlyStartDateTime().getTime());
             }
+            // 开始时间置为紧前任务的结束时间
             for (OptTaskNode preTask : optTaskNode.getPreTasks()) {
                 if (preTask.getPmsTask().getTaskPlanFinishDateTime().after(taskStart))
                     taskStart.setTime(preTask.getPmsTask().getTaskPlanFinishDateTime().getTime());
             }
+            taskStart.setTime(startTime(taskStart, pmsTask.getTaskWorkModel()).getTime());          // 根据紧前任务完成时间和当前任务执行模式得到当前任务的最早开始时间
             taskFinish.setTime(endTime(taskStart, pmsTask.getTaskPlanDur(), pmsTask.getTaskWorkModel()).getTime());  // 当前任务开始时间对应的结束时间
             // 初始化任务计划开始、结束时间
             pmsTask.setTaskPlanStartDateTime(taskStart);
@@ -773,6 +775,28 @@ public class OptMain {
                 + chromosome[2] * optTaskNode.getLateFinishValue()
                 + chromosome[3] * optTaskNode.getImportanceValue());
     }
+    // 由紧前任务结束时间和当前任务工作模式得到当前任务开始时间
+    public Timestamp startTime(Timestamp end, int model) {
+        Timestamp start = new Timestamp(end.getTime());
+        if (model == 1) {       // 若执行模式为连续，则全体都可以开始，无需考虑工作时间制度
+            return start;
+        }
+        // 若执行模式为普通，即为朝八晚六的工作模式
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(start);
+        int h = calendar.get(Calendar.HOUR_OF_DAY);     // 小时时间
+        if (8 <= h && h < 18) {         // 如果在日常工作时间内，则可以直接作为任务开始时间
+            return start;
+        }
+        // 如果不在日常工作时间内，则开始时间推迟到下一个工作时间
+        if (h < 8) {
+            start.setTime(start.getTime() + (8 - h) * MS_OF_HOUR);
+        } else if (h >= 18) {
+            start.setTime(start.getTime() + (24 + 8 - h) * MS_OF_HOUR);
+        }
+        return start;
+    }
+
     // 由开始时间、时长以及工作模式得到结束时间
     public Timestamp endTime(Timestamp start, double dur, int model) {
         Timestamp end = new Timestamp(start.getTime());
