@@ -58,6 +58,13 @@
         select * from pms_task where task_par_uid = #{taskParUid}
     </select>
 
+    <select id="selectByUidList" resultMap="pmsTaskMap" parameterType="java.util.List">
+        select * from pms_task where task_uid in
+        <foreach collection="list" open="(" separator="," close=")" item="taskUid">
+            #{taskUid}
+        </foreach>
+    </select>
+
     <select id="selectByUid" resultMap="pmsTaskMap">
         select * from pms_task where task_uid = #{taskUid}
     </select>

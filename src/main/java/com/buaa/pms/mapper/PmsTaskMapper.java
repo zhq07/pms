@@ -19,6 +19,8 @@ public interface PmsTaskMapper {
 
     public List<PmsTask> selectByParUid(String taskParUid);
 
+    public List<PmsTask> selectByUidList(List taskUidList);
+
     public PmsTask selectByUid(String taskUid);
 
     public void save(PmsTask pmsTask);

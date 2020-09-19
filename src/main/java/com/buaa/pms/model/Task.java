@@ -1,5 +1,6 @@
 package com.buaa.pms.model;
 
+import com.buaa.pms.entity.PmsGroup;
 import com.buaa.pms.entity.PmsTask;
 
 import java.util.List;
@@ -15,16 +16,25 @@ public class Task {
     private List<PmsTask> taskNormalSucTasks;
     private List<PmsTask> taskRealSucTasks;
 
+    // 所属任务组
+    private PmsGroup pmsGroup;
+
     public Task() {}
 
     public Task(PmsTask pmsTask) {
         this.pmsTask = pmsTask;
     }
 
-    public Task(PmsTask pmsTask, List<PmsTask> taskNormalPreTasks, List<PmsTask> taskRealPreTasks) {
+//    public Task(PmsTask pmsTask, List<PmsTask> taskNormalPreTasks, List<PmsTask> taskRealPreTasks) {
+//        this.pmsTask = pmsTask;
+//        this.taskNormalPreTasks = taskNormalPreTasks;
+//        this.taskRealPreTasks = taskRealPreTasks;
+//    }
+
+    public Task(PmsTask pmsTask, List<PmsTask> taskNormalPreTasks, PmsGroup pmsGroup) {
         this.pmsTask = pmsTask;
         this.taskNormalPreTasks = taskNormalPreTasks;
-        this.taskRealPreTasks = taskRealPreTasks;
+        this.pmsGroup = pmsGroup;
     }
 
     public Task(PmsTask pmsTask, List<PmsTask> taskNormalPreTasks) {
@@ -70,5 +80,13 @@ public class Task {
 
     public void setTaskRealSucTasks(List<PmsTask> taskRealSucTasks) {
         this.taskRealSucTasks = taskRealSucTasks;
+    }
+
+    public PmsGroup getPmsGroup() {
+        return pmsGroup;
+    }
+
+    public void setPmsGroup(PmsGroup pmsGroup) {
+        this.pmsGroup = pmsGroup;
     }
 }

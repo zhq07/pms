@@ -49,6 +49,11 @@ public class PmsTaskController {
         return pmsTaskService.selectByParUid(taskParUid);
     }
 
+    @GetMapping("/getPmsTaskListByGroupUid/{groupUid}")
+    public List<PmsTask> getPmsTaskListByGroupUid(@PathVariable String groupUid) {
+        return pmsTaskService.getPmsTaskListByGroupUid(groupUid);
+    }
+
     @GetMapping("/getByUid/{taskUid}")
     public PmsTask getPmsTaskByUid(@PathVariable String taskUid) {
         return pmsTaskService.selectByUid(taskUid);

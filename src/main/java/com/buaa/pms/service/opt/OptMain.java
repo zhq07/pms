@@ -20,6 +20,10 @@ public class OptMain {
     @Resource
     PmsTaskLinkService pmsTaskLinkService;
     @Resource
+    PmsTaskGroupService pmsTaskGroupService;
+    @Resource
+    PmsGroupService pmsGroupService;
+    @Resource
     PmsProjectService pmsProjectService;
     @Resource
     PmsProcessService pmsProcessService;
@@ -83,6 +87,18 @@ public class OptMain {
     // 所有参与优化的流程，key为流程UID，value为对应流程实例
     private Map<String, PmsProcess> pmsProcessMap;
 
+    // 所有参与优化的任务组与任务的关系
+    private List<PmsTaskGroup> pmsTaskGroupList;
+
+    // 所有任务组及其包含的任务，key为任务组UID，value为其包含的任务数组
+    private Map<String, List<OptTaskNode>> groupUidOptTaskNodesMap;
+
+    // 每个任务组的首尾任务节点，key为任务组Uid，value为任务组内首尾节点组成的数组，下标0为首节点，下标1为尾结点
+    private Map<String, OptTaskNode[]> groupUidFirstAndLastTaskNode;
+
+    // 任务Uid和其所属任务组Uid的map
+    private Map<String, String> taskUidAndGroupUid;
+
     // 所有参与优化的任务，key为任务UID，value为对应OptTaskNode
     private Map<String, OptTaskNode> optTaskNodeMap;
 
@@ -126,6 +142,18 @@ public class OptMain {
         // 所有参与优化的流程，key为流程UID，value为对应流程实例
         pmsProcessMap = new HashMap<>();
 
+        // 所有参与优化的任务组与任务的关系
+        pmsTaskGroupList = new ArrayList<>();
+
+        // 所有任务组及其包含的任务，key为任务组UID，value为其包含的任务数组
+        groupUidOptTaskNodesMap = new HashMap<>();
+
+        // 每个任务组的首尾任务节点，key为任务组Uid，value为任务组内首尾节点组成的数组，下标0为首节点，下标1为尾结点
+        groupUidFirstAndLastTaskNode = new HashMap<>();
+
+        // 任务Uid和其所属任务组Uid的map
+        taskUidAndGroupUid = new HashMap<>();
+
         // 所有参与优化的任务，key为任务UID，value为对应OptTaskNode
         optTaskNodeMap = new HashMap<>();
 
@@ -164,11 +192,26 @@ public class OptMain {
         }
         // 得到优化起点与终点时间相隔的天数
         optDays = (optDestination.getTime() - optOrigin.getTime()) / (MS_OF_DAY);
+
         // 获取全部待优化任务，实例化任务链表的节点OptTaskNode
         for (PmsTask pmsTask : pmsTaskService.selectByProcUidList(procUidList)) {
             optTaskNodeMap.put(pmsTask.getTaskUid(), new OptTaskNode(pmsTask));
         }
         optTaskCountSum = optTaskNodeMap.size();    // 待优化任务总数
+
+        // 获取全部任务组与任务的关系，初始化同组任务map，groupUidOptTaskNodesMap以及taskUidAndGroupUid
+        pmsTaskGroupList = pmsTaskGroupService.selectByProcUidList(procUidList);
+        for (PmsTaskGroup taskGroup : pmsTaskGroupList) {
+            if (groupUidOptTaskNodesMap.containsKey(taskGroup.getTaskGroupGroupUid())) {
+                groupUidOptTaskNodesMap.get(taskGroup.getTaskGroupGroupUid()).add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
+            } else {
+                List<OptTaskNode> optTaskNodeList = new ArrayList<>();
+                optTaskNodeList.add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
+                groupUidOptTaskNodesMap.put(taskGroup.getTaskGroupGroupUid(), optTaskNodeList);
+            }
+            taskUidAndGroupUid.put(taskGroup.getTaskGroupTaskUid(), taskGroup.getTaskGroupGroupUid());
+        }
+
         // 获取全部待优化任务的资源方案，初始化“任务-资源方案”taskResPlanMap
         for (PmsTaskResPlan pmsTaskResPlan : pmsTaskResPlanService.selectByProcUidList(procUidList)) {
             String pmsTaskUid = pmsTaskResPlan.getResPlanTaskUid();
@@ -197,70 +240,109 @@ public class OptMain {
                     break;
             }
         }
-        // 获取全部任务连接，并赋予任务节点optTaskNode中的普通连接和真连接集合，使待优化任务节点连接起来
+        // 获取全部任务连接，并赋予任务节点optTaskNode中的普通连接集合，使待优化任务节点连接起来
         for (PmsTaskLink pmsTaskLink : pmsTaskLinkService.selectByProcUidList(procUidList)) {
             OptTaskNode preTaskNode = optTaskNodeMap.get(pmsTaskLink.getTaskLinkPreTaskUid());  // 连接中的前任务
             OptTaskNode sucTaskNode = optTaskNodeMap.get(pmsTaskLink.getTaskLinkSucTaskUid());  // 连接中的后任务
-            if (pmsTaskLink.getTaskLinkType() == TASKLINKTYPE_NORMAL) {         // 若为普通连接
-                preTaskNode.getNormalSucTasks().add(sucTaskNode);
-                sucTaskNode.getNormalPreTasks().add(preTaskNode);
-            } else {                                                            // 若为真连接
-                preTaskNode.getRealSucTasks().add(sucTaskNode);
-                sucTaskNode.getRealPreTasks().add(preTaskNode);
+            preTaskNode.getNormalSucTasks().add(sucTaskNode);
+            sucTaskNode.getNormalPreTasks().add(preTaskNode);
+        }
+        // 确定任务的互斥任务集合，此处任务关系指，两个任务没有前后关系但又不能同时进行；
+        // 找出任务组的首尾节点，初始化groupUidFirstAndLastTaskNode。
+        if (!groupUidOptTaskNodesMap.isEmpty()) {
+            for (Map.Entry<String, List<OptTaskNode>> entry : groupUidOptTaskNodesMap.entrySet()) {
+                String groupUid = entry.getKey();
+                List<OptTaskNode> optTaskNodes = entry.getValue();
+                if (optTaskNodes.isEmpty()) {
+                    continue;
+                }
+                // 找出任务组的首尾节点，初始化groupUidFirstAndLastTaskNode
+                OptTaskNode firstTaskNode = optTaskNodes.get(0);
+                OptTaskNode lastTaskNode = optTaskNodes.get(optTaskNodes.size() - 1);
+                while (!firstTaskNode.getNormalPreTasks().isEmpty() && optTaskNodes.contains(firstTaskNode.getNormalPreTasks().get(0))) {
+                    firstTaskNode = firstTaskNode.getNormalPreTasks().get(0);
+                }
+                while (!lastTaskNode.getNormalSucTasks().isEmpty() && optTaskNodes.contains(lastTaskNode.getNormalSucTasks().get(0))) {
+                    lastTaskNode = lastTaskNode.getNormalSucTasks().get(0);
+                }
+                OptTaskNode[] firstAndLastTaskNode = new OptTaskNode[2];
+                firstAndLastTaskNode[0] = firstTaskNode;
+                firstAndLastTaskNode[1] = lastTaskNode;
+                groupUidFirstAndLastTaskNode.put(groupUid, firstAndLastTaskNode);
+                // 确定任务的互斥任务集合
+                for (OptTaskNode optTaskNode : optTaskNodes) {
+                    optTaskNode.setMutexTasks(new ArrayList<>(optTaskNodes));
+                    optTaskNode.getMutexTasks().remove(optTaskNode);
+                }
+            }
+            // 确定任务组内以及与任务组相关的任务节点的实际紧前任务和紧后任务集合
+            for (Map.Entry<String, List<OptTaskNode>> entry : groupUidOptTaskNodesMap.entrySet()) {
+                String groupUid = entry.getKey();
+                List<OptTaskNode> curGroupTaskNodes = entry.getValue();
+                List<OptTaskNode> preTaskNodes = groupUidFirstAndLastTaskNode.get(groupUid)[0].getNormalPreTasks();
+                List<OptTaskNode> sucTaskNodes = groupUidFirstAndLastTaskNode.get(groupUid)[1].getNormalSucTasks();
+                Set<OptTaskNode> preTaskNodeSetOfGroup = new HashSet<>();
+                Set<OptTaskNode> sucTaskNodeSetOfGroup = new HashSet<>();
+                // 任务组的紧前任务
+                if (preTaskNodes != null && !preTaskNodes.isEmpty()) {
+                    for (OptTaskNode pre : preTaskNodes) {
+                        Set<OptTaskNode> sucTaskNodeSetOfPre = new HashSet<>(pre.getSucTasks());
+                        sucTaskNodeSetOfPre.addAll(curGroupTaskNodes);
+                        sucTaskNodeSetOfPre.addAll(pre.getNormalSucTasks());
+                        if (!taskUidAndGroupUid.containsKey(pre.getPmsTask().getTaskUid())) {
+                            preTaskNodeSetOfGroup.add(pre);
+                        } else {
+                            List<OptTaskNode> preGroupTaskNodes = groupUidOptTaskNodesMap.get(taskUidAndGroupUid.get(pre.getPmsTask().getTaskUid()));
+                            preTaskNodeSetOfGroup.addAll(preGroupTaskNodes);
+                        }
+                        pre.setSucTasks(new ArrayList<>(sucTaskNodeSetOfPre));
+                    }
+                }
+                preTaskNodes = new ArrayList<>(preTaskNodeSetOfGroup);
+                // 任务组的紧后任务
+                if (sucTaskNodes != null && !sucTaskNodes.isEmpty()) {
+                    for (OptTaskNode suc : sucTaskNodes) {
+                        Set<OptTaskNode> preTaskNodeSetOfSuc = new HashSet<>(suc.getPreTasks());
+                        preTaskNodeSetOfSuc.addAll(curGroupTaskNodes);
+                        preTaskNodeSetOfSuc.addAll(suc.getNormalPreTasks());
+                        if (!taskUidAndGroupUid.containsKey(suc.getPmsTask().getTaskUid())) {
+                            sucTaskNodeSetOfGroup.add(suc);
+                        } else {
+                            List<OptTaskNode> sucGroupTaskNodes = groupUidOptTaskNodesMap.get(taskUidAndGroupUid.get(suc.getPmsTask().getTaskUid()));
+                            sucTaskNodeSetOfGroup.addAll(sucGroupTaskNodes);
+                        }
+                        suc.setPreTasks(new ArrayList<>(preTaskNodeSetOfSuc));
+                    }
+                }
+                sucTaskNodes = new ArrayList<>(sucTaskNodeSetOfGroup);
+
+                for (OptTaskNode taskNodeOfGroup : curGroupTaskNodes) {
+                    taskNodeOfGroup.setPreTasks(preTaskNodes);
+                    taskNodeOfGroup.setSucTasks(sucTaskNodes);
+                }
             }
         }
-        // 确定任务节点的实际紧前任务和紧后任务集合，确定紧前紧后任务数量和当前紧前任务数量，将虚拟首节点和尾结点加入任务连接图中
-        // 确定任务的互斥任务集合，此处任务关系指，两个任务没有前后关系但又不能同时进行
+        // 确定所有任务的实际紧前紧后节点，紧前紧后任务数量和当前紧前任务数量，将虚拟首节点和尾结点加入任务连接图中
         // 赋值任务节点中的资源方案和资源需求集合resPlanReqPairList
         for (OptTaskNode optTaskNode : optTaskNodeMap.values()) {
-            // 实际紧前任务
-            optTaskNode.setPreTasks(optTaskNode.getRealPreTasks().isEmpty() ? optTaskNode.getNormalPreTasks() : optTaskNode.getRealPreTasks());
+            if (optTaskNode.getPreTasks() == null || optTaskNode.getPreTasks().isEmpty()) {
+                optTaskNode.setPreTasks(optTaskNode.getNormalPreTasks());
+            }
             int preTaskCount = optTaskNode.getPreTasks().size();    // 紧前任务数量
             optTaskNode.setPreTaskCount(preTaskCount);
             optTaskNode.setCurPreTaskCount(preTaskCount);
             if (preTaskCount == 0) {
                 startOptTaskNode.getSucTasks().add(optTaskNode);
             }
-            // 实际紧后任务
-            List<OptTaskNode> sucTasks = new ArrayList<>(optTaskNode.getRealSucTasks());     // 真紧后任务一定是实际紧后任务
-            for (OptTaskNode normalSucTask : optTaskNode.getNormalSucTasks()) {
-                if (normalSucTask.getRealPreTasks().size() == 0)    // 普通紧后任务中，没有设置真紧前任务的任务，也是实际紧后任务
-                    sucTasks.add(normalSucTask);
+
+            if (optTaskNode.getSucTasks() == null || optTaskNode.getSucTasks().isEmpty()) {
+                optTaskNode.setSucTasks(optTaskNode.getNormalSucTasks());
             }
-            optTaskNode.setSucTasks(sucTasks);
-//            optTaskNode.setSucTasks(optTaskNode.getRealSucTasks().isEmpty() ? optTaskNode.getNormalSucTasks() : optTaskNode.getRealSucTasks());
             int sucTaskCount = optTaskNode.getSucTasks().size();    // 紧后任务数量
             optTaskNode.setSucTaskCount(sucTaskCount);
             optTaskNode.setCurSucTaskCount(sucTaskCount);
             if (sucTaskCount == 0) {
                 endOptTaskNode.getPreTasks().add(optTaskNode);
-            }
-            // 确定任务的互斥任务集合mutexTasks
-            if (!optTaskNode.getRealPreTasks().isEmpty()) {         // 如果任务有真紧前任务
-                Set<OptTaskNode> mutexTasks = new HashSet<>();
-                // 将真紧前任务与该任务之间的任务加入互斥任务集合
-                // 仅支持一个支路有串行可调任务
-                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$寻找互斥任务$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-                System.out.println(optTaskNode.getPmsTask().getTaskName() + "::");
-                for (OptTaskNode realPreTask : optTaskNode.getRealPreTasks()) {
-                    for (OptTaskNode curTask : realPreTask.getNormalSucTasks()) {
-                        if (curTask.getNormalSucTasks().get(0).getRealPreTasks().isEmpty() || curTask.getNormalSucTasks().get(0).getRealPreTasks().contains(curTask))
-                            continue;
-//                    OptTaskNode curTask = realPreTask.getNormalSucTasks().get(0);
-                        while (!curTask.getNormalSucTasks().isEmpty() && curTask != optTaskNode) {
-                            System.out.print(curTask.getPmsTask().getTaskName()  + "------");
-                            mutexTasks.add(curTask);
-                            curTask = curTask.getNormalSucTasks().get(0);
-                        }
-                    }
-                }
-                System.out.println();
-                if (!mutexTasks.isEmpty()) {
-                    for (OptTaskNode mutexTask : mutexTasks) {
-                        optTaskNode.getMutexTasks().add(mutexTask);
-                        mutexTask.getMutexTasks().add(optTaskNode);
-                    }
-                }
             }
             // 任务的资源方案和资源需求集合resPlanReqPairList
             List<PmsTaskResPlan> pmsTaskResPlans = taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid());
@@ -931,7 +1013,17 @@ public class OptMain {
         return optimize(procUidList);
     }
     public OptResult testWeb(List<String> procUidList) {
-        List<Task> taskList = pmsTaskService.getTaskListByTasksAndTaskLinks(optimize(procUidList), pmsTaskLinkService.selectByProcUidList(procUidList));
+        List<Task> taskList = pmsTaskService.getTaskListByPmsTasksAndTaskLinksAndtaskGroups(optimize(procUidList), pmsTaskLinkService.selectByProcUidList(procUidList), pmsTaskGroupService.selectByProcUidList(procUidList), pmsGroupService.selectByProcUidList(procUidList));
+        // 真紧前任务，为前端甘特图用
+        for (Task task : taskList) {
+            List<OptTaskNode> realPreTasks = optTaskNodeMap.get(task.getPmsTask().getTaskUid()).getPreTasks();
+            List<PmsTask> pmsTasks = new ArrayList<>();
+            for (OptTaskNode optTaskNode : realPreTasks) {
+                pmsTasks.add(optTaskNode.getPmsTask());
+            }
+            task.setTaskRealPreTasks(pmsTasks);
+        }
+
         List<List<ResOcpyNode>> resOcpyNodesList = new LinkedList<>();
         for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMap.entrySet()) {
             List<ResOcpyNode> resOcpyNodes = new LinkedList<>();
@@ -967,7 +1059,6 @@ public class OptMain {
         }
 
         // 根据普通连接，正序广度优先遍历
-        List<List<OptTaskNode>> taskNodeChartList = new LinkedList<>();
         List<List<Task>> procChartTaskList = new LinkedList<>();
         Set<String> taskUidSet = new HashSet<>();
         Queue<OptTaskNode> queue = new LinkedList<>();
@@ -979,14 +1070,15 @@ public class OptMain {
         int size = queue.size();
         // 分层遍历
         while (!queue.isEmpty()) {
-            List<OptTaskNode> optTaskNodes = new LinkedList<>();
             List<Task> tasks = new LinkedList<>();
-            optTaskNodes.addAll(queue);
-            taskNodeChartList.add(optTaskNodes);
             for (int i = 0; i < size; i++) {
                 OptTaskNode optTaskNode = queue.poll();
                 Task task = new Task(optTaskNode.getPmsTask());
+//                task.setTaskRealPreTasks(new LinkedList<>());
                 task.setTaskRealSucTasks(new LinkedList<>());
+//                for (OptTaskNode preTask : optTaskNode.getPreTasks()) {
+//                    task.getTaskRealPreTasks().add(preTask.getPmsTask());
+//                }
                 tasks.add(task);
                 for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
                     task.getTaskRealSucTasks().add(sucTask.getPmsTask());
@@ -1001,12 +1093,7 @@ public class OptMain {
             procChartTaskList.add(tasks);
             size = queue.size();
         }
-//        System.out.println("************************************************************");
-//        System.out.println("层数：" + procChartTaskList.size());
-//        for (int i = 0; i < procChartTaskList.size(); i++) {
-//            System.out.println(procChartTaskList.get(i).size());
-//        }
-//        System.out.println("************************************************************");
+
         OptResult optResult = new OptResult(taskList, resOcpyNodesList, procChartTaskList);
         return optResult;
     }

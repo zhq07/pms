@@ -1,11 +1,10 @@
 package com.buaa.pms.service.serviceImpl;
 
-import com.buaa.pms.entity.PmsProject;
-import com.buaa.pms.entity.PmsTask;
-import com.buaa.pms.entity.PmsTaskLink;
+import com.buaa.pms.entity.*;
 import com.buaa.pms.mapper.PmsTaskMapper;
 import com.buaa.pms.model.Task;
 import com.buaa.pms.service.*;
+import com.buaa.pms.service.PmsGroupService;
 import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +21,12 @@ public class PmsTaskServiceImp implements PmsTaskService {
 
     @Resource
     PmsTaskLinkService pmsTaskLinkService;
+
+    @Resource
+    PmsGroupService pmsGroupService;
+
+    @Resource
+    PmsTaskGroupService pmsTaskGroupService;
 
     @Resource
     PmsTaskResPlanService pmsTaskResPlanService;
@@ -54,7 +59,9 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public List<Task> getTaskListByProjUid(String taskProjUid) {
         List<PmsTask> pmsTasks = this.selectByProjUid(taskProjUid);
         List<PmsTaskLink> pmsTaskLinks = pmsTaskLinkService.selectByProjUid(taskProjUid);
-        return this.getTaskListByTasksAndTaskLinks(pmsTasks, pmsTaskLinks);
+        List<PmsTaskGroup> pmsTaskGroups = pmsTaskGroupService.selectByProjUid(taskProjUid);
+        List<PmsGroup> pmsGroups = pmsGroupService.selectByProjUid(taskProjUid);
+        return this.getTaskListByPmsTasksAndTaskLinksAndtaskGroups(pmsTasks, pmsTaskLinks, pmsTaskGroups, pmsGroups);
     }
 
     @Override
@@ -73,12 +80,30 @@ public class PmsTaskServiceImp implements PmsTaskService {
     public List<Task> getTaskListByProcUid(String taskProcUid) {
         List<PmsTask> pmsTasks = this.selectByProcUid(taskProcUid);
         List<PmsTaskLink> pmsTaskLinks = pmsTaskLinkService.selectByProcUid(taskProcUid);
-        return this.getTaskListByTasksAndTaskLinks(pmsTasks, pmsTaskLinks);
+        List<PmsTaskGroup> pmsTaskGroups = pmsTaskGroupService.selectByProcUid(taskProcUid);
+        List<PmsGroup> pmsGroups = pmsGroupService.selectByProcUid(taskProcUid);
+        return this.getTaskListByPmsTasksAndTaskLinksAndtaskGroups(pmsTasks, pmsTaskLinks, pmsTaskGroups, pmsGroups);
+    }
+
+    @Override
+    public List<PmsTask> getPmsTaskListByGroupUid(String groupUid) {
+        List<String> pmsTaskUidList = new ArrayList<>();
+        for(PmsTaskGroup pmsTaskGroup : pmsTaskGroupService.selectByGroupUid(groupUid)) {
+            pmsTaskUidList.add(pmsTaskGroup.getTaskGroupTaskUid());
+        }
+        return this.selectByUidList(pmsTaskUidList);
     }
 
     @Override
     public List<PmsTask> selectByParUid(String taskParUid) {
         return pmsTaskMapper.selectByParUid(taskParUid);
+    }
+
+    @Override
+    public List<PmsTask> selectByUidList(List taskUidList) {
+        if (taskUidList != null && !taskUidList.isEmpty())
+            return pmsTaskMapper.selectByUidList(taskUidList);
+        return new ArrayList<>();
     }
 
     @Override
@@ -189,51 +214,39 @@ public class PmsTaskServiceImp implements PmsTaskService {
             normalTaskLink.setTaskLinkProjUid(pmsTask.getTaskProjUid());
             pmsTaskLinks.add(normalTaskLink);
         }
-        for (PmsTask realPreTask : task.getTaskRealPreTasks()) {
-            PmsTaskLink realTaskLink = new PmsTaskLink();
-            realTaskLink.setTaskLinkUid(myUUID.getUUID());
-            realTaskLink.setTaskLinkType(1);
-            realTaskLink.setTaskLinkPreTaskUid(realPreTask.getTaskUid());
-            realTaskLink.setTaskLinkSucTaskUid(pmsTask.getTaskUid());
-            realTaskLink.setTaskLinkProcUid(pmsTask.getTaskProcUid());
-            realTaskLink.setTaskLinkProjUid(pmsTask.getTaskProjUid());
-            pmsTaskLinks.add(realTaskLink);
-        }
         if (!pmsTaskLinks.isEmpty())
             pmsTaskLinkService.saveTaskLinks(pmsTaskLinks);
     }
 
-    public List<Task> getTaskListByTasksAndTaskLinks(List<PmsTask> pmsTasks, List<PmsTaskLink> pmsTaskLinks) {
+    @Override
+    public List<Task> getTaskListByPmsTasksAndTaskLinksAndtaskGroups(List<PmsTask> pmsTasks, List<PmsTaskLink> pmsTaskLinks, List<PmsTaskGroup> pmsTaskGroups, List<PmsGroup> pmsGroups) {
         List<Task> taskList = new ArrayList<>();
         Map<String, PmsTask> pmsTaskMap = new HashMap<>();
         Map<String, List<PmsTask>> pmsTaskNormalPreMap = new HashMap<>();
-        Map<String, List<PmsTask>> pmsTaskRealPreMap = new HashMap<>();
+        Map<String, String> taskUidAndGroupUidMap = new HashMap<>();
+        Map<String, PmsGroup> pmsGroupMap = new HashMap<>();
         for (PmsTask pmsTask : pmsTasks) {
             pmsTaskMap.put(pmsTask.getTaskUid(), pmsTask);
         }
         for (PmsTaskLink pmsTaskLink : pmsTaskLinks) {
-            if (pmsTaskLink.getTaskLinkType() == 0) {
-                if (!pmsTaskNormalPreMap.containsKey(pmsTaskLink.getTaskLinkSucTaskUid())) {
-                    List<PmsTask> normalPreTasks = new ArrayList<>();
-                    normalPreTasks.add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
-                    pmsTaskNormalPreMap.put(pmsTaskLink.getTaskLinkSucTaskUid(), normalPreTasks);
-                } else {
-                    pmsTaskNormalPreMap.get(pmsTaskLink.getTaskLinkSucTaskUid()).add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
-                }
+            if (!pmsTaskNormalPreMap.containsKey(pmsTaskLink.getTaskLinkSucTaskUid())) {
+                List<PmsTask> normalPreTasks = new ArrayList<>();
+                normalPreTasks.add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
+                pmsTaskNormalPreMap.put(pmsTaskLink.getTaskLinkSucTaskUid(), normalPreTasks);
             } else {
-                if (!pmsTaskRealPreMap.containsKey(pmsTaskLink.getTaskLinkSucTaskUid())) {
-                    List<PmsTask> realPreTasks = new ArrayList<>();
-                    realPreTasks.add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
-                    pmsTaskRealPreMap.put(pmsTaskLink.getTaskLinkSucTaskUid(), realPreTasks);
-                } else {
-                    pmsTaskRealPreMap.get(pmsTaskLink.getTaskLinkSucTaskUid()).add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
-                }
+                pmsTaskNormalPreMap.get(pmsTaskLink.getTaskLinkSucTaskUid()).add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
             }
+        }
+        for (PmsTaskGroup taskGroup : pmsTaskGroups) {
+            taskUidAndGroupUidMap.put(taskGroup.getTaskGroupTaskUid(), taskGroup.getTaskGroupGroupUid());
+        }
+        for (PmsGroup group : pmsGroups) {
+            pmsGroupMap.put(group.getGroupUid(), group);
         }
         for (PmsTask pmsTask : pmsTasks) {
             List<PmsTask> normalPreTasks = pmsTaskNormalPreMap.get(pmsTask.getTaskUid());
-            List<PmsTask> realPreTasks = pmsTaskRealPreMap.get(pmsTask.getTaskUid());
-            Task task = new Task(pmsTask, normalPreTasks == null ? new ArrayList<>() : normalPreTasks, realPreTasks == null ? new ArrayList<>() : realPreTasks);
+            PmsGroup pmsGroup = pmsGroupMap.get(taskUidAndGroupUidMap.get(pmsTask.getTaskUid()));
+            Task task = new Task(pmsTask, normalPreTasks == null ? new ArrayList<>() : normalPreTasks, pmsGroup);
             taskList.add(task);
         }
         return taskList;

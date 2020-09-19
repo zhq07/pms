@@ -16,49 +16,49 @@
 
     <!--sql语句对应的接口方法名-->
     <select id="selectAll" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link
+        select * from pms_task_link
     </select>
 
     <select id="selectByProjUid" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_proj_uid = #{taskLinkProjUid}
+        select * from pms_task_link where tasklink_proj_uid = #{taskLinkProjUid}
     </select>
 
     <select id="selectByProcUidList" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_proc_uid in
+        select * from pms_task_link where tasklink_proc_uid in
         <foreach collection="list" open="(" separator="," close=")" item="procUid">
             #{procUid}
         </foreach>
     </select>
 
     <select id="selectByProcUid" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_proc_uid = #{taskLinkProcUid}
+        select * from pms_task_link where tasklink_proc_uid = #{taskLinkProcUid}
     </select>
 
     <select id="selectByUid" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_uid = #{taskLinkUid}
+        select * from pms_task_link where tasklink_uid = #{taskLinkUid}
     </select>
 
     <select id="selectByTaskUid" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
+        select * from pms_task_link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
     </select>
 
     <select id="selectByPreTaskUid" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
+        select * from pms_task_link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
     </select>
 
     <select id="selectBySucTaskUid" resultMap="pmsTaskLinkMap">
-        select * from pms_task_Link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
+        select * from pms_task_link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
     </select>
 
     <insert id="save" parameterType="PmsTaskLink">
-        insert into pms_task_Link
+        insert into pms_task_link
         (tasklink_uid, tasklink_pretask_uid, tasklink_suctask_uid, tasklink_type, tasklink_proj_uid, tasklink_proc_uid)
         values
         (#{taskLinkUid}, #{taskLinkPreTaskUid}, #{taskLinkSucTaskUid}, #{taskLinkType}, #{taskLinkProjUid}, #{taskLinkProcUid})
     </insert>
 
     <insert id="saveTaskLinks" parameterType="java.util.List">
-        insert into pms_task_Link
+        insert into pms_task_link
         (tasklink_uid, tasklink_pretask_uid, tasklink_suctask_uid, tasklink_type, tasklink_proj_uid, tasklink_proc_uid)
         values
         <foreach collection="list" item="item" index="index" separator=",">
@@ -67,31 +67,31 @@
     </insert>
 
     <delete id="deleteByUid">
-        delete from pms_task_Link where tasklink_uid = #{taskLinkUid}
+        delete from pms_task_link where tasklink_uid = #{taskLinkUid}
     </delete>
 
     <delete id="deleteByPreTaskUid">
-        delete from pms_task_Link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
+        delete from pms_task_link where tasklink_pretask_uid = #{taskLinkPreTaskUid}
     </delete>
 
     <delete id="deleteBySucTaskUid">
-        delete from pms_task_Link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
+        delete from pms_task_link where tasklink_suctask_uid = #{taskLinkSucTaskUid}
     </delete>
 
     <delete id="deleteByTaskUid">
-        delete from pms_task_Link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
+        delete from pms_task_link where tasklink_pretask_uid = #{taskLinkTaskUid} or tasklink_suctask_uid = #{taskLinkTaskUid}
     </delete>
 
     <delete id="deleteByProcUid">
-        delete from pms_task_Link where tasklink_proc_uid = #{taskLinkProcUid}
+        delete from pms_task_link where tasklink_proc_uid = #{taskLinkProcUid}
     </delete>
 
     <delete id="deleteByProjUid">
-        delete from pms_task_Link where tasklink_proj_uid = #{taskLinkProjUid}
+        delete from pms_task_link where tasklink_proj_uid = #{taskLinkProjUid}
     </delete>
     
     <update id="update" parameterType="PmsTaskLink">
-        update pms_task_Link set
+        update pms_task_link set
         tasklink_pretask_uid = #{taskLinkPreTaskUid}, tasklink_suctask_uid = #{taskLinkSucTaskUid}, tasklink_type = #{taskLinkType},
         tasklink_proj_uid = #{taskLinkProjUid}, tasklink_proc_uid = #{taskLinkProcUid}
         where tasklink_uid = #{taskLinkUid}
@@ -99,7 +99,7 @@
 
     <update id="updateTaskLinks" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
-            update pms_task_Link set
+            update pms_task_link set
             tasklink_pretask_uid = #{item.taskLinkPreTaskUid}, tasklink_suctask_uid = #{item.taskLinkSucTaskUid}, tasklink_type = #{item.taskLinkType},
             tasklink_proj_uid = #{item.taskLinkProjUid}, tasklink_proc_uid = #{item.taskLinkProcUid}
             where tasklink_uid = #{item.taskLinkUid}
