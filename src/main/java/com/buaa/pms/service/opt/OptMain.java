@@ -49,8 +49,8 @@ public class OptMain {
     public static final long MS_OF_HOUR = 1000 * 3600;      // 1小时的毫秒数
     public static final long MS_OF_DAY = 1000 * 3600 * 24;  // 1天的毫秒数
 
-    public static final int MAX_G = 1;           // 最大迭代次数
-    public static final int CHROMOSOME_NUM = 10;  // 种群规模（个体数量）
+    public static final int MAX_G = 20;           // 最大迭代次数
+    public static final int CHROMOSOME_NUM = 50;  // 种群规模（个体数量）
     public static final double SF = 0.5;        // 变异操作时的缩放因子
     public static final double MR = 0.2;        // 变异操作时，后半段的变异概率
     public static final double CR = 0.8;        // 交叉操作时的交叉概率
@@ -1272,15 +1272,6 @@ public class OptMain {
                 }
             }
             readyTaskMap.put(pmsTask.getTaskUid(), optTaskNode);    // 加入已安排任务集合
-//            System.out.println("**************");
-//            System.out.println(pmsTask.getTaskName());
-//            System.out.println("优先级" + optTaskNode.getPriorityValue());
-//            System.out.println(optTaskNode.getSucTaskCountSum() + "\t" + "\t" + optTaskNode.getSucTaskDurSum() + "\t" + "\t"
-//                    + optTaskNode.getLateFinish() + "\t" + "\t" + optTaskNode.getImportance());
-//            System.out.println(optTaskNode.getSucTaskCountSumValue() + "\t" + "\t" + optTaskNode.getSucTaskDurSumValue() + "\t" + "\t"
-//                    + optTaskNode.getLateFinishValue() + "\t" + "\t" + optTaskNode.getImportanceValue());
-//            System.out.println(pmsTask.getTaskPlanStartDateTime());
-//            System.out.println(pmsTask.getTaskPlanFinishDateTime());
         }
 
         // 得到个体对应的计划中，每个项目的开始结束时间，存入projStartFinishTimeMap并返回
@@ -1374,8 +1365,6 @@ public class OptMain {
             if (finish.after(projLateFinish)) {         // 如果项目超期了，适应度值就加上罚函数
                 double exceedTime = (finish.getTime() - projLateFinish.getTime()) / MS_OF_DAY + 1;  // 超期天数
                 f += g * exceedTime * exceedTime / estimateDur;      // 加上罚函数对个体进行惩罚
-//                System.out.println();
-//                System.out.println("超期" + exceedTime + "被惩罚了：" + finish);
             }
             fitness += f;
         }
