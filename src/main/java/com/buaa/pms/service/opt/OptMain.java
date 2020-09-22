@@ -49,8 +49,8 @@ public class OptMain {
     public static final long MS_OF_HOUR = 1000 * 3600;      // 1小时的毫秒数
     public static final long MS_OF_DAY = 1000 * 3600 * 24;  // 1天的毫秒数
 
-    public static final int MAX_G = 20;           // 最大迭代次数
-    public static final int CHROMOSOME_NUM = 50;  // 种群规模（个体数量）
+    public static final int MAX_G = 3;           // 最大迭代次数
+    public static final int CHROMOSOME_NUM = 10;  // 种群规模（个体数量）
     public static final double SF = 0.5;        // 变异操作时的缩放因子
     public static final double MR = 0.2;        // 变异操作时，后半段的变异概率
     public static final double CR = 0.8;        // 交叉操作时的交叉概率
@@ -1547,14 +1547,57 @@ public class OptMain {
         OptResult optResult = new OptResult(taskList, resOcpyNodesList, procChartTaskList);
         return optResult;
     }
-    public List<PmsTask> testWebLink(JSONObject info) {
+    public JSONObject testWebLink(JSONObject info) {
         List<PmsTask> pmsTaskList = webOptimize(info);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (PmsTask pmsTask : pmsTaskList) {
-            System.out.println(pmsTask.getTaskName());
-            System.out.println(sdf.format(pmsTask.getTaskPlanStartDateTime()));
-            System.out.println(sdf.format(pmsTask.getTaskPlanFinishDateTime()));
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        for (PmsTask pmsTask : pmsTaskList) {
+//            System.out.println(pmsTask.getTaskName());
+//            System.out.println(sdf.format(pmsTask.getTaskPlanStartDateTime()));
+//            System.out.println(sdf.format(pmsTask.getTaskPlanFinishDateTime()));
+//        }
+        Map<String, String> resPlanTaskMap = new HashMap<>();
+        for (Map.Entry<String, List<PmsTaskResPlan>> entry : taskResPlanMap.entrySet()) {
+            String taskUid = entry.getKey();
+            for (PmsTaskResPlan resPlan : entry.getValue()) {
+                resPlanTaskMap.put(resPlan.getResPlanUid(), taskUid);
+            }
         }
-        return pmsTaskList;
+        Map<String, String> taskUidResPlanUidMap = new HashMap<>();
+        Map<String, List<JSONObject>> resArMap = new HashMap<>(pmsTaskList.size());
+        for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMap.entrySet()) {
+            String resUid = entry.getKey();
+            ResOcpyNode resOcpyNode = entry.getValue().sucOcpy;
+            while (resOcpyNode != null) {
+                JSONObject resAr = new JSONObject();
+                resAr.put("resNo", resUid);
+                resAr.put("planStart", resOcpyNode.getResStartDateTime().getTime());
+                resAr.put("planEnd", resOcpyNode.getResFinishDateTime().getTime());
+                String taskUid = resPlanTaskMap.get(resOcpyNode.getPmsTaskResReq().getResReqResPlanUid());
+                taskUidResPlanUidMap.put(taskUid, resOcpyNode.getPmsTaskResReq().getResReqResPlanUid());
+                if (resArMap.containsKey(taskUid)) {
+                    resArMap.get(taskUid).add(resAr);
+                } else {
+                    List<JSONObject> resArList = new ArrayList<>();
+                    resArList.add(resAr);
+                    resArMap.put(taskUid, resArList);
+                }
+
+                resOcpyNode = resOcpyNode.sucOcpy;
+            }
+        }
+        List<JSONObject> nodeTaskList = new ArrayList<>(pmsTaskList.size());
+        for (PmsTask pmsTask : pmsTaskList) {
+            String taskUid = pmsTask.getTaskUid();
+            JSONObject nodeTask = new JSONObject();
+            nodeTask.put("taskNo", taskUid);
+            nodeTask.put("planStart", pmsTask.getTaskPlanStartDateTime().getTime());
+            nodeTask.put("planEnd", pmsTask.getTaskPlanFinishDateTime().getTime());
+            nodeTask.put("planNo", taskUidResPlanUidMap.get(taskUid));      // 任务选择的资源方案编号
+            nodeTask.put("resList", resArMap.get(taskUid));
+            nodeTaskList.add(nodeTask);
+        }
+        JSONObject result = new JSONObject();
+        result.put("nodeTask", nodeTaskList);
+        return result;
     }
 }
