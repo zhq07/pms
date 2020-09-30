@@ -943,7 +943,7 @@ public class WebOptMain {
     public Timestamp startTime(Timestamp end, int model) {
         int index = (int) ((end.getTime() - optOrigin.getTime()) / MS_OF_DAY);
         int temp = index;
-        while (index < holidayCount.length && holidayCount[index] != holidayCount[index + 1]) {
+        while (index < holidayCount.length - 1 && holidayCount[index + 1] != holidayCount[index]) {
             index++;    // 如果这一天是节假日，就后移一天
         }
         return new Timestamp(end.getTime() + (index - temp) * MS_OF_DAY);
@@ -979,15 +979,19 @@ public class WebOptMain {
         int startIndex = (int) ((start.getTime() - optOrigin.getTime()) / MS_OF_DAY);
         int duration = (int) dur;
         int endIndex = startIndex + duration;
+        if (endIndex >= holidayCount.length) {
+            endIndex = holidayCount.length - 1;
+        }
         int holidayNum = holidayCount[endIndex] - holidayCount[startIndex];     // 任务时间段里包含的节假日数
         while (holidayNum > 0) {
             endIndex++;     // 结束时间后移一天
+            duration++;
             if (endIndex < holidayCount.length && holidayCount[endIndex] != holidayCount[endIndex - 1]) {
                 continue;   // 如果新增的这一天是节假日，则任务时间段内的工作日并没有增加
             }
             holidayNum--;
         }
-        return new Timestamp(start.getTime() + ((int)dur) * MS_OF_DAY);
+        return new Timestamp(start.getTime() + duration * MS_OF_DAY);
     }
 //    public Timestamp endTime(Timestamp start, double dur, int model) {
 //        Timestamp end = new Timestamp(start.getTime());
