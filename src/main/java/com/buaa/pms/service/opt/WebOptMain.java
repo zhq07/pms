@@ -57,6 +57,9 @@ public class WebOptMain {
 
     private Calendar calendar = Calendar.getInstance();
 
+    // 记录从优化起始时间开始到第i天之前，有多少天节假日，i从0开始计数
+    int[] holidayCount;
+
     // 编码上每一位基因的取值范围
     int[] genValueLimit;
 
@@ -117,6 +120,11 @@ public class WebOptMain {
     // 资源占用情况，key为资源UID，value为该资源被占用的时间段链表
     private Map<String, ResOcpyNode> resOcpyNodeMap;
 
+    /**
+     * 初始化任务的连接图以及任务资源等信息的数据结构
+     * @param info
+     * @return
+     */
     public OptTaskNode webInitTaskNodes(JSONObject info) {
 
         JSONArray projectArray = info.getJSONArray("project");
@@ -171,6 +179,11 @@ public class WebOptMain {
         for (Object knowledge : knowledgeArray) {
             pmsKnowledgeList.add((PmsKnowledge)JSONObject.toBean((JSONObject)knowledge, PmsKnowledge.class));
         }
+
+        String[] holidayStringArray = new String[]{"2020-01-01", "2020-01-24", "2020-01-25", "2020-01-26", "2020-01-27", "2020-01-28", "2020-01-29", "2020-01-30", "2020-04-04",
+                                         "2020-04-05", "2020-04-06", "2020-05-01", "2020-05-02", "2020-05-03", "2020-05-04", "2020-05-05", "2020-06-25", "2020-06-26",
+                                         "2020-06-27", "2020-10-01", "2020-10-02", "2020-10-03", "2020-10-04", "2020-10-05", "2020-10-06", "2020-10-07", "2020-10-08"};
+        List<String> holidayStringList = new ArrayList<>(Arrays.asList(holidayStringArray));
 
         // 优化的时间起点，即所有项目的最早开始时间
         optOrigin = new Timestamp(Long.MAX_VALUE);
@@ -239,6 +252,21 @@ public class WebOptMain {
                 optDestination.setTime(projLate.getTime());
             }
         }
+
+        // 初始化节假日累计数组holidayCount
+        holidayCount = new int[367];      // 记录从优化起始时间开始到第i天之前，有多少天节假日，i从0开始计数
+        for (int i = 0; i < holidayStringArray.length; i++) {
+            Timestamp holidayTime = Timestamp.valueOf(holidayStringArray[i].substring(0, 10) + " 00:00:00");
+            if (holidayTime.before(optOrigin)) {
+                continue;
+            }
+            int index = (int) ((holidayTime.getTime() - optOrigin.getTime()) / MS_OF_DAY);
+            holidayCount[index + 1] = 1;    // 初始标记，第index天是假期，index从0开始计数
+        }
+        for (int i = 1; i < holidayCount.length; i++) {
+            holidayCount[i] += holidayCount[i - 1];
+        }
+
         // 得到优化起点与终点时间相隔的天数
         optDays = (optDestination.getTime() - optOrigin.getTime()) / (MS_OF_DAY);
 
@@ -913,7 +941,12 @@ public class WebOptMain {
      * @return
      */
     public Timestamp startTime(Timestamp end, int model) {
-        return new Timestamp(end.getTime());
+        int index = (int) ((end.getTime() - optOrigin.getTime()) / MS_OF_DAY);
+        int temp = index;
+        while (index < holidayCount.length && holidayCount[index] != holidayCount[index + 1]) {
+            index++;    // 如果这一天是节假日，就后移一天
+        }
+        return new Timestamp(end.getTime() + (index - temp) * MS_OF_DAY);
     }
 //    public Timestamp startTime(Timestamp end, int model) {
 //        Timestamp start = new Timestamp(end.getTime());
@@ -943,6 +976,17 @@ public class WebOptMain {
      * @return
      */
     public Timestamp endTime(Timestamp start, double dur, int model) {
+        int startIndex = (int) ((start.getTime() - optOrigin.getTime()) / MS_OF_DAY);
+        int duration = (int) dur;
+        int endIndex = startIndex + duration;
+        int holidayNum = holidayCount[endIndex] - holidayCount[startIndex];     // 任务时间段里包含的节假日数
+        while (holidayNum > 0) {
+            endIndex++;     // 结束时间后移一天
+            if (endIndex < holidayCount.length && holidayCount[endIndex] != holidayCount[endIndex - 1]) {
+                continue;   // 如果新增的这一天是节假日，则任务时间段内的工作日并没有增加
+            }
+            holidayNum--;
+        }
         return new Timestamp(start.getTime() + ((int)dur) * MS_OF_DAY);
     }
 //    public Timestamp endTime(Timestamp start, double dur, int model) {
