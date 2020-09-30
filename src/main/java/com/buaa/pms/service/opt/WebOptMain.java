@@ -1016,6 +1016,12 @@ public class WebOptMain {
      */
     public void moveTimeToNextPoint(Timestamp time) {
         time.setTime(time.getTime() + MS_OF_DAY);
+        int index = (int) ((time.getTime() - optOrigin.getTime()) / MS_OF_DAY);
+        int temp = index;
+        while (index < holidayCount.length - 1 && holidayCount[index + 1] != holidayCount[index]) {
+            index++;    // 如果这一天是节假日，就后移一天
+        }
+        time.setTime(time.getTime() + (index - temp) * MS_OF_DAY);
     }
 //    public void moveTimeToNextPoint(Timestamp time) {
 //        calendar.setTime(time);
