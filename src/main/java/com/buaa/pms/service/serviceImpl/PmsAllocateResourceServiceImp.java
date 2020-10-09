@@ -59,6 +59,11 @@ public class PmsAllocateResourceServiceImp implements PmsAllocateResourceService
     }
 
     @Override
+    public List<PmsAllocateResource> selectByResUidList(List arResUidList) {
+        return pmsAllocateResourceMapper.selectByResUidList(arResUidList);
+    }
+
+    @Override
     public List<AllocateResource> getAllocateResourceListByResUid(String arResUid) {
         return this.getAllocateResourceFromPmsAllocateResource(this.selectByResUid(arResUid));
     }

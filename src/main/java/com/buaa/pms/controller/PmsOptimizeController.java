@@ -27,7 +27,8 @@ public class PmsOptimizeController {
     @RequestMapping("/testOptResult")
     public JSONObject testOptResult(@RequestBody JSONObject info) {
         JSONUtils.getMorpherRegistry().registerMorpher(new TimestampMorpher());     // 注册时间转换方式，Long转Timestamp
-        return optMain.testWebLink(info);
+//        return optMain.testWebLink(info);
+        return webOptMain.optResult(info);
     }
 
     @RequestMapping("/webOptResult")

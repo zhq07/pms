@@ -42,6 +42,13 @@
         select * from pms_allocate_resource where ar_res_uid = #{arResUid}
     </select>
 
+    <select id="selectByResUidList" resultMap="pmsAllocateResourceMap" parameterType="java.util.List">
+        select * from pms_allocate_resource where ar_res_uid in
+        <foreach collection="list" open="(" separator="," close=")" item="resUid">
+            #{resUid}
+        </foreach>
+    </select>
+
     <select id="selectByUid" resultMap="pmsAllocateResourceMap">
         select * from pms_allocate_resource where ar_uid = #{arUid}
     </select>

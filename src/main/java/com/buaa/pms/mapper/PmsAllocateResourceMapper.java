@@ -18,6 +18,8 @@ public interface PmsAllocateResourceMapper {
 
     public List<PmsAllocateResource> selectByResUid(String arResUid);
 
+    public List<PmsAllocateResource> selectByResUidList(List arResUidList);
+
     public PmsAllocateResource selectByUid(String arUid);
 
     public void save(PmsAllocateResource pmsAllocateResource);

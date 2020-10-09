@@ -38,6 +38,7 @@ public class ResOcpyNode {
         this.pmsAllocateResource = pmsAllocateResource;
         this.resStartDateTime = pmsAllocateResource.getArResStartDateTime();
         this.resFinishDateTime = pmsAllocateResource.getArResStartDateTime();
+        this.resUid = pmsAllocateResource.getArResUid();
         this.resAmount = pmsAllocateResource.getArResAmount();
         this.resWork = pmsAllocateResource.getArResWork();
         this.resWorkModel = pmsAllocateResource.getArResWorkModel();
@@ -54,8 +55,11 @@ public class ResOcpyNode {
         this.resAmount = resOcpyNode.resAmount;
         this.resWork = resOcpyNode.resWork;
         this.resWorkModel = resOcpyNode.resWorkModel;
-        this.preOcpy = resOcpyNode.preOcpy;
-        this.sucOcpy = resOcpyNode.sucOcpy;
+    }
+
+    public ResOcpyNode(Timestamp resStart, Timestamp resFinish) {
+        this.resStartDateTime = resStart;
+        this.resFinishDateTime = resFinish;
     }
 
     public PmsAllocateResource getPmsAllocateResource() {

@@ -42,6 +42,8 @@ public class OptMain {
     PmsPlaceService pmsPlaceService;
     @Resource
     PmsKnowledgeService pmsKnowledgeService;
+    @Resource
+    PmsAllocateResourceService pmsAllocateResourceService;
 
     public static final int IMPORTANCEVALUE_HIGHEST = 4;    // 任务最大重要性值
     public static final long MS_OF_HOUR = 1000 * 3600;      // 1小时的毫秒数
@@ -117,6 +119,8 @@ public class OptMain {
     // 资源占用情况，key为资源UID，value为该资源被占用的时间段链表
     private Map<String, ResOcpyNode> resOcpyNodeMap;
 
+    private Map<String, ResOcpyNode> resOcpyNodeMapOrig;
+
     /**
      * 本地优化的初始化
      * @param procUidList
@@ -172,6 +176,8 @@ public class OptMain {
 
         // 资源占用情况，key为资源UID，value为该资源被占用的时间段链表
         resOcpyNodeMap = new HashMap<>();
+
+        resOcpyNodeMapOrig = new HashMap<>();
 
         startOptTaskNode = new OptTaskNode();  // 虚拟首节点
         endOptTaskNode = new OptTaskNode();    // 虚拟尾结点
@@ -233,7 +239,9 @@ public class OptMain {
             });
         }
         // 获取资源方案的资源需求，初始化“资源方案-资源需求”resPlanResReqMap
+        // 初始化相关资源的已占用情况resOcpyNodeMapOrig
         for (PmsTaskResReq pmsTaskResReq : pmsTaskResReqService.selectByProcUidList(procUidList)) {
+            resOcpyNodeMapOrig.put(pmsTaskResReq.getResReqResUid(), new ResOcpyNode(new Timestamp(0), new Timestamp(0)));
             String resPlanUid = pmsTaskResReq.getResReqResPlanUid();
             if (!resPlanResReqMap.containsKey(resPlanUid)) {
                 resPlanResReqMap.put(resPlanUid, new LinkedList<PmsTaskResReq>());
@@ -252,6 +260,28 @@ public class OptMain {
                     break;
             }
         }
+        List<PmsAllocateResource> pmsAllocateResources = pmsAllocateResourceService.selectByResUidList(new ArrayList<String>(resOcpyNodeMapOrig.keySet()));
+        Collections.sort(pmsAllocateResources, (o1, o2) -> {        // 按照占用开始时间对集合pmsAllocateResources进行排序，以便对resOcpyNodeMapOrig初始化时不用再排序
+            if (o1.getArResStartDateTime().before(o2.getArResStartDateTime())) return -1;
+            else if (o1.getArResStartDateTime().after(o2.getArResStartDateTime())) return 1;
+            return 0;
+        });
+        Map<String, ResOcpyNode> arListTailMap = new HashMap<>(resOcpyNodeMapOrig);     // 记录resOcpyNodeMapOrig的value中的list的尾结点，以便插入新节点
+        for (PmsAllocateResource pmsAllocateResource : pmsAllocateResources) {
+            if (pmsAllocateResource.getArResStartDateTime().after(optOrigin) || pmsAllocateResource.getArResFinishDateTime().before(optDestination))
+                continue;   // 不再此次优化的时间段之内的占用就忽略
+            String resUid = pmsAllocateResource.getArResUid();
+            ResOcpyNode newResOcpyNode = new ResOcpyNode(pmsAllocateResource);
+            arListTailMap.get(resUid).sucOcpy = newResOcpyNode;
+            arListTailMap.put(resUid, newResOcpyNode);
+        }
+        Iterator<Map.Entry<String, ResOcpyNode>> it = resOcpyNodeMapOrig.entrySet().iterator();
+        while(it.hasNext()) {
+            Map.Entry<String, ResOcpyNode> entry = it.next();
+            if (entry.getValue().sucOcpy == null)
+                it.remove();        // 如果除了虚拟头结点外，没有有效的资源占用，就删除该元素
+        }
+
         // 获取全部任务连接，并赋予任务节点optTaskNode中的普通连接集合，使待优化任务节点连接起来
         for (PmsTaskLink pmsTaskLink : pmsTaskLinkService.selectByProcUidList(procUidList)) {
             OptTaskNode preTaskNode = optTaskNodeMap.get(pmsTaskLink.getTaskLinkPreTaskUid());  // 连接中的前任务
@@ -1135,6 +1165,18 @@ public class OptMain {
         Map<String, OptTaskNode> readyTaskMap = new HashMap<>();        // 存储已被安排时间的任务节点，key为任务UID
 //        resOcpyNodeMap = new HashMap<>();
         resOcpyNodeMap.clear();     // 还原资源占用情况resOcpyNodeMap
+        for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMapOrig.entrySet()) {
+            String resUid = entry.getKey();
+            ResOcpyNode origNode = entry.getValue();
+            ResOcpyNode newNode = new ResOcpyNode(origNode);
+            resOcpyNodeMap.put(resUid, newNode);
+            while (origNode.sucOcpy != null) {
+                origNode = origNode.sucOcpy;
+                newNode.sucOcpy = new ResOcpyNode(origNode);
+                newNode.sucOcpy.preOcpy = newNode;
+                newNode = newNode.sucOcpy;
+            }
+        }
         // 正序广度优先遍历，解码，求个体的工期Dur和完成时间Finish
         Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
         // 求原任务节点图中，没有紧前任务的任务节点的优先级评价值
@@ -1177,7 +1219,10 @@ public class OptMain {
                 readyTaskMap.put(pmsTask.getTaskUid(), optTaskNode);    // 加入已安排任务集合
                 continue;
             }
-            List<PmsTaskResReq> resReqs = optTaskNode.getResPlanReqPairList().get(resPlanIndex).getValue();    // 个体编码中的任务资源方案中的资源需求
+            List<PmsTaskResReq> resReqs = new ArrayList<>();    // 个体编码中的任务资源方案中的资源需求
+            if (optTaskNode.getResPlanReqPairList() != null && !optTaskNode.getResPlanReqPairList().isEmpty()) {
+                resReqs = optTaskNode.getResPlanReqPairList().get(resPlanIndex).getValue();
+            }
             // 根据资源需求和资源占用情况搜索任务可行的最早开始时间，工作时间为8点到18点
             double dur = pmsTask.getTaskPlanDur();  // 任务预计工期
             List<ResOcpyNode> newResNodes = new LinkedList<>(); // 暂存新的资源占用节点
@@ -1531,7 +1576,7 @@ public class OptMain {
         // 编码后半段，逐码变异，变异概率MR
         for (int i = 4; i < genNum; i++) {
             if (Math.random() < MR) {                   // 如果满足变异概率
-                if (genValueLimit[i] >= 0)              // 如果任务有资源方案(!= -1)
+                if (genValueLimit[i] > 0)              // 如果任务有资源方案(!= -1)
                     mutation[i] = getResPlanNo(i, random.nextInt(genValueLimit[i]));    // 资源方案序号
             } else {
                 mutation[i] = r1[i];
@@ -1616,6 +1661,12 @@ public class OptMain {
         for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMap.entrySet()) {
             List<ResOcpyNode> resOcpyNodes = new LinkedList<>();
             ResOcpyNode resOcpyNode = entry.getValue().sucOcpy;
+            while (resOcpyNode != null && resOcpyNode.getPmsTaskResReq() == null) {     // 过滤掉非优化项目的占用节点
+                resOcpyNode = resOcpyNode.sucOcpy;
+            }
+            if (resOcpyNode == null) {
+                continue;
+            }
             String resUid = entry.getKey();
             String resName = null;
             int resType = resOcpyNode.getResType();
@@ -1634,6 +1685,10 @@ public class OptMain {
 
             while (resOcpyNode != null) {
                 ResOcpyNode newNode = new ResOcpyNode(resOcpyNode);
+                if (newNode.getPmsTaskResReq() == null) {
+                    resOcpyNode = resOcpyNode.sucOcpy;
+                    continue;
+                }
                 newNode.setProjName(pmsProjectMap.get(newNode.getPmsTaskResReq().getResReqProjUid()).getProjName());
                 newNode.setTaskName(optTaskNodeMap.get(newNode.getPmsTaskResReq().getResReqTaskUid()).getPmsTask().getTaskName());
                 newNode.setResName(resName);
@@ -1702,6 +1757,10 @@ public class OptMain {
             String resUid = entry.getKey();
             ResOcpyNode resOcpyNode = entry.getValue().sucOcpy;
             while (resOcpyNode != null) {
+                if (resOcpyNode.getPmsTaskResReq() == null) {       // 过滤掉非优化项目的占用节点
+                    resOcpyNode = resOcpyNode.sucOcpy;
+                    continue;
+                }
                 JSONObject resAr = new JSONObject();
                 resAr.put("resNo", resUid);
                 resAr.put("planStart", resOcpyNode.getResStartDateTime().getTime());

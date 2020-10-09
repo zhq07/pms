@@ -18,6 +18,8 @@ public interface PmsAllocateResourceService {
 
     public List<PmsAllocateResource> selectByResUid(String arResUid);
 
+    public List<PmsAllocateResource> selectByResUidList(List arResUidList);
+
     public List<AllocateResource> getAllocateResourceListByResUid(String arResUid);
 
     public PmsAllocateResource selectByUid(String arUid);
