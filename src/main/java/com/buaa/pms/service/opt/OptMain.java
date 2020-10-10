@@ -49,8 +49,8 @@ public class OptMain {
     public static final long MS_OF_HOUR = 1000 * 3600;      // 1小时的毫秒数
     public static final long MS_OF_DAY = 1000 * 3600 * 24;  // 1天的毫秒数
 
-    public static final int MAX_G = 3;           // 最大迭代次数
-    public static final int CHROMOSOME_NUM = 10;  // 种群规模（个体数量）
+    public static final int MAX_G = 10;           // 最大迭代次数
+    public static final int CHROMOSOME_NUM = 20;  // 种群规模（个体数量）
     public static final double SF = 0.5;        // 变异操作时的缩放因子
     public static final double MR = 0.2;        // 变异操作时，后半段的变异概率
     public static final double CR = 0.8;        // 交叉操作时的交叉概率
@@ -482,6 +482,9 @@ public class OptMain {
                 if (tempResPlans != null && !tempResPlans.isEmpty()) {
                     List<Integer> priList = new ArrayList<>();
                     for (PmsTaskResPlan pmsTaskResPlan : taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid())) {
+                        if (!resPlanResReqMap.containsKey(pmsTaskResPlan.getResPlanUid())) {    // 忽略空的资源方案
+                            continue;
+                        }
                         if (priList.isEmpty()) {
                             priList.add(pmsTaskResPlan.getResPlanPriority());
                         }
@@ -491,20 +494,25 @@ public class OptMain {
                             }
                         }
                     }
-                    // 反转priList
-                    Collections.reverse(priList);
-                    // 初始化genValueLimit和resPlanPriCumulation
-                    genValueLimit[resPlanGenIndex] = priList.get(0);
-                    resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
-                    int priIndex = 0;       // priList的下标
-                    for (int i = 1; i < tempResPlans.size(); i++) {
-                        int resPlanPriority = tempResPlans.get(i).getResPlanPriority();
-                        int preResPlanPriority = tempResPlans.get(i - 1).getResPlanPriority();
-                        if (resPlanPriority != preResPlanPriority) {
-                            priIndex++;
-                        }
-                        genValueLimit[resPlanGenIndex] += priList.get(priIndex);
+                    if (!priList.isEmpty()) {
+                        // 反转priList
+                        Collections.reverse(priList);
+                        // 初始化genValueLimit和resPlanPriCumulation
+                        genValueLimit[resPlanGenIndex] = priList.get(0);
                         resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
+                        int priIndex = 0;       // priList的下标
+                        for (int i = 1; i < tempResPlans.size(); i++) {
+                            if (!resPlanResReqMap.containsKey(tempResPlans.get(i).getResPlanUid())) {    // 忽略空的资源方案
+                                continue;
+                            }
+                            int resPlanPriority = tempResPlans.get(i).getResPlanPriority();
+                            int preResPlanPriority = tempResPlans.get(i - 1).getResPlanPriority();
+                            if (resPlanPriority != preResPlanPriority) {
+                                priIndex++;
+                            }
+                            genValueLimit[resPlanGenIndex] += priList.get(priIndex);
+                            resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
+                        }
                     }
                 }
                 resPlanGenIndex++;
@@ -906,6 +914,9 @@ public class OptMain {
                 if (tempResPlans != null && !tempResPlans.isEmpty()) {
                     List<Integer> priList = new ArrayList<>();
                     for (PmsTaskResPlan pmsTaskResPlan : taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid())) {
+                        if (!resPlanResReqMap.containsKey(pmsTaskResPlan.getResPlanUid())) {    // 忽略空的资源方案
+                            continue;
+                        }
                         if (priList.isEmpty()) {
                             priList.add(pmsTaskResPlan.getResPlanPriority());
                         }
@@ -915,20 +926,25 @@ public class OptMain {
                             }
                         }
                     }
-                    // 反转priList
-                    Collections.reverse(priList);
-                    // 初始化genValueLimit和resPlanPriCumulation
-                    genValueLimit[resPlanGenIndex] = priList.get(0);
-                    resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
-                    int priIndex = 0;       // priList的下标
-                    for (int i = 1; i < tempResPlans.size(); i++) {
-                        int resPlanPriority = tempResPlans.get(i).getResPlanPriority();
-                        int preResPlanPriority = tempResPlans.get(i - 1).getResPlanPriority();
-                        if (resPlanPriority != preResPlanPriority) {
-                            priIndex++;
-                        }
-                        genValueLimit[resPlanGenIndex] += priList.get(priIndex);
+                    if (!priList.isEmpty()) {
+                        // 反转priList
+                        Collections.reverse(priList);
+                        // 初始化genValueLimit和resPlanPriCumulation
+                        genValueLimit[resPlanGenIndex] = priList.get(0);
                         resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
+                        int priIndex = 0;       // priList的下标
+                        for (int i = 1; i < tempResPlans.size(); i++) {
+                            if (!resPlanResReqMap.containsKey(tempResPlans.get(i).getResPlanUid())) {    // 忽略空的资源方案
+                                continue;
+                            }
+                            int resPlanPriority = tempResPlans.get(i).getResPlanPriority();
+                            int preResPlanPriority = tempResPlans.get(i - 1).getResPlanPriority();
+                            if (resPlanPriority != preResPlanPriority) {
+                                priIndex++;
+                            }
+                            genValueLimit[resPlanGenIndex] += priList.get(priIndex);
+                            resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
+                        }
                     }
                 }
                 resPlanGenIndex++;
