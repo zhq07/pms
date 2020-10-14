@@ -1053,7 +1053,7 @@ public class OptMain {
         decode(bestIndividual);
         // 正序广度优先遍历，打印优化结果
         List<PmsTask> result = new LinkedList<>();
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
+        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
         priQueue.addAll(startOptTaskNode.getSucTasks());
         while (!priQueue.isEmpty()) {
             OptTaskNode optTaskNode = priQueue.poll();
@@ -1152,7 +1152,7 @@ public class OptMain {
         decode(bestIndividual);
         // 正序广度优先遍历，打印优化结果
         List<PmsTask> result = new LinkedList<>();
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
+        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
         priQueue.addAll(startOptTaskNode.getSucTasks());
         while (!priQueue.isEmpty()) {
             OptTaskNode optTaskNode = priQueue.poll();
@@ -1194,7 +1194,7 @@ public class OptMain {
             }
         }
         // 正序广度优先遍历，解码，求个体的工期Dur和完成时间Finish
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
+        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
         // 求原任务节点图中，没有紧前任务的任务节点的优先级评价值
         for (OptTaskNode optTaskNode : startOptTaskNode.getSucTasks()) {
             // 计算个体的优先级评价值
@@ -1431,7 +1431,7 @@ public class OptMain {
     /**
      * 自定义优先队列的比较器，按任务优先级评价的降序排列
      */
-    static Comparator<OptTaskNode> cmpOptTaskNode = new Comparator<OptTaskNode>() {
+    static Comparator<OptTaskNode> cmpOptTaskNodeByPriority = new Comparator<OptTaskNode>() {
         @Override
         public int compare(OptTaskNode o1, OptTaskNode o2) {
             return Double.compare(o2.getPriorityValue(), o1.getPriorityValue());

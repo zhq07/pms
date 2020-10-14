@@ -142,6 +142,7 @@ public class WebOptMain {
         JSONArray placeArray = info.getJSONArray("place");
         JSONArray knowledgeArray = info.getJSONArray("knowledge");
         JSONArray allocateResourceArray = info.getJSONArray("allocateResource");
+        JSONArray holidayArray = info.containsKey("holiday") ? info.getJSONArray("holiday") : new JSONArray();
 
         List<PmsProject> pmsProjectList = new ArrayList<>(projectArray.size());
         List<PmsTask> pmsTaskList = new ArrayList<>(taskArray.size());
@@ -189,10 +190,21 @@ public class WebOptMain {
             pmsAllocateResourceList.add((PmsAllocateResource)JSONObject.toBean((JSONObject)allocateResource, PmsAllocateResource.class));
         }
 
-        String[] holidayStringArray = new String[]{"2020-01-01", "2020-01-24", "2020-01-25", "2020-01-26", "2020-01-27", "2020-01-28", "2020-01-29", "2020-01-30", "2020-04-04",
-                                         "2020-04-05", "2020-04-06", "2020-05-01", "2020-05-02", "2020-05-03", "2020-05-04", "2020-05-05", "2020-06-25", "2020-06-26",
-                                         "2020-06-27", "2020-10-01", "2020-10-02", "2020-10-03", "2020-10-04", "2020-10-05", "2020-10-06", "2020-10-07", "2020-10-08"};
-        List<String> holidayStringList = new ArrayList<>(Arrays.asList(holidayStringArray));
+        // 读入节假日，为调试方便，如果没有传入节假日的话，就用自定义的节假日列表
+        String[] holidayStringArray;
+        List<String> holidayStringList = new ArrayList<String>();
+        if (holidayArray != null && !holidayArray.isEmpty()) {
+            for (Object holiday : holidayArray) {
+                holidayStringList.add((String)holiday);
+            }
+            holidayStringArray = new String[holidayStringList.size()];
+            holidayStringList.toArray(holidayStringArray);
+        } else {
+            // 为调试而设置的自定义的节假日列表
+            holidayStringArray = new String[]{"2020-01-01", "2020-01-24", "2020-01-25", "2020-01-26", "2020-01-27", "2020-01-28", "2020-01-29", "2020-01-30", "2020-04-04",
+                    "2020-04-05", "2020-04-06", "2020-05-01", "2020-05-02", "2020-05-03", "2020-05-04", "2020-05-05", "2020-06-25", "2020-06-26",
+                    "2020-06-27", "2020-10-01", "2020-10-02", "2020-10-03", "2020-10-04", "2020-10-05", "2020-10-06", "2020-10-07", "2020-10-08"};
+        }
 
         // 优化的时间起点，即所有项目的最早开始时间
         optOrigin = new Timestamp(Long.MAX_VALUE);
@@ -691,7 +703,7 @@ public class WebOptMain {
         decode(bestIndividual);
         // 正序广度优先遍历，打印优化结果
         List<PmsTask> result = new LinkedList<>();
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
+        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
         priQueue.addAll(startOptTaskNode.getSucTasks());
         while (!priQueue.isEmpty()) {
             OptTaskNode optTaskNode = priQueue.poll();
@@ -733,7 +745,7 @@ public class WebOptMain {
             }
         }
         // 正序广度优先遍历，解码，求个体的工期Dur和完成时间Finish
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNode);  // 任务优先队列，按任务优先级评价的升序排列
+        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
         // 求原任务节点图中，没有紧前任务的任务节点的优先级评价值
         for (OptTaskNode optTaskNode : startOptTaskNode.getSucTasks()) {
             // 计算个体的优先级评价值
@@ -961,7 +973,7 @@ public class WebOptMain {
     /**
      * 自定义优先队列的比较器，按任务优先级评价的降序排列
      */
-    static Comparator<OptTaskNode> cmpOptTaskNode = new Comparator<OptTaskNode>() {
+    static Comparator<OptTaskNode> cmpOptTaskNodeByPriority = new Comparator<OptTaskNode>() {
         @Override
         public int compare(OptTaskNode o1, OptTaskNode o2) {
             return Double.compare(o2.getPriorityValue(), o1.getPriorityValue());
