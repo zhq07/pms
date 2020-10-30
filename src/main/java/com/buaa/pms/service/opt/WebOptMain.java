@@ -244,7 +244,7 @@ public class WebOptMain {
         taskResPlanMap = new HashMap<>();
 
         // 所有涉及到的非独占资源的数量，key为资源UID，value为该资源实例的数量
-        Map<String, Double> resAmountMap = new HashMap<>();
+        resAmountMap = new HashMap<>();
         // 所有资源方案的资源需求，key为资源方案UID，value为该资源包含的资源需求
         resPlanResReqMap = new HashMap<>();
 
@@ -284,6 +284,9 @@ public class WebOptMain {
                 continue;
             }
             int index = (int) ((holidayTime.getTime() - optOrigin.getTime()) / MS_OF_DAY);
+            if (index >= 366) {
+                break;
+            }
             holidayCount[index + 1] = 1;    // 初始标记，第index天是假期，index从0开始计数
         }
         for (int i = 1; i < holidayCount.length; i++) {
@@ -864,7 +867,7 @@ public class WebOptMain {
                             }
                         } else {        // 如果包含资源数量信息，说明是非独占资源
                             // 判断资源需求能否得到满足，即在任务期间，有足够的剩余资源来完成任务
-                            double amountSum = resAmountMap.get(resReq.getResReqResUid());     // 资源总量
+                            double amountSum = resAmountMap.get(resUid);     // 资源总量
                             double amountReq = resReq.getResReqResAmount();
                             // 查找第一个资源占用结束时间在任务开始时间之后的节点
                             while (resOcpyNode != null && !resOcpyNode.getResFinishDateTime().after(taskStart)) {
@@ -886,7 +889,7 @@ public class WebOptMain {
                                         double resAmount = resOcpyNode.getResAmount();
                                         int startIndex = (int) ((Math.max(taskStart.getTime(), resOcpyNode.getResStartDateTime().getTime()) - taskStart.getTime()) / MS_OF_DAY);
                                         int endIndex = (int) ((Math.min(taskFinish.getTime(), resOcpyNode.getResFinishDateTime().getTime()) - taskStart.getTime()) / MS_OF_DAY);
-                                        for (int i = startIndex; i <= endIndex; i++) {
+                                        for (int i = startIndex; i < endIndex; i++) {
                                             resOccAmount[i] += resAmount;
                                         }
                                     }
@@ -1218,8 +1221,9 @@ public class WebOptMain {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (PmsTask pmsTask : pmsTaskList) {
             System.out.println(pmsTask.getTaskName());
-            System.out.println(sdf.format(pmsTask.getTaskPlanStartDateTime()));
-            System.out.println(sdf.format(pmsTask.getTaskPlanFinishDateTime()));
+            System.out.println(sdf.format(pmsTask.getTaskPlanStartDateTime()) + "  -----  " + sdf.format(pmsTask.getTaskEarlyStartDateTime()));
+            System.out.println(pmsTask.getTaskPlanDur());
+            System.out.println(sdf.format(pmsTask.getTaskPlanFinishDateTime()) + "  -----  " + sdf.format(pmsTask.getTaskLateFinishDateTime()));
         }
         Map<String, String> resPlanTaskMap = new HashMap<>();
         for (Map.Entry<String, List<PmsTaskResPlan>> entry : taskResPlanMap.entrySet()) {

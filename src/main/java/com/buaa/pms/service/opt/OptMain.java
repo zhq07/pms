@@ -1633,34 +1633,6 @@ public class OptMain {
         return crossover;
     }
 
-    public List<PmsTask> test() {
-        List<String> procUidList = new ArrayList<>();
-        procUidList.add("707224909687816192");
-        procUidList.add("707323834117652480");
-//        initTaskNodes(procUidList);
-//
-//        // 正序广度优先遍历
-//        Queue<OptTaskNode> queue = new LinkedList<>();
-//        queue.addAll(startOptTaskNode.getSucTasks());
-//        System.out.println("正序遍历");
-//        while (!queue.isEmpty()) {
-//            OptTaskNode optTaskNode = queue.poll();
-//            for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
-//                sucTask.setCurPreTaskCount(sucTask.getCurPreTaskCount() - 1);
-//                // 紧后任务入队
-//                if (sucTask.getCurPreTaskCount() == 0) {
-//                    queue.add(sucTask);
-//                    sucTask.setCurPreTaskCount(sucTask.getPreTaskCount());
-//                }
-//            }
-//            System.out.println("任务名称：" + optTaskNode.getPmsTask().getTaskName());
-//            System.out.println("**基因位下标：" + optTaskNode.getResPlanGenIndex()
-//                    + "   后续任务数量规则项：" + optTaskNode.getSucTaskCountSumValue() + "   后续任务工期规则项：" + optTaskNode.getSucTaskDurSumValue()
-//                    + "   任务最晚完成时间规则项" + optTaskNode.getLateFinishValue() + "   任务重要性规则项" + optTaskNode.getImportanceValue());
-//        }
-        return optimize(procUidList);
-    }
-
     public OptResult testWeb(List<String> procUidList) {
         List<Task> taskList = pmsTaskService.getTaskListByPmsTasksAndTaskLinksAndtaskGroups(optimize(procUidList), pmsTaskLinkService.selectByProcUidList(procUidList), pmsTaskGroupService.selectByProcUidList(procUidList), pmsGroupService.selectByProcUidList(procUidList));
         // 真紧前任务，为前端甘特图用
