@@ -37,6 +37,13 @@ public class Task {
         this.pmsGroup = pmsGroup;
     }
 
+    public Task(PmsTask pmsTask, List<PmsTask> taskNormalPreTasks, List<PmsTask> taskNormalSucTasks, PmsGroup pmsGroup) {
+        this.pmsTask = pmsTask;
+        this.taskNormalPreTasks = taskNormalPreTasks;
+        this.taskNormalSucTasks = taskNormalSucTasks;
+        this.pmsGroup = pmsGroup;
+    }
+
     public Task(PmsTask pmsTask, List<PmsTask> taskNormalPreTasks) {
         this.pmsTask = pmsTask;
         this.taskNormalPreTasks = taskNormalPreTasks;

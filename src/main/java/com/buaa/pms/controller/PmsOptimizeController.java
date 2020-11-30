@@ -1,6 +1,7 @@
 package com.buaa.pms.controller;
 
 import com.buaa.pms.model.OptResult;
+import com.buaa.pms.service.opt.GaOpt;
 import com.buaa.pms.service.opt.OptMain;
 import com.buaa.pms.service.opt.WebOptMain;
 import com.buaa.pms.util.TimestampMorpher;
@@ -18,6 +19,13 @@ public class PmsOptimizeController {
     OptMain optMain;
     @Resource
     WebOptMain webOptMain;
+    @Resource
+    GaOpt gaOpt;
+
+    @PostMapping("/getOptResultGa")
+    public OptResult getOptResultGa(@RequestBody List<String> procUidList) {
+        return gaOpt.testWeb(procUidList);
+    }
 
     @PostMapping("/getOptResult")
     public OptResult getOptResult(@RequestBody List<String> procUidList) {
@@ -27,7 +35,6 @@ public class PmsOptimizeController {
     @RequestMapping("/testOptResult")
     public JSONObject testOptResult(@RequestBody JSONObject info) {
         JSONUtils.getMorpherRegistry().registerMorpher(new TimestampMorpher());     // 注册时间转换方式，Long转Timestamp
-//        return optMain.testWebLink(info);
         return webOptMain.optResult(info);
     }
 

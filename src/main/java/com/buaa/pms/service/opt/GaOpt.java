@@ -7,8 +7,6 @@ import com.buaa.pms.model.ResOcpyNode;
 import com.buaa.pms.model.Task;
 import com.buaa.pms.service.*;
 import javafx.util.Pair;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-public class OptMain {
+public class GaOpt {
     @Resource
     PmsTaskService pmsTaskService;
     @Resource
@@ -52,8 +50,8 @@ public class OptMain {
     public static final int MAX_G = 10;           // 最大迭代次数
     public static final int CHROMOSOME_NUM = 50;  // 种群规模（个体数量）
     public static final double SF = 0.5;        // 变异操作时的缩放因子
-    public static final double MR = 0.2;        // 变异操作时，后半段的变异概率
-    public static final double CR = 0.8;        // 交叉操作时的交叉概率
+    public static final double MR = 0.2;        // 变异概率
+    public static final double CR = 0.8;        // 交叉概率
 
     public static final int PRIO_FACTOR_NUM = 4;
 
@@ -106,6 +104,9 @@ public class OptMain {
 
     // 所有参与优化的任务，key为任务UID，value为对应OptTaskNode
     private Map<String, OptTaskNode> optTaskNodeMap;
+
+    // 所有参与优化的任务，按照任务编号taskNo排列存储
+    private List<OptTaskNode> optTaskNodeListByNo;
 
     // 所有任务的资源方案，key为任务UID，value为该任务包含的资源方案
     private Map<String, List<PmsTaskResPlan>> taskResPlanMap;
@@ -166,11 +167,14 @@ public class OptMain {
         // 所有参与优化的任务，key为任务UID，value为对应OptTaskNode
         optTaskNodeMap = new HashMap<>();
 
+        // 所有参与优化的任务，按照任务编号taskNo排列存储
+//        optTaskNodeListByNo = new ArrayList<>();
+
         // 所有任务的资源方案，key为任务UID，value为该任务包含的资源方案
         taskResPlanMap = new HashMap<>();
 
         // 所有涉及到的非独占资源的数量，key为资源UID，value为该资源实例的数量
-         resAmountMap = new HashMap<>();
+        resAmountMap = new HashMap<>();
         // 所有资源方案的资源需求，key为资源方案UID，value为该资源包含的资源需求
         resPlanResReqMap = new HashMap<>();
 
@@ -213,19 +217,20 @@ public class OptMain {
         }
         optTaskCountSum = optTaskNodeMap.size();    // 待优化任务总数
 
-        resPlanPriCumulation = new ArrayList[optTaskCountSum + 4];
+        resPlanPriCumulation = new ArrayList[optTaskCountSum];
+        optTaskNodeListByNo = new ArrayList<OptTaskNode>(optTaskCountSum);
 
         // 获取全部任务组与任务的关系，初始化同组任务map，groupUidOptTaskNodesMap以及taskUidAndGroupUid
-        for (PmsTaskGroup taskGroup : pmsTaskGroupService.selectByProcUidList(procUidList)) {
-            if (groupUidOptTaskNodesMap.containsKey(taskGroup.getTaskGroupGroupUid())) {
-                groupUidOptTaskNodesMap.get(taskGroup.getTaskGroupGroupUid()).add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
-            } else {
-                List<OptTaskNode> optTaskNodeList = new ArrayList<>();
-                optTaskNodeList.add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
-                groupUidOptTaskNodesMap.put(taskGroup.getTaskGroupGroupUid(), optTaskNodeList);
-            }
-            taskUidAndGroupUid.put(taskGroup.getTaskGroupTaskUid(), taskGroup.getTaskGroupGroupUid());
-        }
+//        for (PmsTaskGroup taskGroup : pmsTaskGroupService.selectByProcUidList(procUidList)) {
+//            if (groupUidOptTaskNodesMap.containsKey(taskGroup.getTaskGroupGroupUid())) {
+//                groupUidOptTaskNodesMap.get(taskGroup.getTaskGroupGroupUid()).add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
+//            } else {
+//                List<OptTaskNode> optTaskNodeList = new ArrayList<>();
+//                optTaskNodeList.add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
+//                groupUidOptTaskNodesMap.put(taskGroup.getTaskGroupGroupUid(), optTaskNodeList);
+//            }
+//            taskUidAndGroupUid.put(taskGroup.getTaskGroupTaskUid(), taskGroup.getTaskGroupGroupUid());
+//        }
 
         // 获取全部待优化任务的资源方案，初始化“任务-资源方案”taskResPlanMap
         for (PmsTaskResPlan pmsTaskResPlan : pmsTaskResPlanService.selectByProcUidList(procUidList)) {
@@ -448,19 +453,17 @@ public class OptMain {
             }
             // 初始化projFirstLastTasksMap，key是项目UID，value是项目中没有紧前任务的任务节点和无紧后任务的任务两个list组成的数组
             if (!projFirstLastTasksMap.containsKey(pmsTask.getTaskProjUid())) {
-                projFirstLastTasksMap.put(pmsTask.getTaskProjUid(), new ArrayList[]{ new ArrayList<>(), new ArrayList<>() });
+                projFirstLastTasksMap.put(pmsTask.getTaskProjUid(), new ArrayList[]{ new ArrayList<OptTaskNode>(), new ArrayList<OptTaskNode>() });
             }
             projFirstLastTasksMap.get(pmsTask.getTaskProjUid())[0].add(firstOptTaskNode);
         }
         // 赋值任务节点中的项目最大步长，即项目包含最多任务数量的路径中的任务数量maxProjPathTaskCount
         // 计算任务优先级评价函数中各规则项的值
-        // 为每个任务指定其资源方案编号在编码中的位置下标resPlanIndex
+        // 为每个任务指定编号taskNo，任务资源基因的取值上限genValueLimit
         // 正序广度优先遍历每个项目
-        genValueLimit = new int[optTaskCountSum + 4];
-        for (int i = 0; i < 4; i++) {
-            genValueLimit[i] = 1;       // 前半段基因取值的上限为1
-        }
-        int resPlanGenIndex = 4;    // 后半段表示资源方案，从下标4开始
+        genValueLimit = new int[optTaskCountSum];
+
+        int taskNo = 0;
         for (List<OptTaskNode>[] firstLastOptTaskNodes : projFirstLastTasksMap.values()) {
             List<OptTaskNode> firstOptTaskNodes = firstLastOptTaskNodes[0];
             double maxProjPathTaskCount = projMaxPathTaskCountMap.get(firstOptTaskNodes.get(0).getPmsTask().getTaskProjUid());
@@ -476,10 +479,11 @@ public class OptMain {
                         sucTask.setCurPreTaskCount(sucTask.getPreTaskCount());
                     }
                 }
-                // 指定在编码中的位置下标
-                optTaskNode.setResPlanGenIndex(resPlanGenIndex);
+                // 指定任务编号
+                optTaskNode.setTaskNo(taskNo);
+                optTaskNodeListByNo.add(taskNo, optTaskNode);
                 // 后半段基因取值的上限为资源方案的权重的数字总和
-                resPlanPriCumulation[resPlanGenIndex] = new ArrayList<>();
+                resPlanPriCumulation[taskNo] = new ArrayList<>();
 
                 List<PmsTaskResPlan> tempResPlans = taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid());
                 if (tempResPlans != null && !tempResPlans.isEmpty()) {
@@ -501,8 +505,8 @@ public class OptMain {
                         // 反转priList
                         Collections.reverse(priList);
                         // 初始化genValueLimit和resPlanPriCumulation
-                        genValueLimit[resPlanGenIndex] = priList.get(0);
-                        resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
+                        genValueLimit[taskNo] = priList.get(0);
+                        resPlanPriCumulation[taskNo].add(genValueLimit[taskNo]);
                         int priIndex = 0;       // priList的下标
                         for (int i = 1; i < tempResPlans.size(); i++) {
                             if (!resPlanResReqMap.containsKey(tempResPlans.get(i).getResPlanUid())) {    // 忽略空的资源方案
@@ -513,13 +517,13 @@ public class OptMain {
                             if (resPlanPriority != preResPlanPriority) {
                                 priIndex++;
                             }
-                            genValueLimit[resPlanGenIndex] += priList.get(priIndex);
-                            resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
+                            genValueLimit[taskNo] += priList.get(priIndex);
+                            resPlanPriCumulation[taskNo].add(genValueLimit[taskNo]);
                         }
                     }
                 }
-                resPlanGenIndex++;
-//                genValueLimit[resPlanGenIndex++] = optTaskNode.getResPlanReqPairList().size();    // 后半段基因取值的上限为资源方案的个数
+                taskNo++;
+
                 // 赋值任务节点中的maxProjPathTaskCount
                 optTaskNode.setMaxProjPathTaskCount(maxProjPathTaskCount);
 
@@ -544,437 +548,6 @@ public class OptMain {
         return startOptTaskNode;
     }
 
-    /**
-     * 接收JSON数据的优化初始化
-     * @param info
-     * @return
-     */
-    public OptTaskNode webInitTaskNodes(JSONObject info) {
-
-        JSONArray projectArray = info.getJSONArray("project");
-        JSONArray taskArray = info.getJSONArray("task");
-        JSONArray taskLinkArray = info.getJSONArray("taskLink");
-        JSONArray taskGroupArray = info.getJSONArray("taskGroup");
-        JSONArray taskResPlanArray = info.getJSONArray("taskResPlan");
-        JSONArray taskResReqArray = info.getJSONArray("taskResReq");
-        JSONArray humanArray = info.getJSONArray("human");
-        JSONArray equipmentArray = info.getJSONArray("equipment");
-        JSONArray placeArray = info.getJSONArray("place");
-        JSONArray knowledgeArray = info.getJSONArray("knowledge");
-
-        List<PmsProject> pmsProjectList = new ArrayList<>(projectArray.size());
-        List<PmsTask> pmsTaskList = new ArrayList<>(taskArray.size());
-        List<PmsTaskLink> pmsTaskLinkList = new ArrayList<>(taskLinkArray.size());
-        List<PmsTaskGroup> pmsTaskGroupList = new ArrayList<>(taskGroupArray.size());
-        List<PmsTaskResPlan> pmsTaskResPlanList = new ArrayList<>(taskResPlanArray.size());
-        List<PmsTaskResReq> pmsTaskResReqList = new ArrayList<>(taskResReqArray.size());
-        List<PmsHuman> pmsHumanList = new ArrayList<>(humanArray.size());
-        List<PmsEquipment> pmsEquipmentList = new ArrayList<>(equipmentArray.size());
-        List<PmsPlace> pmsPlaceList = new ArrayList<>(placeArray.size());
-        List<PmsKnowledge> pmsKnowledgeList = new ArrayList<>(knowledgeArray.size());
-
-        for (Object project : projectArray) {
-            pmsProjectList.add((PmsProject) JSONObject.toBean((JSONObject) project, PmsProject.class));
-        }
-        for (Object task : taskArray) {
-            pmsTaskList.add((PmsTask) JSONObject.toBean((JSONObject) task, PmsTask.class));
-        }
-        for (Object taskLink : taskLinkArray) {
-            pmsTaskLinkList.add((PmsTaskLink)JSONObject.toBean((JSONObject) taskLink, PmsTaskLink.class));
-        }
-        for (Object taskGroup : taskGroupArray) {
-            pmsTaskGroupList.add((PmsTaskGroup)JSONObject.toBean((JSONObject)taskGroup, PmsTaskGroup.class));
-        }
-        for (Object taskResPlan : taskResPlanArray) {
-            pmsTaskResPlanList.add((PmsTaskResPlan) JSONObject.toBean((JSONObject)taskResPlan, PmsTaskResPlan.class));
-        }
-        for (Object taskResReq : taskResReqArray) {
-            pmsTaskResReqList.add((PmsTaskResReq)JSONObject.toBean((JSONObject)taskResReq, PmsTaskResReq.class));
-        }
-        for (Object humam : humanArray) {
-            pmsHumanList.add((PmsHuman)JSONObject.toBean((JSONObject)humam, PmsHuman.class));
-        }
-        for (Object equip : equipmentArray) {
-            pmsEquipmentList.add((PmsEquipment)JSONObject.toBean((JSONObject)equip, PmsEquipment.class));
-        }
-        for (Object place : placeArray) {
-            pmsPlaceList.add((PmsPlace)JSONObject.toBean((JSONObject)place, PmsPlace.class));
-        }
-        for (Object knowledge : knowledgeArray) {
-            pmsKnowledgeList.add((PmsKnowledge)JSONObject.toBean((JSONObject)knowledge, PmsKnowledge.class));
-        }
-
-        // 优化的时间起点，即所有项目的最早开始时间
-        optOrigin = new Timestamp(Long.MAX_VALUE);
-
-        // 优化的时间终点，即所有项目的最晚完成时间
-        optDestination = new Timestamp(Long.MIN_VALUE);
-
-        // 优化起点与终点时间相隔的天数
-        optDays = 0;
-
-        // 所有参与优化的项目，key为项目UID，value为对应项目实例
-        pmsProjectMap = new HashMap<>();
-
-        // 所有参与优化的项目的最大步长，key为项目UID，value为对应项目的任务数量最大的路径上的任务个数
-        projMaxPathTaskCountMap = new HashMap<>();
-
-        // 项目的无紧前任务的任务和无紧后任务的任务，key是项目UID，value是项目中没有紧前任务的任务节点和无紧后任务的任务两个list组成的数组
-        // 两者分别是数组的第0个元素和第1个元素
-        projFirstLastTasksMap = new HashMap<>();
-
-        // 所有参与优化的流程，key为流程UID，value为对应流程实例
-        pmsProcessMap = new HashMap<>();
-
-        // 所有任务组及其包含的任务，key为任务组UID，value为其包含的任务数组
-        groupUidOptTaskNodesMap = new HashMap<>();
-
-        // 每个任务组的首尾任务节点，key为任务组Uid，value为任务组内首尾节点组成的数组，下标0为首节点，下标1为尾结点
-        groupUidFirstAndLastTaskNode = new HashMap<>();
-
-        // 任务Uid和其所属任务组Uid的map
-        taskUidAndGroupUid = new HashMap<>();
-
-        // 所有参与优化的任务，key为任务UID，value为对应OptTaskNode
-        optTaskNodeMap = new HashMap<>();
-
-        // 所有任务的资源方案，key为任务UID，value为该任务包含的资源方案
-        taskResPlanMap = new HashMap<>();
-
-        // 所有涉及到的非独占资源的数量，key为资源UID，value为该资源实例的数量
-        Map<String, Double> resAmountMap = new HashMap<>();
-        // 所有资源方案的资源需求，key为资源方案UID，value为该资源包含的资源需求
-        resPlanResReqMap = new HashMap<>();
-
-        // 资源占用情况，key为资源UID，value为该资源被占用的时间段链表
-        resOcpyNodeMap = new HashMap<>();
-
-        startOptTaskNode = new OptTaskNode();  // 虚拟首节点
-        endOptTaskNode = new OptTaskNode();    // 虚拟尾结点
-
-        List<String> projUidList = new ArrayList<>();   // 待优化项目UID集合
-        // 获取全部待优化流程
-//        for (PmsProcess pmsProcess : pmsProcessService.selectByUidList(procUidList)) {
-//            pmsProcessMap.put(pmsProcess.getProcUid(), pmsProcess);
-//            projUidList.add(pmsProcess.getProcProjUid());
-//        }
-        // 获取全部待优化项目，并得到优化起点和终点时间
-        for (PmsProject pmsProject : pmsProjectList) {
-            pmsProjectMap.put(pmsProject.getProjUid(), pmsProject);
-            Timestamp projEarly = pmsProject.getProjEarlyStartDateTime();
-            Timestamp projLate = pmsProject.getProjLateFinishDateTime();
-            // 优化起点为各项目最早的最早开始时间，终点为最晚的最晚结束时间
-            if (optOrigin != null && projEarly != null && projEarly.before(optOrigin)) {
-                optOrigin.setTime(projEarly.getTime());
-            }
-            if (optDestination != null && projLate != null && projLate.after(optDestination)) {
-                optDestination.setTime(projLate.getTime());
-            }
-        }
-        // 得到优化起点与终点时间相隔的天数
-        optDays = (optDestination.getTime() - optOrigin.getTime()) / (MS_OF_DAY);
-
-        // 获取全部待优化任务，实例化任务链表的节点OptTaskNode
-        for (PmsTask pmsTask : pmsTaskList) {
-            optTaskNodeMap.put(pmsTask.getTaskUid(), new OptTaskNode(pmsTask));
-        }
-        optTaskCountSum = optTaskNodeMap.size();    // 待优化任务总数
-
-        resPlanPriCumulation = new ArrayList[optTaskCountSum + 4];
-
-        // 获取全部任务组与任务的关系，初始化同组任务map，groupUidOptTaskNodesMap以及taskUidAndGroupUid
-        for (PmsTaskGroup taskGroup : pmsTaskGroupList) {
-            if (groupUidOptTaskNodesMap.containsKey(taskGroup.getTaskGroupGroupUid())) {
-                groupUidOptTaskNodesMap.get(taskGroup.getTaskGroupGroupUid()).add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
-            } else {
-                List<OptTaskNode> optTaskNodeList = new ArrayList<>();
-                optTaskNodeList.add(optTaskNodeMap.get(taskGroup.getTaskGroupTaskUid()));
-                groupUidOptTaskNodesMap.put(taskGroup.getTaskGroupGroupUid(), optTaskNodeList);
-            }
-            taskUidAndGroupUid.put(taskGroup.getTaskGroupTaskUid(), taskGroup.getTaskGroupGroupUid());
-        }
-
-        // 获取全部待优化任务的资源方案，初始化“任务-资源方案”taskResPlanMap
-        for (PmsTaskResPlan pmsTaskResPlan : pmsTaskResPlanList) {
-            String pmsTaskUid = pmsTaskResPlan.getResPlanTaskUid();
-            if (!taskResPlanMap.containsKey(pmsTaskUid)) {
-                taskResPlanMap.put(pmsTaskUid, new LinkedList<PmsTaskResPlan>());
-            }
-            taskResPlanMap.get(pmsTaskUid).add(pmsTaskResPlan);
-        }
-        // 获取涉及的非独占资源的原数量
-        for (PmsPlace pmsPlace : pmsPlaceList) {
-            resAmountMap.put(pmsPlace.getPlaceUid(), pmsPlace.getPlaceArea().doubleValue());
-        }
-        for (PmsKnowledge pmsKnowledge : pmsKnowledgeList) {
-            resAmountMap.put(pmsKnowledge.getKnowlUid(), pmsKnowledge.getKnowlAmount().doubleValue());
-        }
-        // 初始化“资源方案-资源需求”resPlanResReqMap
-        for (PmsTaskResReq pmsTaskResReq : pmsTaskResReqList) {
-            String resPlanUid = pmsTaskResReq.getResReqResPlanUid();
-            if (!resPlanResReqMap.containsKey(resPlanUid)) {
-                resPlanResReqMap.put(resPlanUid, new LinkedList<PmsTaskResReq>());
-            }
-            resPlanResReqMap.get(resPlanUid).add(pmsTaskResReq);
-        }
-        // 获取全部任务连接，并赋予任务节点optTaskNode中的普通连接集合，使待优化任务节点连接起来
-        for (PmsTaskLink pmsTaskLink : pmsTaskLinkList) {
-            OptTaskNode preTaskNode = optTaskNodeMap.get(pmsTaskLink.getTaskLinkPreTaskUid());  // 连接中的前任务
-            OptTaskNode sucTaskNode = optTaskNodeMap.get(pmsTaskLink.getTaskLinkSucTaskUid());  // 连接中的后任务
-            preTaskNode.getNormalSucTasks().add(sucTaskNode);
-            sucTaskNode.getNormalPreTasks().add(preTaskNode);
-        }
-        // 确定任务的互斥任务集合，此处任务关系指，两个任务没有前后关系但又不能同时进行；
-        // 找出任务组的首尾节点，初始化groupUidFirstAndLastTaskNode。
-        if (!groupUidOptTaskNodesMap.isEmpty()) {
-            for (Map.Entry<String, List<OptTaskNode>> entry : groupUidOptTaskNodesMap.entrySet()) {
-                String groupUid = entry.getKey();
-                List<OptTaskNode> optTaskNodes = entry.getValue();
-                if (optTaskNodes.isEmpty()) {
-                    continue;
-                }
-                // 找出任务组的首尾节点，初始化groupUidFirstAndLastTaskNode
-                OptTaskNode firstTaskNode = optTaskNodes.get(0);
-                OptTaskNode lastTaskNode = optTaskNodes.get(optTaskNodes.size() - 1);
-                while (!firstTaskNode.getNormalPreTasks().isEmpty() && optTaskNodes.contains(firstTaskNode.getNormalPreTasks().get(0))) {
-                    firstTaskNode = firstTaskNode.getNormalPreTasks().get(0);
-                }
-                while (!lastTaskNode.getNormalSucTasks().isEmpty() && optTaskNodes.contains(lastTaskNode.getNormalSucTasks().get(0))) {
-                    lastTaskNode = lastTaskNode.getNormalSucTasks().get(0);
-                }
-                OptTaskNode[] firstAndLastTaskNode = new OptTaskNode[2];
-                firstAndLastTaskNode[0] = firstTaskNode;
-                firstAndLastTaskNode[1] = lastTaskNode;
-                groupUidFirstAndLastTaskNode.put(groupUid, firstAndLastTaskNode);
-                // 确定任务的互斥任务集合
-                for (OptTaskNode optTaskNode : optTaskNodes) {
-                    optTaskNode.setMutexTasks(new ArrayList<>(optTaskNodes));
-                    optTaskNode.getMutexTasks().remove(optTaskNode);
-                }
-            }
-            // 确定任务组内以及与任务组相关的任务节点的实际紧前任务和紧后任务集合
-            for (Map.Entry<String, List<OptTaskNode>> entry : groupUidOptTaskNodesMap.entrySet()) {
-                String groupUid = entry.getKey();
-                List<OptTaskNode> curGroupTaskNodes = entry.getValue();
-                List<OptTaskNode> preTaskNodes = groupUidFirstAndLastTaskNode.get(groupUid)[0].getNormalPreTasks();
-                List<OptTaskNode> sucTaskNodes = groupUidFirstAndLastTaskNode.get(groupUid)[1].getNormalSucTasks();
-                Set<OptTaskNode> preTaskNodeSetOfGroup = new HashSet<>();
-                Set<OptTaskNode> sucTaskNodeSetOfGroup = new HashSet<>();
-                // 任务组的紧前任务
-                if (preTaskNodes != null && !preTaskNodes.isEmpty()) {
-                    for (OptTaskNode pre : preTaskNodes) {
-                        Set<OptTaskNode> sucTaskNodeSetOfPre = new HashSet<>(pre.getSucTasks());
-                        sucTaskNodeSetOfPre.addAll(curGroupTaskNodes);
-                        sucTaskNodeSetOfPre.addAll(pre.getNormalSucTasks());
-                        if (!taskUidAndGroupUid.containsKey(pre.getPmsTask().getTaskUid())) {
-                            preTaskNodeSetOfGroup.add(pre);
-                        } else {
-                            List<OptTaskNode> preGroupTaskNodes = groupUidOptTaskNodesMap.get(taskUidAndGroupUid.get(pre.getPmsTask().getTaskUid()));
-                            preTaskNodeSetOfGroup.addAll(preGroupTaskNodes);
-                        }
-                        pre.setSucTasks(new ArrayList<>(sucTaskNodeSetOfPre));
-                    }
-                }
-                preTaskNodes = new ArrayList<>(preTaskNodeSetOfGroup);
-                // 任务组的紧后任务
-                if (sucTaskNodes != null && !sucTaskNodes.isEmpty()) {
-                    for (OptTaskNode suc : sucTaskNodes) {
-                        Set<OptTaskNode> preTaskNodeSetOfSuc = new HashSet<>(suc.getPreTasks());
-                        preTaskNodeSetOfSuc.addAll(curGroupTaskNodes);
-                        preTaskNodeSetOfSuc.addAll(suc.getNormalPreTasks());
-                        if (!taskUidAndGroupUid.containsKey(suc.getPmsTask().getTaskUid())) {
-                            sucTaskNodeSetOfGroup.add(suc);
-                        } else {
-                            List<OptTaskNode> sucGroupTaskNodes = groupUidOptTaskNodesMap.get(taskUidAndGroupUid.get(suc.getPmsTask().getTaskUid()));
-                            sucTaskNodeSetOfGroup.addAll(sucGroupTaskNodes);
-                        }
-                        suc.setPreTasks(new ArrayList<>(preTaskNodeSetOfSuc));
-                    }
-                }
-                sucTaskNodes = new ArrayList<>(sucTaskNodeSetOfGroup);
-
-                for (OptTaskNode taskNodeOfGroup : curGroupTaskNodes) {
-                    taskNodeOfGroup.setPreTasks(preTaskNodes);
-                    taskNodeOfGroup.setSucTasks(sucTaskNodes);
-                }
-            }
-        }
-        // 确定所有任务的实际紧前紧后节点，紧前紧后任务数量和当前紧前任务数量，将虚拟首节点和尾结点加入任务连接图中
-        // 赋值任务节点中的资源方案和资源需求集合resPlanReqPairList
-        for (OptTaskNode optTaskNode : optTaskNodeMap.values()) {
-            if (optTaskNode.getPreTasks() == null || optTaskNode.getPreTasks().isEmpty()) {
-                optTaskNode.setPreTasks(optTaskNode.getNormalPreTasks());
-            }
-            int preTaskCount = optTaskNode.getPreTasks().size();    // 紧前任务数量
-            optTaskNode.setPreTaskCount(preTaskCount);
-            optTaskNode.setCurPreTaskCount(preTaskCount);
-            if (preTaskCount == 0) {
-                startOptTaskNode.getSucTasks().add(optTaskNode);
-            }
-
-            if (optTaskNode.getSucTasks() == null || optTaskNode.getSucTasks().isEmpty()) {
-                optTaskNode.setSucTasks(optTaskNode.getNormalSucTasks());
-            }
-            int sucTaskCount = optTaskNode.getSucTasks().size();    // 紧后任务数量
-            optTaskNode.setSucTaskCount(sucTaskCount);
-            optTaskNode.setCurSucTaskCount(sucTaskCount);
-            if (sucTaskCount == 0) {
-                endOptTaskNode.getPreTasks().add(optTaskNode);
-            }
-            // 任务的资源方案和资源需求集合resPlanReqPairList
-            List<PmsTaskResPlan> pmsTaskResPlans = taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid());
-            if (pmsTaskResPlans != null && !pmsTaskResPlans.isEmpty()) {
-                for (PmsTaskResPlan pmsTaskResPlan : pmsTaskResPlans) {
-                    Pair<String, List<PmsTaskResReq>> pair = new Pair<>(pmsTaskResPlan.getResPlanUid(), resPlanResReqMap.get(pmsTaskResPlan.getResPlanUid()));
-                    if (pair.getValue() != null && !pair.getValue().isEmpty())
-                        optTaskNode.getResPlanReqPairList().add(pair);
-                }
-                optTaskNode.setResPlanCount(pmsTaskResPlans.size());    // 该任务的资源方案个数
-            }
-        }
-        // 确定任务的
-        // 后续任务数量（包括自身）最多的路径上的任务个数sucTaskCountSum;
-        // 后续任务工期和（包括自身）最大的路径上的任务工期和sucTaskDurSum;
-        // 任务最晚完成时间与优化起点日期相差的天数lateFinish;
-        // 任务重要性importance
-        // 以及优先级评价函数中相应规则项的值
-        // 倒序广度优先遍历
-        Queue<OptTaskNode> traversalQueue = new LinkedList<>(endOptTaskNode.getPreTasks());
-        while (!traversalQueue.isEmpty()) {
-            OptTaskNode optTaskNode = traversalQueue.poll();
-            for (OptTaskNode preTask : optTaskNode.getPreTasks()) {
-                preTask.setCurSucTaskCount(preTask.getCurSucTaskCount() - 1);
-                // 紧前任务入队
-                if (preTask.getCurSucTaskCount() == 0) {
-                    traversalQueue.add(preTask);
-                    preTask.setCurSucTaskCount(preTask.getCurSucTaskCount());
-                }
-            }
-            // 以当前任务为起点到该任务所在项目终点的路径中：
-            // 最大的任务数量sucTaskCountSum
-            // 最长的任务工期和sucTaskDurSum
-            double sucTaskCountSum = 0;
-            double sucTaskDurSum = 0;
-            for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
-                sucTaskCountSum = Math.max(sucTaskCountSum, sucTask.getSucTaskCountSum());
-                sucTaskDurSum = Math.max(sucTaskDurSum, sucTask.getSucTaskDurSum());
-            }
-            optTaskNode.setSucTaskCountSum(sucTaskCountSum + 1);   // 加上自身的数量1
-            optTaskNode.setSucTaskDurSum(sucTaskDurSum + optTaskNode.getPmsTask().getTaskPlanDur()); // 加上自身工期
-            // 任务最晚完成时间与优化起点日期相差的天数lateFinish
-            optTaskNode.setLateFinish((optTaskNode.getPmsTask().getTaskLateFinishDateTime().getTime() - optOrigin.getTime()) / (MS_OF_DAY));
-            // 任务重要性importance
-            optTaskNode.setImportance(optTaskNode.getPmsTask().getTaskPriority());
-        }
-        // 设定每个项目原本没有紧前任务的任务的最早开始时间，若已设定，则保留；若未设定，则设为项目最早开始时间
-        for (OptTaskNode firstOptTaskNode : startOptTaskNode.getSucTasks()) {
-            PmsTask pmsTask = firstOptTaskNode.getPmsTask();
-            if (pmsTask.getTaskEarlyStartDateTime() == null) {
-                pmsTask.setTaskEarlyStartDateTime(pmsProjectMap.get(pmsTask.getTaskProjUid()).getProjEarlyStartDateTime());
-            }
-            // 初始化projMaxPathTaskCountMap，项目的最大步长，key为项目UID，value为对应项目的任务数量最大的路径上的任务个数
-            if (!projMaxPathTaskCountMap.containsKey(pmsTask.getTaskProjUid())) {
-                projMaxPathTaskCountMap.put(pmsTask.getTaskProjUid(), firstOptTaskNode.getSucTaskCountSum());
-            } else  {
-                projMaxPathTaskCountMap.put(pmsTask.getTaskProjUid(), Math.max(projMaxPathTaskCountMap.get(pmsTask.getTaskProjUid()), firstOptTaskNode.getSucTaskCountSum()));
-            }
-            // 初始化projFirstLastTasksMap，key是项目UID，value是项目中没有紧前任务的任务节点和无紧后任务的任务两个list组成的数组
-            if (!projFirstLastTasksMap.containsKey(pmsTask.getTaskProjUid())) {
-                projFirstLastTasksMap.put(pmsTask.getTaskProjUid(), new ArrayList[]{ new ArrayList<>(), new ArrayList<>() });
-            }
-            projFirstLastTasksMap.get(pmsTask.getTaskProjUid())[0].add(firstOptTaskNode);
-        }
-        // 赋值任务节点中的项目最大步长，即项目包含最多任务数量的路径中的任务数量maxProjPathTaskCount
-        // 计算任务优先级评价函数中各规则项的值
-        // 为每个任务指定其资源方案编号在编码中的位置下标resPlanIndex
-        // 正序广度优先遍历每个项目
-        genValueLimit = new int[optTaskCountSum + 4];
-        for (int i = 0; i < 4; i++) {
-            genValueLimit[i] = 1;       // 前半段基因取值的上限为1
-        }
-        int resPlanGenIndex = 4;    // 后半段表示资源方案，从下标4开始
-        for (List<OptTaskNode>[] firstLastOptTaskNodes : projFirstLastTasksMap.values()) {
-            List<OptTaskNode> firstOptTaskNodes = firstLastOptTaskNodes[0];
-            double maxProjPathTaskCount = projMaxPathTaskCountMap.get(firstOptTaskNodes.get(0).getPmsTask().getTaskProjUid());
-            // 正序广度优先遍历一个项目
-            Queue<OptTaskNode> queue = new LinkedList<>(firstOptTaskNodes);
-            while (!queue.isEmpty()) {
-                OptTaskNode optTaskNode = queue.poll();
-                for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
-                    sucTask.setCurPreTaskCount(sucTask.getCurPreTaskCount() - 1);
-                    // 紧后任务入队
-                    if (sucTask.getCurPreTaskCount() == 0) {
-                        queue.add(sucTask);
-                        sucTask.setCurPreTaskCount(sucTask.getPreTaskCount());
-                    }
-                }
-                // 指定在编码中的位置下标
-                optTaskNode.setResPlanGenIndex(resPlanGenIndex);
-                // 后半段基因取值的上限为资源方案的权重的数字总和
-                resPlanPriCumulation[resPlanGenIndex] = new ArrayList<>();
-
-                List<PmsTaskResPlan> tempResPlans = taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid());
-                if (tempResPlans != null && !tempResPlans.isEmpty()) {
-                    List<Integer> priList = new ArrayList<>();
-                    for (PmsTaskResPlan pmsTaskResPlan : taskResPlanMap.get(optTaskNode.getPmsTask().getTaskUid())) {
-                        if (!resPlanResReqMap.containsKey(pmsTaskResPlan.getResPlanUid())) {    // 忽略空的资源方案
-                            continue;
-                        }
-                        if (priList.isEmpty()) {
-                            priList.add(pmsTaskResPlan.getResPlanPriority());
-                        }
-                        else {
-                            if (pmsTaskResPlan.getResPlanPriority() != priList.get(priList.size() - 1)) {   // 去掉重复值
-                                priList.add(pmsTaskResPlan.getResPlanPriority());
-                            }
-                        }
-                    }
-                    if (!priList.isEmpty()) {
-                        // 反转priList
-                        Collections.reverse(priList);
-                        // 初始化genValueLimit和resPlanPriCumulation
-                        genValueLimit[resPlanGenIndex] = priList.get(0);
-                        resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
-                        int priIndex = 0;       // priList的下标
-                        for (int i = 1; i < tempResPlans.size(); i++) {
-                            if (!resPlanResReqMap.containsKey(tempResPlans.get(i).getResPlanUid())) {    // 忽略空的资源方案
-                                continue;
-                            }
-                            int resPlanPriority = tempResPlans.get(i).getResPlanPriority();
-                            int preResPlanPriority = tempResPlans.get(i - 1).getResPlanPriority();
-                            if (resPlanPriority != preResPlanPriority) {
-                                priIndex++;
-                            }
-                            genValueLimit[resPlanGenIndex] += priList.get(priIndex);
-                            resPlanPriCumulation[resPlanGenIndex].add(genValueLimit[resPlanGenIndex]);
-                        }
-                    }
-                }
-                resPlanGenIndex++;
-//                genValueLimit[resPlanGenIndex++] = optTaskNode.getResPlanReqPairList().size();    // 后半段基因取值的上限为资源方案的个数
-                // 赋值任务节点中的maxProjPathTaskCount
-                optTaskNode.setMaxProjPathTaskCount(maxProjPathTaskCount);
-
-                // 计算任务优先级评价函数中各规则项的值
-                // 后续任务数量规则项的值
-                optTaskNode.setSucTaskCountSumValue(optTaskNode.getSucTaskCountSum() / maxProjPathTaskCount);
-                // 后续任务工期和规则项的值
-                double projPlanDur = pmsProjectMap.get(optTaskNode.getPmsTask().getTaskProjUid()).getProjPlanDur();
-                optTaskNode.setSucTaskDurSumValue(optTaskNode.getSucTaskDurSum() / projPlanDur);
-                // 任务最晚完成时间规则项的值
-                optTaskNode.setLateFinishValue(1 - optTaskNode.getLateFinish() / optDays);
-                // 任务重要性规则项的值
-                optTaskNode.setImportanceValue(optTaskNode.getImportance() / IMPORTANCEVALUE_HIGHEST);
-
-                // 将projFirstLastTasksMap补充完整，补充每个项目的无紧后任务的任务
-                if (optTaskNode.getSucTaskCount() == 0) {
-                    projFirstLastTasksMap.get(optTaskNode.getPmsTask().getTaskProjUid())[1].add(optTaskNode);
-                }
-            }
-        }
-
-        return startOptTaskNode;
-    }
     /**
      * 流程优化主体
      * @param procUidList
@@ -987,22 +560,44 @@ public class OptMain {
         int G = 0;
         // 种群的代数
         int chromosomeNum = CHROMOSOME_NUM;              // 种群中的个体（染色体）个数
-        int genNum = optTaskCountSum + 4;   // 一个染色体上的基因个数，即编码长度
-        double[][] population = new double[chromosomeNum][genNum];  // 种群存在数组中
+        int genNum = optTaskCountSum << 1;   // 一个染色体上的基因个数，即编码长度
+        int[][] population = new int[chromosomeNum][genNum];  // 种群存在数组中
         double[] populationFitness = new double[chromosomeNum];     // 记录种群中个体的适应度值
+        int[][] sunPopulation = new int[chromosomeNum << 1][genNum];  // 交叉和变异得到的个体
+//        double[] sunPopulationFitness = new double[chromosomeNum];     // 交叉和变异个体的适应度值
         // 初始化种群
         Random random = new Random();
-        for (int i = 0; i < chromosomeNum; i++) {
-            for (int j = 0; j < 4; j++) {
-                population[i][j] = random.nextDouble();
-            }
-            for (int j = 4; j < genNum; j++) {
-                if (genValueLimit[j] == 0)
-                    population[i][j] = -1;  // 若任务没有资源方案，则对应基因置为-1
-                else
-                    population[i][j] = getResPlanNo(j, random.nextInt(genValueLimit[j]));    // 资源方案序号
+        if (startOptTaskNode != null) {
+            List<OptTaskNode> readyTaskNodes = new LinkedList<>();
+            for (int i = 0; i < chromosomeNum; i++) {
+                int genIndex = 0;
+                // 正序广度优先遍历所有任务
+                readyTaskNodes.addAll(startOptTaskNode.getSucTasks());
+                while (!readyTaskNodes.isEmpty()) {
+                    int taskIndex = random.nextInt(readyTaskNodes.size());
+                    OptTaskNode optTaskNode = readyTaskNodes.remove(taskIndex);     // 随机选择一个无紧前任务的任务
+                    int taskNo = optTaskNode.getTaskNo();
+                    population[i][genIndex] = taskNo;            // 填充一位基因
+                    if (genValueLimit[taskNo] == 0)
+                        population[i][optTaskCountSum + genIndex] = -1;  // 若任务没有资源方案，则对应资源基因置为-1，否则按优先级随机选取一个资源方案
+                    else {
+                        population[i][optTaskCountSum + genIndex] = getResPlanNo(taskNo, random.nextInt(genValueLimit[taskNo]));
+//                        optTaskNode.setResPlanGenIndex(optTaskCountSum + genIndex);
+                    }
+                    genIndex++;
+                    // 紧后任务入队
+                    for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
+                        sucTask.setCurPreTaskCount(sucTask.getCurPreTaskCount() - 1);
+                        // 无紧前任务的紧后任务入队
+                        if (sucTask.getCurPreTaskCount() == 0) {
+                            readyTaskNodes.add(sucTask);
+                            sucTask.setCurPreTaskCount(sucTask.getPreTaskCount());
+                        }
+                    }
+                }
             }
         }
+
         // 计算初始种群中个体的适应度函数，初始化populationFitness
         System.out.println("**********************适应度*********************");
         System.out.println("第" + G + "代");
@@ -1014,28 +609,66 @@ public class OptMain {
         // 开始迭代进化
         while (++G <= maxG) {
             System.out.println("第" + G + "代");
-            // 逐个遍历种群的个体，对第i个个体进行“变异->交叉->选择”操作，得到下一代种群的第i个个体
-            // 先进行变异、交叉，得到每个个体对应的交叉个体
-            double[][] populationCrossover = new double[chromosomeNum][genNum]; // 暂存交叉个体
-            // 遍历种群，得到交叉个体
+            // 逐个遍历种群的个体，对第i个个体进行“交叉->变异”操作，将新产生的个体保存在sunPopulation中
+            int sunIndex = 0;
             for (int i = 0; i < chromosomeNum; i++) {
-                double[] target = population[i];                            // 目标个体
-                double[] mutation = mutate(i, population, genValueLimit);   // 得到变异个体（返回的是new double[]）
-                double[] crossover = cross(target, mutation);               // 得到交叉个体（返回的是改变数值后的mutation）
-                populationCrossover[i] = crossover;                         // 暂存交叉个体，以免population数组中的数据变化影响其他个体的变异交叉
-            }
-            // 选择操作，比较个体与其对应的交叉个体的适应度值，选择适应度值小（综合工期+罚函数值小）的个体进入下一代
-            for (int i = 0; i < chromosomeNum; i++) {
-                // 如果交叉个体的适应度值小于原个体，则选择交叉个体进入种群的下一代，否则，保持原个体进入下一代
-                double targetFitness = fitness(G, decode(population[i]));               // 由于G增大了，所以要重新计算目标个体的适应度值
-                double crossoverFitness = fitness(G, decode(populationCrossover[i]));   // 交叉个体的适应度值
-                if(crossoverFitness < targetFitness) {
-                    population[i] = populationCrossover[i];
-                    populationFitness[i] = crossoverFitness;        // 更新种群中第i个个体的适应度值
-                } else {
-                    populationFitness[i] = targetFitness;
+                int[] target = population[i];                            // 目标个体
+                if (Math.random() < CR) {
+                    int[] crossover = cross(target, population, i);               // 得到交叉个体（返回的是new int[]）
+                    if (Math.random() < MR) {
+                        int[] mutation = mutate(crossover, genValueLimit);   // 得到变异个体（返回的是变异后的crossover，不是new int[]）
+                        sunPopulation[sunIndex++] = mutation;
+                    } else {
+                        sunPopulation[sunIndex++] = crossover;
+                    }
                 }
             }
+
+            // 选择操作，比较个体与其对应的交叉个体的适应度值，选择适应度值小（综合工期+罚函数值小）的个体进入下一代
+            int[][] newPopulation = new int[chromosomeNum][genNum];
+            double[] newPopulationFitness = new double[chromosomeNum];
+            int newIndex = 0;       // 新种群newPopulationd的下标指示
+            // 交叉变异产生的个体锦标赛，前后对称的两个个体比较，留下优秀的
+            for (int i = 0, j = sunIndex - 1; i <= j; i++, j--) {
+                double firstFitness = fitness(G, decode(sunPopulation[i]));
+                double secondFitness = fitness(G, decode(sunPopulation[j]));
+                if (firstFitness < secondFitness) {
+                    newPopulation[newIndex++] = sunPopulation[i];
+                    newPopulationFitness[i] = firstFitness;
+                } else {
+                    newPopulation[newIndex++] = sunPopulation[j];
+                    newPopulationFitness[i] = secondFitness;
+                }
+            }
+            // 原种群个体锦标赛，新种群补充完整
+            int spareNum = chromosomeNum - newIndex;    // 还需要补充的个体个数
+            int team = chromosomeNum / spareNum;        // 每组的个体数量，组内竞标
+            int remainder = chromosomeNum % team;       // 分组后剩下凑不够一组的个体数量，之后将这些个体合并进第一组参与竞赛
+            int index = 0;                              // 原种群的下标指示
+            double tmpFitness = Double.MAX_VALUE;
+            // 第一组与“剩余个体”一起竞赛
+            for (index = 0; index < remainder + team; index++) {
+                if (populationFitness[index] < tmpFitness) {
+                    newPopulation[newIndex] = population[index];
+                    newPopulationFitness[newIndex] = populationFitness[index];
+                }
+            }
+            newIndex++;
+            // 逐个组进行组内竞赛，胜出的留下
+            while (index < chromosomeNum && newIndex < chromosomeNum) {
+                tmpFitness = Double.MAX_VALUE;
+                for (int i = 0; i < team; i++) {
+                    if (populationFitness[index] < tmpFitness) {
+                        newPopulation[newIndex] = population[index];
+                        newPopulationFitness[newIndex] = populationFitness[index];
+                    }
+                    index++;
+                }
+                newIndex++;
+            }
+            population = newPopulation;
+            populationFitness = newPopulationFitness;
+
             // 打印新一代适应度值
             for (int i = 0; i < chromosomeNum; i++) {
                 populationFitness[i] = fitness(G, decode(population[i]));
@@ -1044,7 +677,7 @@ public class OptMain {
             System.out.println();
         }
         // 找出优化后，种群中的最佳个体
-        double[] bestIndividual  = population[0];
+        int[] bestIndividual  = population[0];
         double bestFitness = populationFitness[0];
         for (int i = 0; i < chromosomeNum; i++) {
             if (bestFitness > populationFitness[i]) {
@@ -1059,7 +692,7 @@ public class OptMain {
         decode(bestIndividual);
         // 正序广度优先遍历，打印优化结果
         List<PmsTask> result = new LinkedList<>();
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
+        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的降序排列
         priQueue.addAll(startOptTaskNode.getSucTasks());
         while (!priQueue.isEmpty()) {
             OptTaskNode optTaskNode = priQueue.poll();
@@ -1082,106 +715,13 @@ public class OptMain {
         return result;
     }
 
-    public List<PmsTask> webOptimize(JSONObject info) {
-        webInitTaskNodes(info);  // 初始化任务节点图，获得任务节点网络的虚拟首节点
-
-        int maxG = MAX_G;                       // 最大迭代次数
-        int G = 0;
-        // 种群的代数
-        int chromosomeNum = CHROMOSOME_NUM;              // 种群中的个体（染色体）个数
-        int genNum = optTaskCountSum + 4;   // 一个染色体上的基因个数，即编码长度
-        double[][] population = new double[chromosomeNum][genNum];  // 种群存在数组中
-        double[] populationFitness = new double[chromosomeNum];     // 记录种群中个体的适应度值
-        // 初始化种群
-        Random random = new Random();
-        for (int i = 0; i < chromosomeNum; i++) {
-            for (int j = 0; j < 4; j++) {
-                population[i][j] = random.nextDouble();
-            }
-            for (int j = 4; j < genNum; j++) {
-                if (genValueLimit[j] == 0)
-                    population[i][j] = -1;  // 若任务没有资源方案，则对应基因置为-1
-                else
-                    population[i][j] = getResPlanNo(j, random.nextInt(genValueLimit[j]));    // 资源方案序号
-            }
-        }
-        // 计算初始种群中个体的适应度函数，初始化populationFitness
-        System.out.println("**********************适应度*********************");
-        System.out.println("第" + G + "代");
-        for (int i = 0; i < chromosomeNum; i++) {
-            populationFitness[i] = fitness(G, decode(population[i]));
-            System.out.print(populationFitness[i] + "\t");
-        }
-        System.out.println();
-        // 开始迭代进化
-        while (++G <= maxG) {
-            System.out.println("第" + G + "代");
-            // 逐个遍历种群的个体，对第i个个体进行“变异->交叉->选择”操作，得到下一代种群的第i个个体
-            // 先进行变异、交叉，得到每个个体对应的交叉个体
-            double[][] populationCrossover = new double[chromosomeNum][genNum]; // 暂存交叉个体
-            // 遍历种群，得到交叉个体
-            for (int i = 0; i < chromosomeNum; i++) {
-                double[] target = population[i];                            // 目标个体
-                double[] mutation = mutate(i, population, genValueLimit);   // 得到变异个体（返回的是new double[]）
-                double[] crossover = cross(target, mutation);               // 得到交叉个体（返回的是改变数值后的mutation）
-                populationCrossover[i] = crossover;                         // 暂存交叉个体，以免population数组中的数据变化影响其他个体的变异交叉
-            }
-            // 选择操作，比较个体与其对应的交叉个体的适应度值，选择适应度值小（综合工期+罚函数值小）的个体进入下一代
-            for (int i = 0; i < chromosomeNum; i++) {
-                // 如果交叉个体的适应度值小于原个体，则选择交叉个体进入种群的下一代，否则，保持原个体进入下一代
-                double targetFitness = fitness(G, decode(population[i]));               // 由于G增大了，所以要重新计算目标个体的适应度值
-                double crossoverFitness = fitness(G, decode(populationCrossover[i]));   // 交叉个体的适应度值
-                if(crossoverFitness < targetFitness) {
-                    population[i] = populationCrossover[i];
-                    populationFitness[i] = crossoverFitness;        // 更新种群中第i个个体的适应度值
-                } else {
-                    populationFitness[i] = targetFitness;
-                }
-            }
-            // 打印新一代适应度值
-            for (int i = 0; i < chromosomeNum; i++) {
-                populationFitness[i] = fitness(G, decode(population[i]));
-                System.out.print(populationFitness[i] + "\t");
-            }
-            System.out.println();
-        }
-        // 找出优化后，种群中的最佳个体
-        double[] bestIndividual  = population[0];
-        double bestFitness = populationFitness[0];
-        for (int i = 0; i < chromosomeNum; i++) {
-            if (bestFitness > populationFitness[i]) {
-                bestFitness = populationFitness[i];
-                bestIndividual = population[i];
-            }
-        }
-        // 最佳个体解码，重置任务优先级、资源占用表
-        decode(bestIndividual);
-        // 正序广度优先遍历，打印优化结果
-        List<PmsTask> result = new LinkedList<>();
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
-        priQueue.addAll(startOptTaskNode.getSucTasks());
-        while (!priQueue.isEmpty()) {
-            OptTaskNode optTaskNode = priQueue.poll();
-            for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
-                sucTask.setCurPreTaskCount(sucTask.getCurPreTaskCount() - 1);
-                // 可执行的紧后任务入队
-                if (sucTask.getCurPreTaskCount() == 0) {
-                    sucTask.setCurPreTaskCount(sucTask.getPreTaskCount());  // 恢复当前紧前任务值，以便下次遍历时使用
-                    priQueue.add(sucTask);
-                }
-            }
-            PmsTask pmsTask = optTaskNode.getPmsTask();
-            result.add(pmsTask);
-        }
-        return result;
-    }
-
     /**
      * 解码，得到个体对应的计划中，每个项目的开始、结束时间，存入projStartFinishTimeMap并返回
      * @param chromosome
      * @return
      */
-    public Map<String, Timestamp[]> decode(double[] chromosome) {
+    public Map<String, Timestamp[]> decode(int[] chromosome) {
+
         Map<String, Timestamp[]> projStartFinishTimeMap = new HashMap<>();
         Map<String, OptTaskNode> readyTaskMap = new HashMap<>();        // 存储已被安排时间的任务节点，key为任务UID
 //        resOcpyNodeMap = new HashMap<>();
@@ -1198,25 +738,11 @@ public class OptMain {
                 newNode = newNode.sucOcpy;
             }
         }
-        // 正序广度优先遍历，解码，求个体的工期Dur和完成时间Finish
-        Queue<OptTaskNode> priQueue = new PriorityQueue<>(cmpOptTaskNodeByPriority);  // 任务优先队列，按任务优先级评价的升序排列
-        // 求原任务节点图中，没有紧前任务的任务节点的优先级评价值
-        for (OptTaskNode optTaskNode : startOptTaskNode.getSucTasks()) {
-            // 计算个体的优先级评价值
-            optTaskNode.setPriorityValue(priorityValue(optTaskNode, chromosome));
-        }
-        priQueue.addAll(startOptTaskNode.getSucTasks());
-        while (!priQueue.isEmpty()) {
-            OptTaskNode optTaskNode = priQueue.poll();
-            for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
-                sucTask.setCurPreTaskCount(sucTask.getCurPreTaskCount() - 1);
-                // 可执行的紧后任务入队
-                if (sucTask.getCurPreTaskCount() == 0) {
-                    sucTask.setPriorityValue(priorityValue(sucTask, chromosome));   // 入队前要计算优先级评价值
-                    sucTask.setCurPreTaskCount(sucTask.getPreTaskCount());  // 恢复当前紧前任务值，以便下次遍历时使用
-                    priQueue.add(sucTask);
-                }
-            }
+        // 按个体编码的顺序遍历任务，解码，求个体的工期Dur和完成时间Finish
+        for (int i = 0; i < optTaskCountSum; i++) {
+            int taskNo = chromosome[i];
+            OptTaskNode optTaskNode = optTaskNodeListByNo.get(taskNo);
+
             // 安排任务开始、结束时间
             PmsTask pmsTask = optTaskNode.getPmsTask();     // 获取任务实例
             // 确定安排任务开始时间的搜索起点，即任务最早开始时间及其紧前任务的计划完成时间中，最晚的时间
@@ -1235,7 +761,7 @@ public class OptMain {
             // 初始化任务计划开始、结束时间
             pmsTask.setTaskPlanStartDateTime(taskStart);
             pmsTask.setTaskPlanFinishDateTime(taskFinish);
-            int resPlanIndex = (int)chromosome[optTaskNode.getResPlanGenIndex()];   // 个体选定的该任务的资源方案在任务资源方案list中的下标
+            int resPlanIndex = chromosome[i + optTaskCountSum];   // 个体选定的该任务的资源方案在任务资源方案list中的下标
             if (resPlanIndex == -1) {   // 如果没有资源方案，则不考虑资源
                 readyTaskMap.put(pmsTask.getTaskUid(), optTaskNode);    // 加入已安排任务集合
                 continue;
@@ -1458,12 +984,12 @@ public class OptMain {
 
     /**
      * 返回资源方案在list中的下标
-     * @param j
+     * @param taskNo
      * @param r
      * @return
      */
-    public int getResPlanNo(int j, int r) {
-        List<Integer> cumulation = resPlanPriCumulation[j];
+    public int getResPlanNo(int taskNo, int r) {
+        List<Integer> cumulation = resPlanPriCumulation[taskNo];
         for (int i = 0; i < cumulation.size(); i++) {
             if (r < cumulation.get(i))
                 return i;
@@ -1562,77 +1088,121 @@ public class OptMain {
 
     /**
      * 变异操作
-     * @param target
-     * @param population
+     * @param crossover
      * @param genValueLimit
      * @return
      */
-    public double[] mutate(int target, double[][] population, int[] genValueLimit) {
+    public int[] mutate(int[] crossover, int[] genValueLimit) {
         Random random = new Random();
-        int chromosomeNum = population.length;
-        int genNum = population[0].length;
-        double[] mutation = new double[genNum];     // 变异个体
-        // 选取三个不同的个体
-        int a = (int)(Math.random() * chromosomeNum);
-        int b = (int)(Math.random() * chromosomeNum);
-        int c = (int)(Math.random() * chromosomeNum);
-        while (a == target)
-            a = (int)(Math.random() * chromosomeNum);
-        while (b == a)
-            b = (int)(Math.random() * chromosomeNum);
-        while (c == b)
-            c = (int)(Math.random() * chromosomeNum);
-        double[] r1 = population[a];
-        double[] r2 = population[b];
-        double[] r3 = population[c];
-        // 编码前半段，差分进化产生变异，缩放因子SF
-        for (int i = 0; i < 4; i++) {
-            mutation[i] = r1[i] + SF * (r2[i] - r3[i]);
-            // mutation[i]不超过[0, 1]
-            if (mutation[i] < 0)
-                mutation[i] = -mutation[i];
-            if (mutation[i] > 1)
-                mutation[i] = 2 - mutation[i];
+        int genNum = crossover.length;
+        // 任务顺序单点变异
+        int point = (int) (Math.random() * optTaskCountSum);
+        OptTaskNode optTaskNode = optTaskNodeListByNo.get(crossover[point]);
+        int taskNo = crossover[point];
+        int resPlanNo = crossover[point + optTaskCountSum];
+
+        Set<Integer> preTaskNoSet = new HashSet<>();
+        Set<Integer> sucTaskNoSet = new HashSet<>();
+        for (OptTaskNode preTask : optTaskNode.getPreTasks()) {
+            preTaskNoSet.add(preTask.getTaskNo());
         }
-        // 编码后半段，逐码变异，变异概率MR
-        for (int i = 4; i < genNum; i++) {
-            if (Math.random() < MR) {                   // 如果满足变异概率
-                if (genValueLimit[i] > 0)              // 如果任务有资源方案(!= -1)
-                    mutation[i] = getResPlanNo(i, random.nextInt(genValueLimit[i]));    // 资源方案序号
-            } else {
-                mutation[i] = r1[i];
-            }
+        for (OptTaskNode sucTask : optTaskNode.getSucTasks()) {
+            sucTaskNoSet.add(sucTask.getTaskNo());
         }
 
-        return mutation;
+        int preTaskIndex = point - 1, sucTaskIndex = point + 1;     // 紧前任务和紧后任务在个体编码中的下标
+        while (preTaskIndex > 0 && !preTaskNoSet.contains(crossover[preTaskIndex])) {
+            preTaskIndex--;
+        }
+        while (sucTaskIndex < optTaskCountSum - 1 && !sucTaskNoSet.contains(crossover[sucTaskIndex])) {
+            sucTaskIndex++;
+        }
+
+        int newPoint = (int) (Math.random() * (sucTaskIndex - preTaskIndex - 1)) + preTaskIndex + 1;    // 变异后的位置
+        if (newPoint < point) {
+            for (int i = point; i > newPoint; i--) {
+                crossover[i] = crossover[i - 1];
+            }
+            for (int i = point + optTaskCountSum; i > newPoint + optTaskCountSum; i--) {
+                crossover[i] = crossover[i - 1];
+            }
+            crossover[newPoint] = taskNo;
+            crossover[newPoint + optTaskCountSum] = resPlanNo;
+        } else if (newPoint > point) {
+            for (int i = point; i < newPoint; i++) {
+                crossover[i] = crossover[i + 1];
+            }
+            for (int i = point + optTaskCountSum; i < newPoint + optTaskCountSum; i++) {
+                crossover[i] = crossover[i + 1];
+            }
+            crossover[newPoint] = taskNo;
+            crossover[newPoint + optTaskCountSum] = resPlanNo;
+        }
+        // 任务资源方案逐点变异
+        for (int i = optTaskCountSum; i < genNum; i++) {
+            if (random.nextDouble() < 0.2) {
+                if (crossover[i] != -1) {
+                    int curTaskNo = crossover[i - optTaskCountSum];
+                    crossover[i] = getResPlanNo(curTaskNo, random.nextInt(genValueLimit[curTaskNo]));
+                }
+            }
+        }
+        return crossover;
     }
 
     /**
      * 交叉操作
      * @param target
-     * @param mutation
+     * @param population
+     * @param index
      * @return
      */
-    public double[] cross(double[] target, double[] mutation) {
+    public int[] cross(int[] target, int[][] population, int index) {
         int genNum = target.length;
-        double[] crossover = mutation;      // 变异个体将通过交叉操作成为交叉个体
-        // 编码前半段，差分进化产生交叉，交叉概率为CR
-        for (int i = 0; i < 4; i++) {
-            if (Math.random() < CR) {       // 如果满足交叉概率
-                crossover[i] = target[i];
+        int[] targetMate;                       // 另一个参与交叉的个体
+        int[] crossover = new int[genNum];      // 交叉得到的新个体
+        while (true) {
+            int tmp = (int) (Math.random() * population.length);
+            if (tmp != index) {
+                targetMate = population[tmp];
+                break;
             }
         }
-        // 编码后半段，两点交叉
-        if (Math.random() < CR) {       // 如果满足交叉概率
-            int left = (int) (Math.random() * (genNum - 4)) + 4;      // 交叉点1
-            int right = (int) (Math.random() * (genNum - 4)) + 4;     // 交叉点2
-            if (left > right) {
-                int temp = left;
-                left = right;
-                right = temp;
+        // 特殊的单点交叉
+        int point = (int) (Math.random() * optTaskCountSum);      // 交叉点
+        int[] check = new int[optTaskCountSum];
+        // 保留目标个体的前半段或后半段
+        if (Math.random() < 0.5) {      // 保留前半段
+            for (int i = 0; i <= point; i++) {
+                check[target[i]] = 1;
             }
-            for (int i = left; i <= right; i++) {
+            for (int i = 0; i <= point; i++) {
                 crossover[i] = target[i];
+                crossover[optTaskCountSum + i] = target[optTaskCountSum + i];
+            }
+            int j = point + 1;
+            for (int i = 0; i < optTaskCountSum && j < optTaskCountSum; i++) {
+                if (check[targetMate[i]] == 0) {
+                    crossover[j] = targetMate[i];
+                    crossover[optTaskCountSum + j] = targetMate[optTaskCountSum + i];
+                    j++;
+                }
+            }
+        } else {                         // 保留后半段
+            for (int i = point; i < optTaskCountSum; i++) {
+                check[target[i]] = 1;
+            }
+            for (int i = point; i < optTaskCountSum; i++) {
+                crossover[i] = target[i];
+                crossover[optTaskCountSum + i] = target[optTaskCountSum + i];
+            }
+            int j = 0;
+            for (int i = 0; i < optTaskCountSum && j < point; i++) {
+                if (check[targetMate[i]] == 0) {
+                    crossover[j] = targetMate[i];
+                    crossover[optTaskCountSum + j] = targetMate[optTaskCountSum + i];
+                    j++;
+                }
             }
         }
         return crossover;
@@ -1728,62 +1298,5 @@ public class OptMain {
 
         OptResult optResult = new OptResult(taskList, resOcpyNodesList, procChartTaskList);
         return optResult;
-    }
-    public JSONObject testWebLink(JSONObject info) {
-        List<PmsTask> pmsTaskList = webOptimize(info);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (PmsTask pmsTask : pmsTaskList) {
-            System.out.println(pmsTask.getTaskName());
-            System.out.println(sdf.format(pmsTask.getTaskPlanStartDateTime()));
-            System.out.println(sdf.format(pmsTask.getTaskPlanFinishDateTime()));
-        }
-        Map<String, String> resPlanTaskMap = new HashMap<>();
-        for (Map.Entry<String, List<PmsTaskResPlan>> entry : taskResPlanMap.entrySet()) {
-            String taskUid = entry.getKey();
-            for (PmsTaskResPlan resPlan : entry.getValue()) {
-                resPlanTaskMap.put(resPlan.getResPlanUid(), taskUid);
-            }
-        }
-        Map<String, String> taskUidResPlanUidMap = new HashMap<>();
-        Map<String, List<JSONObject>> resArMap = new HashMap<>(pmsTaskList.size());
-        for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMap.entrySet()) {
-            String resUid = entry.getKey();
-            ResOcpyNode resOcpyNode = entry.getValue().sucOcpy;
-            while (resOcpyNode != null) {
-                if (resOcpyNode.getPmsTaskResReq() == null) {       // 过滤掉非优化项目的占用节点
-                    resOcpyNode = resOcpyNode.sucOcpy;
-                    continue;
-                }
-                JSONObject resAr = new JSONObject();
-                resAr.put("resNo", resUid);
-                resAr.put("planStart", resOcpyNode.getResStartDateTime().getTime());
-                resAr.put("planEnd", resOcpyNode.getResFinishDateTime().getTime());
-                String taskUid = resPlanTaskMap.get(resOcpyNode.getPmsTaskResReq().getResReqResPlanUid());
-                taskUidResPlanUidMap.put(taskUid, resOcpyNode.getPmsTaskResReq().getResReqResPlanUid());
-                if (resArMap.containsKey(taskUid)) {
-                    resArMap.get(taskUid).add(resAr);
-                } else {
-                    List<JSONObject> resArList = new ArrayList<>();
-                    resArList.add(resAr);
-                    resArMap.put(taskUid, resArList);
-                }
-
-                resOcpyNode = resOcpyNode.sucOcpy;
-            }
-        }
-        List<JSONObject> nodeTaskList = new ArrayList<>(pmsTaskList.size());
-        for (PmsTask pmsTask : pmsTaskList) {
-            String taskUid = pmsTask.getTaskUid();
-            JSONObject nodeTask = new JSONObject();
-            nodeTask.put("taskNo", taskUid);
-            nodeTask.put("planStart", pmsTask.getTaskPlanStartDateTime().getTime());
-            nodeTask.put("planEnd", pmsTask.getTaskPlanFinishDateTime().getTime());
-            nodeTask.put("planNo", taskUidResPlanUidMap.get(taskUid));      // 任务选择的资源方案编号
-            nodeTask.put("resList", resArMap.get(taskUid));
-            nodeTaskList.add(nodeTask);
-        }
-        JSONObject result = new JSONObject();
-        result.put("nodeTask", nodeTaskList);
-        return result;
     }
 }

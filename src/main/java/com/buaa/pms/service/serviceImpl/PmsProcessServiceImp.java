@@ -130,7 +130,7 @@ public class PmsProcessServiceImp implements PmsProcessService {
                 return FALSE;
             }
             PmsTask pmsTask = pmsTaskService.selectByUid(pmsProject.getProjTaskUid());  // 项目对应的任务
-            if (pmsTask == null || pmsTask.getTaskType() != 5) {    // 如果项目对应的不是黑盒任务
+            if (pmsTask == null || pmsTask.getTaskType() != 5) {    // 如果项目对应的不是黑箱任务
                 // 将流程及其对应的项目状态设为1-已发布
                 pmsProcess.setProcState(1);
                 this.saveOrUpdate(pmsProcess);
@@ -146,15 +146,15 @@ public class PmsProcessServiceImp implements PmsProcessService {
                 pmsTaskService.updatePmsTasks(tasks);
                 return SUCCESS;
             }
-            if (pmsTask.getTaskType() == 5) {   // 如果项目对应的是黑盒任务
-                List<PmsTask>  pmsTaskList = pmsTaskService.selectByProcUid(pmsProcess.getProcUid());   // 黑盒任务对应流程中的任务
+            if (pmsTask.getTaskType() == 5) {   // 如果项目对应的是黑箱任务
+                List<PmsTask>  pmsTaskList = pmsTaskService.selectByProcUid(pmsProcess.getProcUid());   // 黑箱任务对应流程中的任务
                 if (pmsTaskList == null || pmsTaskList.isEmpty()) {
                     return FALSE;
                 }
                 int n = pmsTaskList.size();
                 int index = pmsTask.getTaskId();
-                // 修改黑盒任务所属流程中任务的编号
-                PmsProcess upProcess = this.selectByUid(pmsTask.getTaskProcUid());  // 黑盒任务所属流程
+                // 修改黑箱任务所属流程中任务的编号
+                PmsProcess upProcess = this.selectByUid(pmsTask.getTaskProcUid());  // 黑箱任务所属流程
                 if (upProcess == null) {
                     return FALSE;
                 }
@@ -165,10 +165,10 @@ public class PmsProcessServiceImp implements PmsProcessService {
                     }
                 }
                 pmsTaskService.updatePmsTaskIds(broTasks);
-                // 处理黑盒中的任务
+                // 处理黑箱中的任务
                 PmsTask firstTask = pmsTaskList.get(0);
                 PmsTask lastTask = pmsTaskList.get(n - 1);
-                // 修改黑盒任务对应流程中任务的连接
+                // 修改黑箱任务对应流程中任务的连接
                 List<PmsTaskLink> preLinks = pmsTaskLinkService.selectBySucTaskUid(pmsTask.getTaskUid());
                 for (PmsTaskLink taskLink : preLinks) {
                     taskLink.setTaskLinkSucTaskUid(firstTask.getTaskUid());
@@ -192,7 +192,7 @@ public class PmsProcessServiceImp implements PmsProcessService {
 //                    pmsTaskLinkService.saveOrUpdate(taskLink);
                 }
                 pmsTaskLinkService.updateTaskLinks(blackLinks);
-                // 修改黑盒任务对应流程中任务的所属流程和项目
+                // 修改黑箱任务对应流程中任务的所属流程和项目
                 for (PmsTask task : pmsTaskList) {
                     task.setTaskParUid(pmsTask.getTaskParUid());
                     task.setTaskProcUid(pmsTask.getTaskProcUid());
@@ -202,23 +202,23 @@ public class PmsProcessServiceImp implements PmsProcessService {
 //                    pmsTaskService.saveOrUpdate(task);
                 }
                 pmsTaskService.updatePmsTasks(pmsTaskList);
-                // 修改黑盒任务对应流程中资源计划的所属流程和项目
+                // 修改黑箱任务对应流程中资源计划的所属流程和项目
                 List<PmsTaskResPlan> taskResPlanList = pmsTaskResPlanService.selectByProcUid(pmsProcess.getProcUid());
                 for (PmsTaskResPlan taskResPlan : taskResPlanList) {
                     taskResPlan.setResPlanProcUid(pmsTask.getTaskProcUid());
                     taskResPlan.setResPlanProjUid(pmsTask.getTaskProjUid());
                 }
                 pmsTaskResPlanService.updatePmsTaskResPlans(taskResPlanList);
-                // 修改黑盒任务对应流程中资源需求的所属流程和项目
+                // 修改黑箱任务对应流程中资源需求的所属流程和项目
                 List<PmsTaskResReq> taskResReqList = pmsTaskResReqService.selectByProcUid(pmsProcess.getProcUid());
                 for (PmsTaskResReq taskResReq : taskResReqList) {
                     taskResReq.setResReqProcUid(pmsTask.getTaskProcUid());
                     taskResReq.setResReqProjUid(pmsTask.getTaskProjUid());
                 }
                 pmsTaskResReqService.updatePmsTaskResReqs(taskResReqList);
-                // 删除黑盒任务
+                // 删除黑箱任务
                 pmsTaskService.deleteByUid(pmsTask.getTaskUid());
-                // 删除黑盒任务对应的项目
+                // 删除黑箱任务对应的项目
                 this.deleteByProjUid(pmsProject.getProjUid());
                 pmsProjectService.deleteByUid(pmsProject.getProjUid());
                 return SUCCESS;

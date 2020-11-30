@@ -10,6 +10,8 @@ import java.util.List;
 public class OptTaskNode {
     private PmsTask pmsTask;
 
+    private int taskNo;
+
     // 实际紧前任务，有真紧前任务时等于真紧前任务集合，否则等于普通紧前任务集合
     private List<OptTaskNode> preTasks;
     // 实际紧后任务
@@ -96,6 +98,14 @@ public class OptTaskNode {
 
     public void setPmsTask(PmsTask pmsTask) {
         this.pmsTask = pmsTask;
+    }
+
+    public int getTaskNo() {
+        return taskNo;
+    }
+
+    public void setTaskNo(int taskNo) {
+        this.taskNo = taskNo;
     }
 
     public List<OptTaskNode> getPreTasks() {

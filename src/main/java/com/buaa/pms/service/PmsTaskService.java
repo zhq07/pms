@@ -21,6 +21,8 @@ public interface PmsTaskService {
 
     public List<Task> getTaskListByProcUid(String taskProcUid);
 
+    public List<List<Task>> getProcChartTaskListByProcUid(String taskProcUid);
+
     public List<PmsTask> getPmsTaskListByGroupUid(String groupUid);
 
     public List<PmsTask> selectByParUid(String taskParUid);

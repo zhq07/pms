@@ -44,6 +44,11 @@ public class PmsTaskController {
         return pmsTaskService.getTaskListByProcUid(taskProcUid);
     }
 
+    @GetMapping("/getProcChartTaskListByProcUid/{taskProcUid}")
+    public List<List<Task>> getProcChartTaskListByProcUid(@PathVariable String taskProcUid) {
+        return pmsTaskService.getProcChartTaskListByProcUid(taskProcUid);
+    }
+
     @GetMapping("/getByParUid/{taskParUid}")
     public List<PmsTask> getPmsTaskByParUid(@PathVariable String taskParUid) {
         return pmsTaskService.selectByParUid(taskParUid);

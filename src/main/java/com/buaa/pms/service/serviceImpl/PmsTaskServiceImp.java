@@ -2,6 +2,7 @@ package com.buaa.pms.service.serviceImpl;
 
 import com.buaa.pms.entity.*;
 import com.buaa.pms.mapper.PmsTaskMapper;
+import com.buaa.pms.model.OptTaskNode;
 import com.buaa.pms.model.Task;
 import com.buaa.pms.service.*;
 import com.buaa.pms.service.PmsGroupService;
@@ -9,10 +10,7 @@ import com.buaa.pms.util.MyUUID;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PmsTaskServiceImp implements PmsTaskService {
@@ -83,6 +81,42 @@ public class PmsTaskServiceImp implements PmsTaskService {
         List<PmsTaskGroup> pmsTaskGroups = pmsTaskGroupService.selectByProcUid(taskProcUid);
         List<PmsGroup> pmsGroups = pmsGroupService.selectByProcUid(taskProcUid);
         return this.getTaskListByPmsTasksAndTaskLinksAndtaskGroups(pmsTasks, pmsTaskLinks, pmsTaskGroups, pmsGroups);
+    }
+
+    @Override
+    public List<List<Task>> getProcChartTaskListByProcUid(String taskProcUid) {
+        List<Task> taskList = this.getTaskListByProcUid(taskProcUid);
+        Map<String, Task> taskMap = new HashMap<>(taskList.size() << 1);
+        // 根据普通连接，正序广度优先遍历
+        List<List<Task>> procChartTaskList = new LinkedList<>();
+        Set<String> taskUidSet = new HashSet<>();
+        Queue<Task> queue = new LinkedList<>();
+        for (Task task : taskList) {
+            taskMap.put(task.getPmsTask().getTaskUid(), task);
+            // 无紧前任务的任务入队
+            if (task.getTaskNormalPreTasks().isEmpty())
+                queue.add(task);
+        }
+        int size = queue.size();
+        // 分层遍历
+        while (!queue.isEmpty()) {
+            List<Task> tasks = new LinkedList<>();
+            for (int i = 0; i < size; i++) {
+                Task task = queue.poll();
+                task.setTaskRealSucTasks(new LinkedList<PmsTask>());
+                tasks.add(task);
+                for (PmsTask sucPmsTask : task.getTaskNormalSucTasks()) {
+                    task.getTaskRealSucTasks().add(sucPmsTask);
+                    // 紧后任务节点入队
+                    if (taskUidSet.add(sucPmsTask.getTaskUid())) {
+                        queue.add(taskMap.get(sucPmsTask.getTaskUid()));
+                    }
+                }
+            }
+            procChartTaskList.add(tasks);
+            size = queue.size();
+        }
+        return procChartTaskList;
     }
 
     @Override
@@ -223,6 +257,7 @@ public class PmsTaskServiceImp implements PmsTaskService {
         List<Task> taskList = new ArrayList<>();
         Map<String, PmsTask> pmsTaskMap = new HashMap<>();
         Map<String, List<PmsTask>> pmsTaskNormalPreMap = new HashMap<>();
+        Map<String, List<PmsTask>> pmsTaskNormalSucMap = new HashMap<>();
         Map<String, String> taskUidAndGroupUidMap = new HashMap<>();
         Map<String, PmsGroup> pmsGroupMap = new HashMap<>();
         for (PmsTask pmsTask : pmsTasks) {
@@ -236,6 +271,13 @@ public class PmsTaskServiceImp implements PmsTaskService {
             } else {
                 pmsTaskNormalPreMap.get(pmsTaskLink.getTaskLinkSucTaskUid()).add(pmsTaskMap.get(pmsTaskLink.getTaskLinkPreTaskUid()));
             }
+            if (!pmsTaskNormalSucMap.containsKey(pmsTaskLink.getTaskLinkPreTaskUid())) {
+                List<PmsTask> normalSucTasks = new ArrayList<>();
+                normalSucTasks.add(pmsTaskMap.get(pmsTaskLink.getTaskLinkSucTaskUid()));
+                pmsTaskNormalSucMap.put(pmsTaskLink.getTaskLinkPreTaskUid(), normalSucTasks);
+            } else {
+                pmsTaskNormalSucMap.get(pmsTaskLink.getTaskLinkPreTaskUid()).add(pmsTaskMap.get(pmsTaskLink.getTaskLinkSucTaskUid()));
+            }
         }
         for (PmsTaskGroup taskGroup : pmsTaskGroups) {
             taskUidAndGroupUidMap.put(taskGroup.getTaskGroupTaskUid(), taskGroup.getTaskGroupGroupUid());
@@ -245,8 +287,9 @@ public class PmsTaskServiceImp implements PmsTaskService {
         }
         for (PmsTask pmsTask : pmsTasks) {
             List<PmsTask> normalPreTasks = pmsTaskNormalPreMap.get(pmsTask.getTaskUid());
+            List<PmsTask> normalSucTasks = pmsTaskNormalSucMap.get(pmsTask.getTaskUid());
             PmsGroup pmsGroup = pmsGroupMap.get(taskUidAndGroupUidMap.get(pmsTask.getTaskUid()));
-            Task task = new Task(pmsTask, normalPreTasks == null ? new ArrayList<>() : normalPreTasks, pmsGroup);
+            Task task = new Task(pmsTask, normalPreTasks == null ? new ArrayList<>() : normalPreTasks, normalSucTasks == null ? new ArrayList<>() : normalSucTasks, pmsGroup);
             taskList.add(task);
         }
         return taskList;
