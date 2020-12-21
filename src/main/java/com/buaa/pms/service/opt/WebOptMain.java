@@ -1,10 +1,8 @@
 package com.buaa.pms.service.opt;
 
 import com.buaa.pms.entity.*;
-import com.buaa.pms.model.OptResult;
 import com.buaa.pms.model.OptTaskNode;
 import com.buaa.pms.model.ResOcpyNode;
-import com.buaa.pms.model.Task;
 import com.buaa.pms.service.*;
 import javafx.util.Pair;
 import net.sf.json.JSONArray;

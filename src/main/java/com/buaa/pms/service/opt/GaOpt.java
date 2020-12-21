@@ -123,7 +123,7 @@ public class GaOpt {
     private Map<String, ResOcpyNode> resOcpyNodeMapOrig;
 
     /**
-     * 本地优化的初始化
+     * 遗传算法，本地优化的初始化
      * @param procUidList
      * @return
      */

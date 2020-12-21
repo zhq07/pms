@@ -1320,60 +1320,67 @@ public class OptMain {
                                 }
                             }
                         } else {        // 如果包含资源数量信息，说明是非独占资源
-                            // 判断资源需求能否得到满足，即在任务期间，有足够的剩余资源来完成任务
-                            double amountSum = resAmountMap.get(resReq.getResReqResUid());     // 资源总量
-                            double amountCur =  amountSum;
-                            double amountReq = resReq.getResReqResAmount();
-                            Timestamp resStartTime = new Timestamp(taskStart.getTime());    // 资源占用开始时间
+                            Timestamp resStartTime = new Timestamp(taskStart.getTime());
                             Timestamp resEndTime = endTime(resStartTime, resReq.getResReqResWork(), resReq.getResReqResWorkModel());
-                            // 查找第一个资源占用结束时间在任务开始时间之后的节点
-                            while (resOcpyNode != null && !resOcpyNode.getResFinishDateTime().after(resStartTime)) {
-                                preNode = resOcpyNode;
-                                resOcpyNode = resOcpyNode.sucOcpy;
-                            }
-                            ResOcpyNode curHead = resOcpyNode;      // 记录当前搜到的节点，作为计算资源占用的起点
-                            if (resOcpyNode == null) {      // 如果所有已占用都与现资源需求安排无关，则资源直接安排
-                                newResNode.setResStartDateTime(resStartTime);
-                                newResNode.setResFinishDateTime(endTime(resStartTime, resReq.getResReqResWork(), resReq.getResReqResWorkModel()));
-                                newResNode.setResAmount(resReq.getResReqResAmount());
-                                newResNode.preOcpy = preNode;   // 暂时单向连上，挂在链表上，以便之后定位，搜索完毕后再将新节点嵌入链表中
-                                newResNodes.add(newResNode);
-                            } else {
-                                while (!resEndTime.after(taskFinish)) {
+                            while (!resEndTime.after(taskFinish)) {
+                                // 判断资源需求能否得到满足，即在任务期间，有足够的剩余资源来完成任务
+                                double amountSum = resAmountMap.get(resUid);     // 资源总量
+                                double amountReq = resReq.getResReqResAmount();
+                                // 查找第一个资源占用结束时间在资源使用开始时间之后的节点
+                                while (resOcpyNode != null && !resOcpyNode.getResFinishDateTime().after(resStartTime)) {
+                                    preNode = resOcpyNode;
+                                    resOcpyNode = resOcpyNode.sucOcpy;
+                                }
+                                ResOcpyNode curHead = resOcpyNode;      // 记录当前搜到的节点，作为计算资源占用的起点
+                                if (resOcpyNode == null) {      // 如果所有已占用都与现资源需求安排无关，则资源直接安排
+                                    newResNode.setResStartDateTime(new Timestamp(resStartTime.getTime()));
+                                    newResNode.setResFinishDateTime(new Timestamp(resEndTime.getTime()));
+                                    newResNode.setResAmount(resReq.getResReqResAmount());
+                                    newResNode.preOcpy = preNode;   // 暂时单向连上，挂在链表上，以便之后定位，搜索完毕后再将新节点嵌入链表中
+                                    newResNodes.add(newResNode);
+                                } else {
+                                    int dayNum = (int) (resReq.getResReqResWork() + 1);
+                                    int[] resOccAmount = new int[dayNum];       // 在当前假设的资源使用时间段内，资源已经被占用的数量
                                     while (resOcpyNode != null && resOcpyNode.getResStartDateTime().before(resEndTime)) {
                                         if (resOcpyNode.getResStartDateTime().before(resEndTime) && resOcpyNode.getResFinishDateTime().after(resStartTime)) {
-                                            amountCur -= resOcpyNode.getResAmount();
+                                            double resAmount = resOcpyNode.getResAmount();
+                                            int startIndex = (int) ((Math.max(resStartTime.getTime(), resOcpyNode.getResStartDateTime().getTime()) - resStartTime.getTime()) / MS_OF_DAY);
+                                            int endIndex = (int) ((Math.min(resEndTime.getTime(), resOcpyNode.getResFinishDateTime().getTime()) - resStartTime.getTime()) / MS_OF_DAY);
+                                            for (int i = startIndex; i < endIndex; i++) {
+                                                resOccAmount[i] += resAmount;
+                                            }
                                         }
-                                        // preNode = resOcpyNode;
                                         resOcpyNode = resOcpyNode.sucOcpy;
                                     }
-                                    if (amountCur < amountReq) {    // 如果该资源时间段不满足资源需求，资源开始时间后移一个整点
-                                        moveTimeToNextPoint(resStartTime);
-                                        resEndTime = endTime(resStartTime, resReq.getResReqResWork(), resReq.getResReqResWorkModel());
-                                    } else {
+                                    for (int i = 0; i < dayNum; i++) {
+                                        if (amountReq > amountSum - resOccAmount[i]) {  // 无法满足资源需求量
+                                            resAllocate = false;
+                                            break;
+                                        }
+                                    }
+                                    if (resAllocate) {
                                         // 查找最后一个资源占用开始时间在resStartTime之前的节点preNode，作为新节点的前节点，使资源占用链以占用开始时间排序
-                                        while (curHead != null && curHead.getResStartDateTime().before(resStartTime)) {
+                                        while (curHead != null && curHead.getResStartDateTime().before(taskStart)) {
                                             preNode = curHead;
                                             curHead = curHead.sucOcpy;
                                         }
-                                        newResNode.setResStartDateTime(resStartTime);
-                                        newResNode.setResFinishDateTime(endTime(resStartTime, resReq.getResReqResWork(), resReq.getResReqResWorkModel()));
+                                        newResNode.setResStartDateTime(new Timestamp(resStartTime.getTime()));
+                                        newResNode.setResFinishDateTime(new Timestamp(resEndTime.getTime()));
                                         newResNode.setResAmount(resReq.getResReqResAmount());
                                         newResNode.preOcpy = preNode;   // 暂时单向连上，挂在链表上，以便之后定位，搜索完毕后再将新节点嵌入链表中
                                         newResNodes.add(newResNode);
                                         break;
+                                    } else {
+                                        moveTimeToNextPoint(resStartTime);  // 当前假设的资源使用时间段无法满足资源需求量时，资源使用开始时间后移一个时间单位
+                                        resEndTime.setTime(endTime(resStartTime, resReq.getResReqResWork(), resReq.getResReqResWorkModel()).getTime());  // 移动资源使用开始时间后，对应的结束时间
+                                        continue;
                                     }
-                                    amountCur = amountSum;
-                                    resOcpyNode = curHead;
                                 }
-                                // 如果搜索的资源占用结束时间超出了任务结束时间，则该任务时间不可行，任务开始时间后移到下一个整点
-                                if (resEndTime.after(taskFinish)) {
-                                    resAllocate = false;
-                                    moveTimeToNextPoint(taskStart);
-                                    pmsTask.setTaskPlanStartDateTime(taskStart);
-                                    pmsTask.setTaskPlanFinishDateTime(taskFinish);
-                                    break;
-                                }
+                            }
+                            // 任务时间段内，资源需求量无法满足，则后移任务开始时间，重新尝试分配资源
+                            if (!resAllocate) {
+                                moveTimeToNextPoint(taskStart);
+                                break;
                             }
                         }
                     } else {
