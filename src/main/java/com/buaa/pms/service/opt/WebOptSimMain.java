@@ -127,6 +127,8 @@ public class WebOptSimMain {
     private List<PmsTask> pmsTaskList;
     private List<PmsTaskLink> pmsTaskLinkList;
     private List<PmsTaskGroup> pmsTaskGroupList;
+    private List<PmsTaskResPlan> pmsTaskResPlanList;
+    private List<PmsTaskResReq> pmsTaskResReqList;
     private List<PmsHuman> pmsHumanList;
     private List<PmsEquipment> pmsEquipmentList;
     private List<PmsPlace> pmsPlaceList;
@@ -156,8 +158,8 @@ public class WebOptSimMain {
         pmsTaskList = new ArrayList<>(taskArray.size());
         pmsTaskLinkList = new ArrayList<>(taskLinkArray.size());
         pmsTaskGroupList = new ArrayList<>(taskGroupArray.size());
-        List<PmsTaskResPlan> pmsTaskResPlanList = new ArrayList<>(taskResPlanArray.size());
-        List<PmsTaskResReq> pmsTaskResReqList = new ArrayList<>(taskResReqArray.size());
+        pmsTaskResPlanList = new ArrayList<>(taskResPlanArray.size());
+        pmsTaskResReqList = new ArrayList<>(taskResReqArray.size());
         pmsHumanList = new ArrayList<>(humanArray.size());
         pmsEquipmentList = new ArrayList<>(equipmentArray.size());
         pmsPlaceList = new ArrayList<>(placeArray.size());
@@ -1253,6 +1255,11 @@ public class WebOptSimMain {
             knowledgeMap.put(knowledge.getKnowlUid(), knowledge.getKnowlName());
         }
 
+        Map<String, String> resPlanAndTaskUidMap = new HashMap<>();
+        for (PmsTaskResPlan resPlan : pmsTaskResPlanList) {
+            resPlanAndTaskUidMap.put(resPlan.getResPlanUid(), resPlan.getResPlanTaskUid());
+        }
+
         List<List<ResOcpyNode>> resOcpyNodesList = new LinkedList<>();
         for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMap.entrySet()) {
             List<ResOcpyNode> resOcpyNodes = new LinkedList<>();
@@ -1285,8 +1292,9 @@ public class WebOptSimMain {
                     resOcpyNode = resOcpyNode.sucOcpy;
                     continue;
                 }
-                newNode.setProjName(pmsProjectMap.get(newNode.getPmsTaskResReq().getResReqProjUid()).getProjName());
-                newNode.setTaskName(optTaskNodeMap.get(newNode.getPmsTaskResReq().getResReqTaskUid()).getPmsTask().getTaskName());
+                PmsTask pmsTask = optTaskNodeMap.get(resPlanAndTaskUidMap.get(newNode.getPmsTaskResReq().getResReqResPlanUid())).getPmsTask();
+                newNode.setTaskName(pmsTask.getTaskName());
+                newNode.setProjName(pmsProjectMap.get(pmsTask.getTaskProjUid()).getProjName());
                 newNode.setResName(resName);
                 newNode.setPreOcpy(null);
                 newNode.setSucOcpy(null);
