@@ -127,6 +127,10 @@ public class WebOptSimMain {
     private List<PmsTask> pmsTaskList;
     private List<PmsTaskLink> pmsTaskLinkList;
     private List<PmsTaskGroup> pmsTaskGroupList;
+    private List<PmsHuman> pmsHumanList;
+    private List<PmsEquipment> pmsEquipmentList;
+    private List<PmsPlace> pmsPlaceList;
+    private List<PmsKnowledge> pmsKnowledgeList;
 
     /**
      * 初始化任务的连接图以及任务资源等信息的数据结构
@@ -154,10 +158,10 @@ public class WebOptSimMain {
         pmsTaskGroupList = new ArrayList<>(taskGroupArray.size());
         List<PmsTaskResPlan> pmsTaskResPlanList = new ArrayList<>(taskResPlanArray.size());
         List<PmsTaskResReq> pmsTaskResReqList = new ArrayList<>(taskResReqArray.size());
-        List<PmsHuman> pmsHumanList = new ArrayList<>(humanArray.size());
-        List<PmsEquipment> pmsEquipmentList = new ArrayList<>(equipmentArray.size());
-        List<PmsPlace> pmsPlaceList = new ArrayList<>(placeArray.size());
-        List<PmsKnowledge> pmsKnowledgeList = new ArrayList<>(knowledgeArray.size());
+        pmsHumanList = new ArrayList<>(humanArray.size());
+        pmsEquipmentList = new ArrayList<>(equipmentArray.size());
+        pmsPlaceList = new ArrayList<>(placeArray.size());
+        pmsKnowledgeList = new ArrayList<>(knowledgeArray.size());
         List<PmsAllocateResource> pmsAllocateResourceList = new ArrayList<>(allocateResourceArray.size());
 
         for (Object project : projectArray) {
@@ -1232,6 +1236,23 @@ public class WebOptSimMain {
             task.setTaskRealPreTasks(pmsTasks);
         }
 
+        Map<String, String> humanMap = new HashMap<>();
+        for (PmsHuman human : pmsHumanList) {
+            humanMap.put(human.getHumUid(), human.getHumName());
+        }
+        Map<String, String> equipmentMap = new HashMap<>();
+        for (PmsEquipment equipment : pmsEquipmentList) {
+            equipmentMap.put(equipment.getEquipUid(), equipment.getEquipName());
+        }
+        Map<String, String> placeMap = new HashMap<>();
+        for (PmsPlace place : pmsPlaceList) {
+            placeMap.put(place.getPlaceUid(), place.getPlaceName());
+        }
+        Map<String, String> knowledgeMap = new HashMap<>();
+        for (PmsKnowledge knowledge : pmsKnowledgeList) {
+            knowledgeMap.put(knowledge.getKnowlUid(), knowledge.getKnowlName());
+        }
+
         List<List<ResOcpyNode>> resOcpyNodesList = new LinkedList<>();
         for (Map.Entry<String, ResOcpyNode> entry : resOcpyNodeMap.entrySet()) {
             List<ResOcpyNode> resOcpyNodes = new LinkedList<>();
@@ -1246,16 +1267,16 @@ public class WebOptSimMain {
             String resName = null;
             int resType = resOcpyNode.getResType();
             if (resType == 0) {
-                resName = pmsHumanService.selectByUid(resUid).getHumName();
+                resName = humanMap.get(resUid);
             }
             if (resType == 1) {
-                resName = pmsEquipmentService.selectByUid(resUid).getEquipName();
+                resName = equipmentMap.get(resUid);
             }
             if (resType == 2) {
-                resName = pmsPlaceService.selectByUid(resUid).getPlaceName();
+                resName = placeMap.get(resUid);
             }
             if (resType == 3) {
-                resName = pmsKnowledgeService.selectByUid(resUid).getKnowlName();
+                resName = knowledgeMap.get(resUid);
             }
 
             while (resOcpyNode != null) {
