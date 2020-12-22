@@ -4,6 +4,7 @@ import com.buaa.pms.model.OptResult;
 import com.buaa.pms.service.opt.GaOpt;
 import com.buaa.pms.service.opt.OptMain;
 import com.buaa.pms.service.opt.WebOptMain;
+import com.buaa.pms.service.opt.WebOptSimMain;
 import com.buaa.pms.util.TimestampMorpher;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
@@ -19,6 +20,8 @@ public class PmsOptimizeController {
     OptMain optMain;
     @Resource
     WebOptMain webOptMain;
+    @Resource
+    WebOptSimMain webOptSimMain;
     @Resource
     GaOpt gaOpt;
 
@@ -45,7 +48,7 @@ public class PmsOptimizeController {
     @RequestMapping("/testOptResult")
     public JSONObject testOptResult(@RequestBody JSONObject info) {
         JSONUtils.getMorpherRegistry().registerMorpher(new TimestampMorpher());     // 注册时间转换方式，Long转Timestamp
-        return webOptMain.optResult(info);
+        return webOptSimMain.optResult(info);
     }
 
     /**
